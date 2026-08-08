@@ -1,0 +1,437 @@
+/* Kitland landing motion — subtle, product-grade */
+
+:root {
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-fast: 180ms;
+  --motion-base: 500ms;
+  --motion-slow: 800ms;
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes kitland-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes kitland-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kitland-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes kitland-slide-down {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes kitland-pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(190, 242, 100, 0.45);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 0 6px rgba(190, 242, 100, 0);
+  }
+}
+
+@keyframes kitland-glow-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes kitland-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+  }
+}
+
+@keyframes kitland-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- Reveal system (scroll / mount) ---------- */
+
+.kit-reveal {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity var(--motion-base) var(--motion-ease),
+    transform var(--motion-base) var(--motion-ease);
+  will-change: opacity, transform;
+}
+
+.kit-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.kit-reveal-scale {
+  opacity: 0;
+  transform: scale(0.97) translate3d(0, 14px, 0);
+  transition:
+    opacity var(--motion-slow) var(--motion-ease),
+    transform var(--motion-slow) var(--motion-ease);
+  will-change: opacity, transform;
+}
+
+.kit-reveal-scale.is-visible {
+  opacity: 1;
+  transform: scale(1) translate3d(0, 0, 0);
+}
+
+/* Stagger delays via data-delay */
+.kit-reveal[data-delay="1"],
+.kit-stagger > *:nth-child(1) {
+  transition-delay: 40ms;
+}
+.kit-reveal[data-delay="2"],
+.kit-stagger > *:nth-child(2) {
+  transition-delay: 90ms;
+}
+.kit-reveal[data-delay="3"],
+.kit-stagger > *:nth-child(3) {
+  transition-delay: 140ms;
+}
+.kit-reveal[data-delay="4"],
+.kit-stagger > *:nth-child(4) {
+  transition-delay: 190ms;
+}
+.kit-reveal[data-delay="5"],
+.kit-stagger > *:nth-child(5) {
+  transition-delay: 240ms;
+}
+.kit-reveal[data-delay="6"],
+.kit-stagger > *:nth-child(6) {
+  transition-delay: 290ms;
+}
+.kit-reveal[data-delay="7"] {
+  transition-delay: 340ms;
+}
+.kit-reveal[data-delay="8"] {
+  transition-delay: 390ms;
+}
+
+/* When parent is visible, children stagger if marked */
+.kit-stagger > .kit-reveal {
+  transition-delay: 0ms;
+}
+.kit-stagger.is-visible > .kit-reveal[data-delay="1"] {
+  transition-delay: 60ms;
+}
+.kit-stagger.is-visible > .kit-reveal[data-delay="2"] {
+  transition-delay: 120ms;
+}
+.kit-stagger.is-visible > .kit-reveal[data-delay="3"] {
+  transition-delay: 180ms;
+}
+.kit-stagger.is-visible > .kit-reveal[data-delay="4"] {
+  transition-delay: 240ms;
+}
+.kit-stagger.is-visible > .kit-reveal[data-delay="5"] {
+  transition-delay: 300ms;
+}
+.kit-stagger.is-visible > .kit-reveal[data-delay="6"] {
+  transition-delay: 360ms;
+}
+
+/* ---------- Hero / polish ---------- */
+
+.kit-hero-enter {
+  animation: kitland-fade-up var(--motion-slow) var(--motion-ease) both;
+}
+
+.kit-hero-enter-delay-1 {
+  animation-delay: 80ms;
+}
+.kit-hero-enter-delay-2 {
+  animation-delay: 160ms;
+}
+.kit-hero-enter-delay-3 {
+  animation-delay: 240ms;
+}
+.kit-hero-enter-delay-4 {
+  animation-delay: 320ms;
+}
+.kit-hero-enter-delay-5 {
+  animation-delay: 400ms;
+}
+
+.kit-float {
+  animation: kitland-float 6s var(--motion-ease) infinite;
+}
+
+.kit-pulse-dot {
+  animation: kitland-pulse-dot 2.2s ease-out infinite;
+}
+
+.kit-glow-breathe {
+  animation: kitland-glow-breathe 5s ease-in-out infinite;
+}
+
+/* ---------- Interactive ---------- */
+
+.kit-btn {
+  transition:
+    transform var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease),
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    color var(--motion-fast) ease;
+}
+
+.kit-btn:hover {
+  transform: translateY(-1px);
+}
+
+.kit-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.kit-btn-primary {
+  box-shadow: 0 8px 24px -10px rgba(37, 99, 235, 0.45);
+}
+
+.kit-btn-primary:hover {
+  box-shadow: 0 12px 32px -10px rgba(37, 99, 235, 0.65);
+  background-color: #1d4ed8;
+}
+
+.kit-card {
+  transition:
+    transform var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease),
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease;
+}
+
+.kit-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px -24px rgba(37, 99, 235, 0.35);
+  border-color: #3a3f4b;
+}
+
+.kit-link {
+  transition: color var(--motion-fast) ease, opacity var(--motion-fast) ease;
+}
+
+.kit-link:hover {
+  color: #edeff3;
+}
+
+.kit-nav-link {
+  position: relative;
+  transition: color var(--motion-fast) ease;
+}
+
+.kit-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: #2563eb;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-fast) var(--motion-ease);
+}
+
+.kit-nav-link:hover {
+  color: #edeff3;
+}
+
+.kit-nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Mobile menu */
+.kit-menu-panel {
+  animation: kitland-slide-down 280ms var(--motion-ease) both;
+  transform-origin: top center;
+}
+
+.kit-menu-backdrop {
+  animation: kitland-fade-in 200ms ease both;
+}
+
+/* Desktop export section polish (via data attributes) */
+[data-pencil-name="Workbench Window"],
+[data-pencil-name="Mobile workbench preview"] {
+  transition: box-shadow 400ms var(--motion-ease), transform 400ms var(--motion-ease);
+}
+
+[data-pencil-name="Workbench Window"].kit-float-soft {
+  animation: kitland-float 7s var(--motion-ease) infinite;
+}
+
+/* Catalog cards in desktop export */
+[data-pencil-name="JSON & Markup"],
+[data-pencil-name="JSON &amp; Markup"],
+[data-pencil-name="Encoding & Text"],
+[data-pencil-name="Encoding &amp; Text"],
+[data-pencil-name="Generators"],
+[data-pencil-name="Hash & Crypto"],
+[data-pencil-name="Hash &amp; Crypto"],
+[data-pencil-name="Text & Regex"],
+[data-pencil-name="Text &amp; Regex"],
+[data-pencil-name="Time & Network"],
+[data-pencil-name="Time &amp; Network"] {
+  transition:
+    transform 320ms var(--motion-ease),
+    box-shadow 320ms var(--motion-ease),
+    border-color 200ms ease;
+  cursor: default;
+}
+
+[data-pencil-name="JSON & Markup"]:hover,
+[data-pencil-name="JSON &amp; Markup"]:hover,
+[data-pencil-name="Encoding & Text"]:hover,
+[data-pencil-name="Encoding &amp; Text"]:hover,
+[data-pencil-name="Generators"]:hover,
+[data-pencil-name="Hash & Crypto"]:hover,
+[data-pencil-name="Hash &amp; Crypto"]:hover,
+[data-pencil-name="Text & Regex"]:hover,
+[data-pencil-name="Text &amp; Regex"]:hover,
+[data-pencil-name="Time & Network"]:hover,
+[data-pencil-name="Time &amp; Network"]:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px -20px rgba(37, 99, 235, 0.4);
+}
+
+/* Primary CTA buttons in export (blue fills) */
+[data-pencil-name="CTA Button"],
+[data-pencil-name="Primary action"],
+[data-pencil-name="Big CTA Button"],
+[data-pencil-name="Open workbench"],
+[data-pencil-name="Mobile primary action"],
+[data-pencil-name="CTA button"] {
+  transition:
+    transform 180ms var(--motion-ease),
+    box-shadow 180ms var(--motion-ease),
+    filter 180ms ease;
+  cursor: pointer;
+}
+
+[data-pencil-name="CTA Button"]:hover,
+[data-pencil-name="Primary action"]:hover,
+[data-pencil-name="Big CTA Button"]:hover,
+[data-pencil-name="Open workbench"]:hover,
+[data-pencil-name="Mobile primary action"]:hover,
+[data-pencil-name="CTA button"]:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow: 0 12px 28px -10px rgba(37, 99, 235, 0.55);
+}
+
+[data-pencil-name="Secondary action"]:hover,
+[data-pencil-name="Mobile secondary action"]:hover {
+  transform: translateY(-1px);
+  transition: transform 180ms var(--motion-ease);
+}
+
+/* Nav text links */
+[data-pencil-name="Nav Links"] > * {
+  transition: color 160ms ease;
+  cursor: pointer;
+}
+
+[data-pencil-name="Nav Links"] > *:hover {
+  color: #edeff3 !important;
+}
+
+/* Live dots pulse when enhanced */
+.kit-live-dot {
+  animation: kitland-pulse-dot 2.4s ease-out infinite;
+}
+
+/* Marquee already defined in global — enhance hover pause */
+.kitland-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .kit-reveal,
+  .kit-reveal-scale {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .kit-hero-enter,
+  .kit-float,
+  .kit-float-soft,
+  .kit-pulse-dot,
+  .kit-glow-breathe,
+  .kit-live-dot,
+  .kit-menu-panel,
+  .kit-menu-backdrop {
+    animation: none !important;
+  }
+
+  .kit-btn:hover,
+  .kit-card:hover,
+  [data-pencil-name="JSON & Markup"]:hover,
+  [data-pencil-name="JSON &amp; Markup"]:hover,
+  [data-pencil-name="Encoding & Text"]:hover,
+  [data-pencil-name="Encoding &amp; Text"]:hover,
+  [data-pencil-name="Generators"]:hover,
+  [data-pencil-name="Hash & Crypto"]:hover,
+  [data-pencil-name="Hash &amp; Crypto"]:hover,
+  [data-pencil-name="Text & Regex"]:hover,
+  [data-pencil-name="Text &amp; Regex"]:hover,
+  [data-pencil-name="Time & Network"]:hover,
+  [data-pencil-name="Time &amp; Network"]:hover,
+  [data-pencil-name="CTA Button"]:hover,
+  [data-pencil-name="Primary action"]:hover,
+  [data-pencil-name="Big CTA Button"]:hover {
+    transform: none !important;
+  }
+}

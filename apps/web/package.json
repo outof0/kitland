@@ -1,0 +1,31 @@
+{
+  "name": "@kitland/web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Kitland public landing page",
+  "author": "OutOf0 <hello.outof0@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit --pretty false",
+    "lint": "echo \"lint placeholder for @kitland/web\""
+  },
+  "dependencies": {
+    "lucide-react": "^0.539.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/node": "^24.2.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}

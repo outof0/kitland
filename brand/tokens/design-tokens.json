@@ -1,0 +1,50 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "brand": {
+    "name": "Kitland",
+    "domain": "kitland.dev",
+    "tagline": "Tools out. Work on."
+  },
+  "color": {
+    "brand": {
+      "primary": {
+        "$type": "color",
+        "$value": "#2563EB"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#0F172A"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#F8FAFC"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#A3E635"
+      }
+    },
+    "semantic": {
+      "info": {
+        "$type": "color",
+        "$value": "#38BDF8"
+      },
+      "success": {
+        "$type": "color",
+        "$value": "#22C55E"
+      },
+      "warning": {
+        "$type": "color",
+        "$value": "#F59E0B"
+      },
+      "danger": {
+        "$type": "color",
+        "$value": "#EF4444"
+      }
+    }
+  },
+  "typography": {
+    "ui": "Inter",
+    "display": "Manrope"
+  }
+}

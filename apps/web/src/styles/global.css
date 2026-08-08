@@ -1,0 +1,153 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./motion.css";
+
+@theme {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-surface-low: var(--surface-low);
+  --color-surface: var(--surface);
+  --color-surface-high: var(--surface-high);
+  --color-outline: var(--outline);
+  --color-outline-strong: var(--outline-strong);
+  --color-on-surface: var(--on-surface);
+  --color-on-muted: var(--on-muted);
+  --color-on-faint: var(--on-faint);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-lime: var(--accent-lime);
+  --color-success: var(--success);
+  --color-info: var(--info);
+  --color-rail: var(--rail);
+  --color-ink-dark: var(--ink-dark);
+  --color-code-key: var(--code-key);
+  --color-code-string: var(--code-string);
+  --color-code-number: var(--code-number);
+  --color-code-punct: var(--code-punct);
+  --color-text-secondary: var(--text-secondary);
+  --font-ui: var(--font-ui);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+  --shadow-primary: var(--shadow-primary);
+}
+
+@utility sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@utility not-sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Inter, system-ui, sans-serif;
+  color: #edeff3;
+  background: #0b0c10;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.font-ui {
+  font-family: var(--font-ui);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Marquee for tool rail */
+@keyframes kitland-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.kitland-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: kitland-marquee 40s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kitland-marquee-track {
+    animation: none;
+  }
+}

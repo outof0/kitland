@@ -1,0 +1,29 @@
+{
+  "name": "kitland",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Kitland — everyday developer tools, in one place. Tools out. Work on.",
+  "author": "OutOf0 <hello.outof0@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://kitland.dev",
+  "bugs": {
+    "email": "hello.outof0@gmail.com"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @kitland/web dev",
+    "build": "pnpm --filter @kitland/web build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "format:check": "echo \"format:check placeholder\"",
+    "test": "echo \"No tests yet\"",
+    "test:integration": "echo \"No integration tests yet\"",
+    "test:e2e": "echo \"No e2e tests yet\"",
+    "package:smoke": "echo \"No package smoke yet\"",
+    "security:check": "echo \"No security check yet\"",
+    "release:check": "echo \"No release check yet\""
+  }
+}
