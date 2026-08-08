@@ -1,0 +1,7 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kitland",
+  "compatibility_date": "2026-08-08",
+  // Static site output from Vite (run `pnpm build` first)
+  "pages_build_output_dir": "apps/web/dist"
+}

@@ -4,6 +4,7 @@ dist
 .nitro
 .cache
 .turbo
+.wrangler
 coverage
 *.tsbuildinfo
 

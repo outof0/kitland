@@ -18,6 +18,12 @@
     "build": "pnpm --filter @kitland/web build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "preview": "pnpm --filter @kitland/web preview"
+    "preview": "pnpm --filter @kitland/web preview",
+    "pages:deploy": "pnpm build && wrangler pages deploy apps/web/dist --project-name=kitland",
+    "pages:dev": "pnpm build && wrangler pages dev apps/web/dist"
+  },
+  "devDependencies": {
+    "wrangler": "^4.28.0"
   }
 }
+
