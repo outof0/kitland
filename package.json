@@ -18,12 +18,6 @@
     "build": "pnpm --filter @kitland/web build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "format:check": "echo \"format:check placeholder\"",
-    "test": "echo \"No tests yet\"",
-    "test:integration": "echo \"No integration tests yet\"",
-    "test:e2e": "echo \"No e2e tests yet\"",
-    "package:smoke": "echo \"No package smoke yet\"",
-    "security:check": "echo \"No security check yet\"",
-    "release:check": "echo \"No release check yet\""
+    "preview": "pnpm --filter @kitland/web preview"
   }
 }

@@ -1,7 +1,4 @@
-# Dependencies
 node_modules
-
-# Builds & caches
 dist
 .output
 .nitro
@@ -10,28 +7,21 @@ dist
 coverage
 *.tsbuildinfo
 
-# Env
 .env
 .env.*
 !.env.example
 *.local
 
-# OS / editor
 .DS_Store
 Thumbs.db
 .idea
 .vscode/*
 !.vscode/extensions.json
 
-# Logs
 *.log
 npm-debug.log*
 pnpm-debug.log*
 
-# Design screenshots (regenerate locally)
 design/export/*.png
-apps/web/design-export/
-
-# Archives
 *.zip
 *.tgz
