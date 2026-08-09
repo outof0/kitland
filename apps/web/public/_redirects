@@ -1,2 +1,1 @@
-# SPA fallback — client routes → index.html
-/*    /index.html   200
+# Static routes are emitted as real HTML. Do not add an SPA fallback here.

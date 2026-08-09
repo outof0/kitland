@@ -1,0 +1,22 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { LandingPage } from "@/components/landing/LandingPage";
+
+const description =
+  "Private, local-first developer tools for encoding, formatting, generating, and inspecting text. No account and no server upload required.";
+---
+
+<BaseLayout
+  title="Kitland — Local-first developer tools"
+  description={description}
+  canonicalPath="/"
+  structuredData={{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Kitland",
+    url: "https://kitland.dev/",
+    description,
+  }}
+>
+  <LandingPage />
+</BaseLayout>

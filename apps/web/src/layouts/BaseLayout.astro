@@ -1,0 +1,76 @@
+---
+import "@/styles/global.css";
+
+type JsonLd = Record<string, unknown>;
+
+type Props = {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  robots?: string;
+  structuredData?: JsonLd | readonly JsonLd[];
+};
+
+const {
+  title,
+  description,
+  canonicalPath = Astro.url.pathname,
+  robots = "index,follow",
+  structuredData,
+} = Astro.props;
+const site = Astro.site ?? new URL("https://kitland.dev");
+const canonicalUrl = new URL(canonicalPath, site).toString();
+const socialImageUrl = new URL("/og-kitland-workbench.png", site).toString();
+const schemas = structuredData
+  ? Array.isArray(structuredData)
+    ? structuredData
+    : [structuredData]
+  : [];
+
+// `set:html` is intentional for JSON-LD. Escape `<` so a user-controlled
+// catalog field can never terminate this script tag.
+const serializedSchemas = JSON.stringify(schemas).replaceAll("<", "\\u003c");
+
+// Keep event-handler and style attributes unavailable everywhere. Astro still
+// adds page-specific hashes for its own processed inline bootstrap/styles.
+Astro.csp?.insertScriptResource({ resource: "'none'", kind: "attribute" });
+Astro.csp?.insertStyleResource({ resource: "'none'", kind: "attribute" });
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <meta name="theme-color" content="#0b0c10" />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+
+    <meta property="og:site_name" content="Kitland" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={socialImageUrl} />
+    <meta property="og:image:width" content="1731" />
+    <meta property="og:image:height" content="909" />
+    <meta property="og:image:type" content="image/png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageUrl} />
+    <title>{title}</title>
+
+    {
+      schemas.length > 0 ? (
+        <script is:inline type="application/ld+json" set:html={serializedSchemas} />
+      ) : null
+    }
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,6 @@
+# Search crawlers may index public routes on the canonical origin. The
+# Cloudflare Pages hostnames are excluded separately with X-Robots-Tag rules.
+User-agent: *
+Allow: /
+
+Sitemap: https://kitland.dev/sitemap-index.xml

@@ -1,0 +1,46 @@
+---
+import type { ToolDefinition } from "@kitland/tool-catalog";
+import type { ToolSeoContent } from "@/data/toolSeo";
+import "@/styles/seo.css";
+
+type Props = {
+  tool: ToolDefinition;
+  content: ToolSeoContent;
+};
+
+const { tool, content } = Astro.props;
+const headingId = `${tool.slug}-guide-heading`;
+---
+
+<section class="tool-seo-guide" aria-labelledby={headingId}>
+  <div class="tool-seo-guide__intro">
+    <p class="tool-seo-guide__eyebrow">About this tool</p>
+    <h2 id={headingId}>{content.heading}</h2>
+    <p>{content.introduction}</p>
+  </div>
+
+  <div class="tool-seo-guide__grid">
+    <section aria-labelledby={`${tool.slug}-steps`}>
+      <h3 id={`${tool.slug}-steps`}>How to use it</h3>
+      <ol>
+        {content.steps.map((step) => <li>{step}</li>)}
+      </ol>
+    </section>
+    <section aria-labelledby={`${tool.slug}-uses`}>
+      <h3 id={`${tool.slug}-uses`}>Useful for</h3>
+      <ul>
+        {content.useCases.map((useCase) => <li>{useCase}</li>)}
+      </ul>
+    </section>
+  </div>
+
+  <section class="tool-seo-guide__faq" aria-labelledby={`${tool.slug}-faq`}>
+    <h3 id={`${tool.slug}-faq`}>Frequently asked questions</h3>
+    {content.faqs.map((faq) => (
+      <details>
+        <summary>{faq.question}</summary>
+        <p>{faq.answer}</p>
+      </details>
+    ))}
+  </section>
+</section>

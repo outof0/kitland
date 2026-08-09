@@ -1,8 +1,13 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 @import "./tokens.css";
-@import "./motion.css";
 
-@theme {
+/* Shadcn is the component system. Kitland's existing palette remains the
+ * single source of color truth, including its persisted data-theme switch. */
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+@theme inline {
   --color-bg: var(--bg);
   --color-bg-elevated: var(--bg-elevated);
   --color-surface-low: var(--surface-low);
@@ -16,9 +21,11 @@
   --color-primary: var(--primary);
   --color-primary-strong: var(--primary-strong);
   --color-primary-soft: var(--primary-soft);
-  --color-accent: var(--accent);
+  --color-accent: var(--ui-accent);
   --color-accent-lime: var(--accent-lime);
   --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-error: var(--error);
   --color-info: var(--info);
   --color-rail: var(--rail);
   --color-ink-dark: var(--ink-dark);
@@ -31,6 +38,109 @@
   --font-display: var(--font-display);
   --font-mono: var(--font-mono);
   --shadow-primary: var(--shadow-primary);
+
+  /* Marketing palette. The landing/catalog intentionally keep a fixed dark
+   * canvas, but JSX must still consume named Tailwind tokens rather than raw
+   * hex values. */
+  --color-marketing-canvas: #0b0c10;
+  --color-marketing-shell: #0d0f13;
+  --color-marketing-panel: #0f172a;
+  --color-marketing-recessed: #101216;
+  --color-marketing-panel-deep: #101827;
+  --color-marketing-raised: #111318;
+  --color-marketing-panel-indigo: #111a2c;
+  --color-marketing-surface: #15171c;
+  --color-marketing-surface-hover: #1a1d24;
+  --color-marketing-success-bg: #1a2e12;
+  --color-marketing-primary-soft: #1e3a8a;
+  --color-marketing-warning-bg: #211d12;
+  --color-marketing-divider: #20232b;
+  --color-marketing-divider-strong: #22304c;
+  --color-marketing-divider-blue: #24324d;
+  --color-marketing-border-blue: #26314a;
+  --color-marketing-border-indigo: #263551;
+  --color-marketing-border-recessed: #292d37;
+  --color-marketing-border: #2a2e38;
+  --color-marketing-border-subtle: #303440;
+  --color-marketing-state-border: #30405e;
+  --color-marketing-state-border-strong: #30477d;
+  --color-marketing-icon-border: #314263;
+  --color-marketing-border-card: #343946;
+  --color-marketing-success-border: #365314;
+  --color-marketing-border-strong: #3a3f4b;
+  --color-marketing-warning-border: #4c3f20;
+  --color-marketing-border-hover: #515867;
+  --color-marketing-primary: #2563eb;
+  --color-marketing-primary-hover: #1d4ed8;
+  --color-marketing-primary-light: #60a5fa;
+  --color-marketing-text-faint: #697284;
+  --color-marketing-text-muted: #7c8596;
+  --color-marketing-success: #86efac;
+  --color-marketing-text-quiet: #8e97a7;
+  --color-marketing-text-primary: #93c5fd;
+  --color-marketing-text-cool: #94a3b8;
+  --color-marketing-text-secondary: #9aa3b2;
+  --color-marketing-text-soft: #aab1be;
+  --color-marketing-text-menu: #b4bbc7;
+  --color-marketing-accent: #bef264;
+  --color-marketing-text-strong: #cbd5e1;
+  --color-marketing-foreground: #edeff3;
+  --color-marketing-danger: #fb7185;
+  --color-marketing-warning: #fbbf24;
+  --color-marketing-release-ready: #14532d;
+  --color-marketing-release-ready-bg: #102619;
+  --shadow-marketing-primary: 0 10px 28px -12px rgb(37 99 235 / 60%);
+  --shadow-marketing-primary-hover: 0 14px 34px -12px rgb(37 99 235 / 72%);
+  --shadow-marketing-card: 0 24px 48px -28px rgb(37 99 235 / 50%);
+  --shadow-marketing-preview: 0 36px 90px -36px rgb(37 99 235 / 55%);
+  --background-image-marketing-grid:
+    linear-gradient(rgb(96 165 250 / 4.5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(96 165 250 / 4.5%) 1px, transparent 1px);
+  --background-image-marketing-radial: radial-gradient(
+    circle at 50% 120%,
+    rgb(37 99 235 / 35%),
+    transparent 48%
+  );
+  --animate-marketing-enter: marketing-fade-up 720ms var(--motion-ease) both;
+  --animate-marketing-enter-fast: marketing-fade-up 220ms var(--motion-ease) both;
+  --animate-marketing-pulse: marketing-pulse-dot 2.4s ease-out infinite;
+  --animate-marketing-float: marketing-float 7s var(--motion-ease) infinite;
+
+  /* Shadcn semantic aliases. Do not reuse --accent here: Kitland uses that
+   * name for its lime brand accent, whereas Shadcn uses it as a surface. */
+  --font-sans: var(--font-ui);
+  --font-heading: var(--font-display);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @utility sr-only {
@@ -84,8 +194,6 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: Inter, system-ui, sans-serif;
-  color: #edeff3;
-  background: #0b0c10;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -114,10 +222,6 @@ a {
 button {
   font: inherit;
   cursor: pointer;
-  border: none;
-  background: none;
-  padding: 0;
-  color: inherit;
 }
 
 img {
@@ -125,29 +229,113 @@ img {
   max-width: 100%;
 }
 
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Runtime-only helper elements use named classes rather than style
+ * attributes so the static CSP can keep `style-src-attr 'none'`. */
+.kitland-clipboard-fallback {
+  position: fixed;
+  top: 0;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.kitland-file-picker {
+  display: none;
+}
+
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
-/* Marquee for tool rail */
-@keyframes kitland-marquee {
+@keyframes marketing-fade-up {
   from {
-    transform: translateX(0);
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
   }
   to {
-    transform: translateX(-50%);
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
-.kitland-marquee-track {
-  display: flex;
-  width: max-content;
-  animation: kitland-marquee 40s linear infinite;
+@keyframes marketing-pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgb(190 242 100 / 42%);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 0 6px rgb(190 242 100 / 0%);
+  }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .kitland-marquee-track {
-    animation: none;
+@keyframes marketing-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0);
+  }
+}
+
+/* Semantic variables consumed by the generated Shadcn components. Values are
+ * aliases rather than a parallel palette, so the existing light/dark toggle
+ * updates both custom layout styles and Shadcn controls together. */
+:root,
+:root[data-theme="light"] {
+  --background: var(--bg);
+  --foreground: var(--on-surface);
+  --card: var(--surface);
+  --card-foreground: var(--on-surface);
+  --popover: var(--surface);
+  --popover-foreground: var(--on-surface);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-low);
+  --secondary-foreground: var(--on-surface);
+  --muted: var(--surface-low);
+  --muted-foreground: var(--on-muted);
+  --ui-accent: var(--surface-high);
+  --accent-foreground: var(--on-surface);
+  --destructive: var(--error);
+  --border: var(--outline);
+  --input: var(--outline);
+  --ring: var(--primary);
+  --radius: 0.625rem;
+  --sidebar: var(--bg-elevated);
+  --sidebar-foreground: var(--on-surface);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--surface-low);
+  --sidebar-accent-foreground: var(--on-surface);
+  --sidebar-border: var(--outline);
+  --sidebar-ring: var(--primary);
+}
+
+:root[data-theme="dark"] {
+  --primary-foreground: var(--ink-dark);
+  --sidebar-primary-foreground: var(--ink-dark);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
   }
 }

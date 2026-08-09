@@ -1,0 +1,4 @@
+apps/web/.astro/
+apps/web/dist/
+design/export/
+node_modules/

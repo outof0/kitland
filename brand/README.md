@@ -3,6 +3,7 @@
 Production handoff for **Kitland** (`kitland.dev`).
 
 ## Contents
+
 - `logos/` — outlined SVG logo system
 - `icons/svg/` — app icon and favicon masters
 - `icons/png/` — raster exports from 16–1024 px

@@ -1,0 +1,94 @@
+---
+import { listAvailableTools, type ToolDefinition } from "@kitland/tool-catalog";
+import ToolSeoGuide from "@/components/seo/ToolSeoGuide.astro";
+import {
+  requireToolSeoContent,
+  type ToolSeoContent,
+} from "@/data/toolSeo";
+import { ToolWorkspaceIsland } from "@/islands/ToolWorkspaceIsland";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+type Props = {
+  tool: ToolDefinition;
+  content: ToolSeoContent;
+};
+
+export function getStaticPaths() {
+  return listAvailableTools().map((tool) => ({
+    params: { slug: tool.slug },
+    props: { tool, content: requireToolSeoContent(tool) },
+  }));
+}
+
+const { tool, content } = Astro.props;
+const canonicalPath = `/explore/${tool.slug}`;
+const canonicalUrl = new URL(canonicalPath, Astro.site).toString();
+const faqs = content.faqs.map((faq) => ({
+  "@type": "Question",
+  name: faq.question,
+  acceptedAnswer: {
+    "@type": "Answer",
+    text: faq.answer,
+  },
+}));
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: tool.name,
+    description: tool.description,
+    url: canonicalUrl,
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Any",
+    browserRequirements: "Requires JavaScript for the interactive tool workspace.",
+    isAccessibleForFree: true,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Kitland",
+        item: "https://kitland.dev/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: tool.name,
+        item: canonicalUrl,
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs,
+  },
+];
+---
+
+<BaseLayout
+  title={`${tool.name} — free local browser tool | Kitland`}
+  description={tool.description}
+  canonicalPath={canonicalPath}
+  structuredData={structuredData}
+>
+  <!--
+    Tool renderers are route-loaded client chunks. The static fallback keeps a
+    visible, crawlable h1 without asking React SSR to emit streaming scripts for
+    a lazy component; the full SEO guide below remains canonical static HTML.
+  -->
+  <ToolWorkspaceIsland slug={tool.slug} client:only="react">
+    <section slot="fallback" class="tool-app" aria-labelledby={`${tool.slug}-fallback-title`}>
+      <main class="tool-main">
+        <div class="tool-workspace">
+          <h1 id={`${tool.slug}-fallback-title`} class="tool-header__title">{tool.shortName}</h1>
+          <p class="tool-header__subtitle">{tool.description}</p>
+        </div>
+      </main>
+    </section>
+  </ToolWorkspaceIsland>
+  <ToolSeoGuide tool={tool} content={content} />
+</BaseLayout>

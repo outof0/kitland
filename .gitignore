@@ -5,7 +5,10 @@ dist
 .cache
 .turbo
 .wrangler
+apps/web/.astro
 coverage
+apps/web/playwright-report
+apps/web/test-results
 *.tsbuildinfo
 
 .env

@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main, master]
@@ -12,9 +15,9 @@ concurrency:
 
 jobs:
   build:
-    name: Typecheck & build
+    name: Quality, test & build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -28,17 +31,60 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.12.0
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Test
+        run: pnpm test
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
+
       - name: Build
         run: pnpm build
+
+      - name: Verify bundle budgets
+        run: pnpm --filter @kitland/web bundle:check
+
+      - name: Verify extension packages
+        run: pnpm package:check
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @kitland/web exec playwright install --with-deps chromium
+
+      - name: Web browser smoke test
+        run: pnpm --filter @kitland/web test:e2e
+
+      - name: Browser extension smoke test
+        run: pnpm --filter @kitland/browser-extension test:smoke
+
+      - name: Verify static SEO output
+        run: pnpm --filter @kitland/web seo:check
+
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+            apps/browser-extension/playwright-report
+            apps/browser-extension/test-results
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload web dist
         if: success()
@@ -49,18 +95,57 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+      - name: Upload extension foundation builds
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kitland-extension-foundations
+          path: |
+            apps/browser-extension/dist
+            apps/vscode-extension/dist
+          if-no-files-found: error
+          retention-days: 7
+
+  vscode-integration:
+    name: VS Code Extension Host
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pinned Extension Host tests
+        run: xvfb-run -a pnpm test:integration:vscode
+
   deploy:
     name: Deploy to Cloudflare Pages
-    needs: build
+    needs: [build, vscode-integration]
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Production branch only; skipped until Cloudflare secrets are configured
+    # Explicit opt-in avoids referencing secrets in a job-level `if`, which
+    # GitHub Actions does not support. Enable only after both secrets exist.
     if: >-
       github.event_name == 'push'
       && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-      && vars.CLOUDFLARE_PAGES_ENABLED != 'false'
-      && secrets.CLOUDFLARE_API_TOKEN != ''
-      && secrets.CLOUDFLARE_ACCOUNT_ID != ''
+      && vars.CLOUDFLARE_PAGES_ENABLED == 'true'
+    environment:
+      name: production
+      url: https://kitland.dev
     permissions:
       contents: read
       deployments: write
@@ -77,18 +162,34 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.12.0
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Verify complete-suite production release gate
+        run: pnpm release:verify
+
+      - name: Download verified web dist
+        uses: actions/download-artifact@v4
+        with:
+          name: kitland-web-dist
+          path: apps/web/dist
+
+      - name: Validate deployment credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "Cloudflare deployment is enabled, but required credentials are missing." >&2
+            exit 1
+          fi
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/web/dist --project-name=kitland --branch=${{ github.ref_name }} --commit-dirty=true
+          command: pages deploy apps/web/dist --project-name=kitland --branch=${{ github.ref_name }}

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: mailto:hello.outof0@gmail.com?subject=%5BKitland%20security%5D
+    about: Report suspected vulnerabilities privately. Do not open a public issue.

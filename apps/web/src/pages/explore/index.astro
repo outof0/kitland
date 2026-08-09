@@ -1,0 +1,202 @@
+---
+import { Logo } from "@/components/Logo";
+import { marketingButton, marketingLink } from "@/components/marketing/variants";
+import { CATALOG_FAMILIES } from "@/data/catalog";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getCatalogReleaseReadiness, listTools } from "@kitland/tool-catalog";
+
+const tools = listTools();
+const releaseReadiness = getCatalogReleaseReadiness();
+const registeredToolCount = tools.length;
+const releaseReadyCount = releaseReadiness.releaseReadyToolCount;
+const description =
+  "Track Kitland's 64-tool local-first developer suite across web, browser extension, and VS Code.";
+
+const RELEASE_STAGE_LABELS = {
+  reference: "REFERENCE",
+  planned: "PLANNED",
+  implemented: "IMPLEMENTED",
+  "release-ready": "RELEASE READY",
+} as const;
+const RELEASE_STAGE_CLASSES = {
+  reference: "border-marketing-success-border bg-marketing-success-bg text-marketing-accent",
+  planned: "border-marketing-state-border bg-marketing-panel-deep text-marketing-text-cool",
+  implemented: "border-marketing-warning-border bg-marketing-warning-bg text-marketing-warning",
+  "release-ready": "border-marketing-release-ready bg-marketing-release-ready-bg text-marketing-success",
+} as const;
+---
+
+<BaseLayout
+  title="Tool catalog — Kitland"
+  description={description}
+  canonicalPath="/explore"
+  structuredData={{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Kitland tool catalog",
+    url: "https://kitland.dev/explore",
+    description,
+  }}
+>
+  <div class="min-h-screen bg-marketing-canvas text-marketing-foreground">
+    <header class="border-b border-marketing-border bg-marketing-canvas/95">
+      <nav
+        class="mx-auto flex h-16 w-full max-w-[1248px] items-center justify-between px-5 sm:px-8"
+        aria-label="Catalog"
+      >
+        <a href="/" aria-label="Kitland home">
+          <Logo variant="reverse" className="h-9" />
+        </a>
+        <span
+          class="rounded-full border border-marketing-warning-border bg-marketing-warning-bg px-3 py-1.5 font-mono text-[10px] font-semibold tracking-[0.12em] text-marketing-warning"
+        >
+          PRE-RELEASE
+        </span>
+      </nav>
+    </header>
+
+    <main>
+      <section class="border-b border-marketing-border px-5 py-16 sm:px-8 lg:py-24">
+        <div class="mx-auto w-full max-w-[1248px]">
+          <p class="font-mono text-xs font-semibold tracking-[0.2em] text-marketing-primary-light">
+            CATALOG STATUS · 64-TOOL TARGET
+          </p>
+          <h1
+            class="mt-5 max-w-5xl font-display text-5xl font-extrabold leading-[0.95] tracking-[-0.045em] text-white sm:text-6xl lg:text-7xl"
+          >
+            A complete local workbench, released as one suite.
+          </h1>
+          <p class="mt-6 max-w-3xl text-lg leading-8 text-marketing-text-secondary">
+            A shared implementation contract keeps the catalog coherent across three surfaces.
+            Kitland stays pre-release until all 64 tools meet the same UX, accessibility, security,
+            and packaging gates.
+          </p>
+
+          <dl class="mt-10 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-marketing-border bg-marketing-border sm:grid-cols-3">
+            <div class="bg-marketing-raised p-5">
+              <dd class="font-display text-3xl font-extrabold text-white">
+                {releaseReadiness.targetToolCount}
+              </dd>
+              <dt class="mt-1 font-mono text-[10px] tracking-wide text-marketing-text-muted">RELEASE TARGET</dt>
+            </div>
+            <div class="bg-marketing-raised p-5">
+              <dd class="font-display text-3xl font-extrabold text-white">{registeredToolCount}</dd>
+              <dt class="mt-1 font-mono text-[10px] tracking-wide text-marketing-text-muted">REGISTERED</dt>
+            </div>
+            <div class="col-span-2 bg-marketing-raised p-5 sm:col-span-1">
+              <dd class="font-display text-3xl font-extrabold text-white">{releaseReadyCount}</dd>
+              <dt class="mt-1 font-mono text-[10px] tracking-wide text-marketing-text-muted">RELEASE READY</dt>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="bg-marketing-raised px-5 py-16 sm:px-8 lg:py-20" aria-labelledby="families-heading">
+        <div class="mx-auto w-full max-w-[1248px]">
+          <div class="max-w-3xl">
+            <p class="font-mono text-xs font-semibold tracking-[0.2em] text-marketing-accent">
+              SIX TOOL FAMILIES
+            </p>
+            <h2 id="families-heading" class="mt-4 font-display text-4xl font-extrabold text-white sm:text-5xl">
+              Breadth with a repeatable structure
+            </h2>
+            <p class="mt-4 text-base leading-7 text-marketing-text-secondary">
+              The names below come from the committed 64-tool registry. Their status remains
+              explicit: a design and contract do not mean a tool is runnable.
+            </p>
+          </div>
+
+          <ul class="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {
+              CATALOG_FAMILIES.map((family) => (
+                <li class="flex min-h-64 flex-col rounded-xl border border-marketing-border-card bg-marketing-surface p-6">
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="font-mono text-xs font-semibold text-marketing-primary-light">{family.index}</span>
+                    <span class="font-mono text-[10px] tracking-wide text-marketing-text-faint">PLANNED FAMILY</span>
+                  </div>
+                  <h3 class="mt-8 text-xl font-bold text-white">{family.name}</h3>
+                  <p class="mt-3 text-sm leading-6 text-marketing-text-secondary">{family.description}</p>
+                  <ul class="mt-auto flex flex-wrap gap-2 pt-6" aria-label={`${family.name} tools`}>
+                    {tools
+                      .filter((tool) => tool.family === family.id)
+                      .slice(0, 4)
+                      .map((tool) => (
+                      <li class="rounded border border-marketing-border-card bg-marketing-recessed px-2.5 py-1 font-mono text-[10px] text-marketing-text-quiet">
+                        {tool.shortName}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </section>
+
+      <section class="border-y border-marketing-border-blue bg-marketing-panel px-5 py-16 sm:px-8 lg:py-20" aria-labelledby="registry-heading">
+        <div class="mx-auto w-full max-w-[1248px]">
+          <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+            <div>
+              <p class="font-mono text-xs font-semibold tracking-[0.2em] text-marketing-primary-light">
+                IMPLEMENTATION REGISTRY
+              </p>
+              <h2 id="registry-heading" class="mt-4 font-display text-4xl font-extrabold text-white">
+                Delivery status for every committed tool
+              </h2>
+            </div>
+            <p class="max-w-xl text-sm leading-6 text-marketing-text-cool">
+              A reference or planned definition is product scope, not a shipping claim. Only
+              runnable tools have an Open tool action.
+            </p>
+          </div>
+
+          <ul class="mt-8 divide-y divide-marketing-border overflow-hidden rounded-xl border border-marketing-border bg-marketing-raised">
+            {
+              tools.map((tool) => (
+                <li class="grid gap-5 p-5 sm:grid-cols-[1fr_auto] sm:items-center lg:p-6">
+                  <div>
+                    <div class="flex flex-wrap items-center gap-3">
+                      <h3 class="text-lg font-bold text-white">{tool.name}</h3>
+                      <span class={`rounded border px-2 py-1 font-mono text-[10px] font-semibold ${RELEASE_STAGE_CLASSES[tool.releaseStage]}`}>
+                        {RELEASE_STAGE_LABELS[tool.releaseStage]}
+                      </span>
+                    </div>
+                    <p class="mt-2 max-w-3xl text-sm leading-6 text-marketing-text-secondary">{tool.description}</p>
+                    <ul class="mt-3 flex flex-wrap gap-2" aria-label={`${tool.name} platform status`}>
+                      {Object.entries(tool.platforms).map(([platform, contract]) => (
+                        <li class="rounded border border-marketing-state-border bg-marketing-panel-deep px-2 py-1 font-mono text-[10px] text-marketing-text-cool">
+                          {platform}: {contract.status}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {
+                    tool.status === "available" ? (
+                      <a
+                        href={`/explore/${tool.slug}`}
+                        class={marketingButton({ tone: "secondary", size: "compact" })}
+                      >
+                        Open tool
+                      </a>
+                    ) : (
+                      <span class="font-mono text-[10px] font-semibold tracking-wide text-marketing-text-faint">
+                        NOT YET RUNNABLE
+                      </span>
+                    )
+                  }
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="px-5 py-10 sm:px-8">
+      <div class="mx-auto flex w-full max-w-[1248px] flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-sm text-marketing-text-muted">Kitland · pre-release OSS foundation</p>
+        <a href="/" class={`${marketingLink} text-sm font-semibold text-marketing-text-secondary`}>Back to overview</a>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>

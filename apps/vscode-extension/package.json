@@ -1,0 +1,109 @@
+{
+  "name": "kitland-developer-tools",
+  "displayName": "Kitland — Developer Tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Privacy-first developer tools that run locally in Visual Studio Code.",
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "converter",
+    "developer tools",
+    "formatter",
+    "generator",
+    "local-first",
+    "privacy"
+  ],
+  "homepage": "https://kitland.dev",
+  "bugs": {
+    "url": "https://github.com/OutOf0/kitland/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OutOf0/kitland.git",
+    "directory": "apps/vscode-extension"
+  },
+  "publisher": "outof0",
+  "main": "./dist/desktop/extension.cjs",
+  "browser": "./dist/web/extension.js",
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "typecheck": "tsc --noEmit --pretty false",
+    "lint": "oxlint src test scripts --vitest-plugin --deny-warnings",
+    "test": "vitest run --config vitest.config.ts",
+    "test:integration": "pnpm build && vscode-test",
+    "package:smoke": "pnpm build && node ./scripts/package-smoke.mjs && vsce ls --no-dependencies",
+    "package:vsix": "pnpm package:smoke && node ./scripts/prepare-artifacts.mjs && vsce package --no-dependencies --out ./artifacts/kitland-developer-tools.vsix",
+    "vscode:prepublish": "pnpm build && node ./scripts/package-smoke.mjs"
+  },
+  "dependencies": {
+    "@kitland/core": "workspace:*",
+    "@kitland/tool-catalog": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.15.0",
+    "@types/vscode": "1.100.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.1",
+    "oxlint": "^1.77.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "kitland.base64.encodeSelection",
+        "title": "Base64: Encode and Replace Selection",
+        "category": "Kitland",
+        "enablement": "editorHasSelection"
+      },
+      {
+        "command": "kitland.base64.decodeSelection",
+        "title": "Base64: Decode and Replace Selection",
+        "category": "Kitland",
+        "enablement": "editorHasSelection"
+      },
+      {
+        "command": "kitland.openTool",
+        "title": "Open Tool...",
+        "category": "Kitland"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "kitland.base64.encodeSelection",
+          "when": "editorHasSelection",
+          "group": "1_modification@90"
+        },
+        {
+          "command": "kitland.base64.decodeSelection",
+          "when": "editorHasSelection",
+          "group": "1_modification@91"
+        }
+      ]
+    }
+  },
+  "activationEvents": [
+    "onCommand:kitland.base64.decodeSelection",
+    "onCommand:kitland.base64.encodeSelection",
+    "onCommand:kitland.openTool"
+  ],
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true,
+      "description": "Registered local tools only process text you explicitly select or enter; they do not execute workspace code or access workspace files."
+    },
+    "virtualWorkspaces": {
+      "supported": true
+    }
+  }
+}

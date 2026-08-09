@@ -1,12 +1,12 @@
 :root {
-  --brand-primary: #2563EB;
-  --brand-ink: #0F172A;
-  --brand-surface: #F8FAFC;
-  --brand-accent: #A3E635;
-  --semantic-info: #38BDF8;
-  --semantic-success: #22C55E;
-  --semantic-warning: #F59E0B;
-  --semantic-danger: #EF4444;
+  --brand-primary: #2563eb;
+  --brand-ink: #0f172a;
+  --brand-surface: #f8fafc;
+  --brand-accent: #a3e635;
+  --semantic-info: #38bdf8;
+  --semantic-success: #22c55e;
+  --semantic-warning: #f59e0b;
+  --semantic-danger: #ef4444;
   --font-ui: "Inter", Inter, system-ui, sans-serif;
   --font-display: "Manrope", Inter, system-ui, sans-serif;
 }
