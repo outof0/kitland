@@ -110,4 +110,18 @@ export const waveFourTools = [
     designFrame: "Token Generator (KHKID)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "rsa-key-pair",
+    slug: "rsa-key-pair",
+    name: "RSA Key Pair",
+    shortName: "RSA Key Pair",
+    family: "hash-crypto",
+    pattern: "generate",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Generate an RSA-OAEP key pair locally.",
+    keywords: ["rsa", "key", "pem", "generate"],
+    designFrame: "RSA Key Pair (Oi5nT)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

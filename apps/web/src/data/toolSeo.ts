@@ -174,6 +174,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "Token Generator",
     "Create cryptographically secure random tokens locally with Web Crypto.",
   ),
+  "rsa-key-pair": localTransformSeo(
+    "RSA Key Pair",
+    "Generate RSA-OAEP public and private PEM keys locally with Web Crypto.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

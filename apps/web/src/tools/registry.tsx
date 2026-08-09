@@ -51,6 +51,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "token-generator": async () => ({
     default: (await import("./TokenGeneratorTool")).TokenGeneratorTool,
   }),
+  "rsa-key-pair": async () => ({ default: (await import("./RsaKeyPairTool")).RsaKeyPairTool }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

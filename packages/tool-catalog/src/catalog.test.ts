@@ -57,6 +57,7 @@ describe("tool catalog", () => {
       "bcrypt-hash",
       "jwt-decoder",
       "token-generator",
+      "rsa-key-pair",
       "uuid-id",
       "text-stats",
       "text-diff",
@@ -152,8 +153,8 @@ describe("tool catalog", () => {
     expect(CANONICAL_TOOL_INVENTORY).toHaveLength(64);
     expect(tools.map(({ id, slug }) => ({ id, slug }))).toEqual(CANONICAL_TOOL_INVENTORY);
     expect(tools.every((tool) => tool.designFrame)).toBe(true);
-    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(29);
-    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(34);
+    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(28);
+    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(35);
   });
 
   it("keeps the committed inventory in Pencil artboard order", () => {
