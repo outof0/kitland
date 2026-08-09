@@ -154,6 +154,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "SHA-256 Hash",
     "Create SHA-256 digests locally from UTF-8 text in hex, Base64, or Base64URL output.",
   ),
+  "hmac-generator": localTransformSeo(
+    "HMAC-SHA-256 Generator",
+    "Create a keyed HMAC-SHA-256 signature locally from UTF-8 secret and message text.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

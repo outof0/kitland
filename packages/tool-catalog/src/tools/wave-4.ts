@@ -40,4 +40,18 @@ export const waveFourTools = [
     designFrame: "Hash (SHA) (U1lUQ0)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "hmac-generator",
+    slug: "hmac-generator",
+    name: "HMAC Generator",
+    shortName: "HMAC",
+    family: "hash-crypto",
+    pattern: "transform",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Create HMAC-SHA-256 signatures locally from a secret and message.",
+    keywords: ["hmac", "sha256", "signature", "keyed hash"],
+    designFrame: "HMAC Generator (p0yzv)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

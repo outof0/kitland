@@ -100,6 +100,15 @@ export {
   type ShaHashResult,
 } from "./tools/sha-hash";
 export {
+  signHmacSha256,
+  HMAC_MAX_MESSAGE_CHARS,
+  HMAC_MAX_SECRET_CHARS,
+  HMAC_SHA256_ALGORITHM,
+  HMAC_SHA256_BYTES,
+  type HmacResult,
+  type HmacSigner,
+} from "./tools/hmac-generator";
+export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
   type CaseFormat,
