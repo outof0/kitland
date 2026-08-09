@@ -90,6 +90,22 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "YAML to JSON",
     "Convert supported YAML mappings and sequences into formatted JSON.",
   ),
+  "json-toolbox": localTransformSeo(
+    "JSON Toolbox",
+    "Validate a JSON document and inspect its root type, value count, and nesting depth.",
+  ),
+  "json-to-csv": localTransformSeo(
+    "JSON to CSV",
+    "Convert JSON records into escaped RFC 4180 CSV while keeping the conversion local.",
+  ),
+  "json-to-toml": localTransformSeo(
+    "JSON to TOML",
+    "Convert JSON configuration objects into readable TOML tables and values.",
+  ),
+  "xml-formatter": localTransformSeo(
+    "XML Formatter",
+    "Validate and format XML locally with external entities disabled.",
+  ),
   "html-entities": localTransformSeo(
     "HTML Entities",
     "Encode reserved characters or decode common named and numeric HTML entities.",
@@ -121,6 +137,30 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
   "text-reverser": localTransformSeo(
     "Text Reverser",
     "Reverse characters, words, or lines with Unicode-aware handling.",
+  ),
+  "text-stats": localTransformSeo(
+    "Text Stats",
+    "Count characters, words, lines, and reading metrics without uploading your text.",
+  ),
+  "text-diff": localTransformSeo(
+    "Text Diff",
+    "Compare two text values and review bounded line-level changes locally.",
+  ),
+  "lorem-ipsum": localTransformSeo(
+    "Lorem Ipsum",
+    "Generate placeholder paragraphs and sentences for prototypes and layout tests.",
+  ),
+  "regex-tester": localTransformSeo(
+    "Regex Tester",
+    "Test a regular expression against sample text and inspect bounded matches and captures.",
+  ),
+  "random-port": localTransformSeo(
+    "Random Port",
+    "Generate valid random network ports for local development and configuration examples.",
+  ),
+  "random-number": localTransformSeo(
+    "Random Number",
+    "Generate cryptographically secure random numbers within a chosen range locally.",
   ),
 };
 

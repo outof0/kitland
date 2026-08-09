@@ -109,3 +109,77 @@ export {
   type TextReverseMode,
   type TextReverseOptions,
 } from "./tools/text-reverser";
+export {
+  inspectJson,
+  JSON_TOOLBOX_MAX_DEPTH,
+  JSON_TOOLBOX_MAX_INPUT_CHARS,
+  JSON_TOOLBOX_MAX_NODES,
+  type JsonInspection,
+  type JsonRootType,
+} from "./tools/json-toolbox";
+export {
+  jsonToCsv,
+  JSON_TO_CSV_MAX_COLUMNS,
+  JSON_TO_CSV_MAX_INPUT_CHARS,
+  JSON_TO_CSV_MAX_OUTPUT_CHARS,
+  JSON_TO_CSV_MAX_ROWS,
+  type JsonToCsvOptions,
+} from "./tools/json-to-csv";
+export {
+  jsonToToml,
+  JSON_TO_TOML_MAX_DEPTH,
+  JSON_TO_TOML_MAX_INPUT_CHARS,
+  JSON_TO_TOML_MAX_NODES,
+  JSON_TO_TOML_MAX_OUTPUT_CHARS,
+} from "./tools/json-to-toml";
+export {
+  formatXml,
+  XML_FORMATTER_MAX_DEPTH,
+  XML_FORMATTER_MAX_INPUT_CHARS,
+  XML_FORMATTER_MAX_OUTPUT_CHARS,
+  XML_FORMATTER_MAX_TOKENS,
+  type XmlFormatResult,
+} from "./tools/xml-formatter";
+export { getTextStats, TEXT_STATS_MAX_INPUT_CHARS, type TextStats } from "./tools/text-stats";
+export {
+  diffText,
+  TEXT_DIFF_MAX_INPUT_CHARS,
+  TEXT_DIFF_MAX_LINES,
+  TEXT_DIFF_MAX_MATRIX_CELLS,
+  type TextDiffLine,
+  type TextDiffResult,
+} from "./tools/text-diff";
+export {
+  testRegex,
+  REGEX_TEST_MAX_INPUT_CHARS,
+  REGEX_TEST_MAX_MATCHES,
+  REGEX_TEST_MAX_PATTERN_CHARS,
+  type RegexCapture,
+  type RegexMatch,
+  type RegexTestOptions,
+  type RegexTestResult,
+} from "./tools/regex-tester";
+export {
+  generateLoremIpsum,
+  LOREM_MAX_AMOUNT,
+  LOREM_MAX_OUTPUT_BYTES,
+  type LoremIpsumOptions,
+  type LoremUnit,
+} from "./tools/lorem-ipsum";
+export {
+  generateRandomPorts,
+  RANDOM_PORT_MAX_COUNT,
+  type PortProtocol,
+  type PortRange,
+  type RandomPortOptions,
+  type RandomPortResult,
+  type SecureRandomUint32,
+} from "./tools/random-port";
+export {
+  generateRandomNumbers,
+  RANDOM_NUMBER_MAX_COUNT,
+  RANDOM_NUMBER_MAX_DECIMALS,
+  RANDOM_NUMBER_MAX_STEPS,
+  type RandomNumberOptions,
+  type RandomNumberResult,
+} from "./tools/random-number";

@@ -854,3 +854,123 @@ html.tool-navigation-open body {
     min-height: 320px;
   }
 }
+
+/* Shared generator layout. Keep generator tools on the same design-token
+ * surface as the editor tools instead of embedding utility-class styling in
+ * each renderer. */
+.generator-layout {
+  display: grid;
+  grid-template-columns: minmax(17rem, 18.75rem) minmax(0, 1fr);
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.generator-controls,
+.generator-output {
+  border: 1px solid var(--outline);
+  border-radius: 14px;
+  min-width: 0;
+}
+
+.generator-controls {
+  padding: 18px;
+  background: var(--bg-elevated);
+}
+
+.generator-form {
+  display: grid;
+  gap: 1rem;
+}
+.generator-form--two-column {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.generator-field {
+  display: grid;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.generator-input {
+  width: 100%;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--outline);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--on-surface);
+}
+.generator-input--mono {
+  font-family: var(--font-mono);
+}
+.generator-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+.generator-submit,
+.generator-help--wide {
+  grid-column: 1 / -1;
+}
+.generator-help {
+  margin: 0;
+  color: var(--on-faint);
+  font-size: 0.75rem;
+}
+.generator-output {
+  display: flex;
+  min-height: 22rem;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--surface);
+}
+.generator-output__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.generator-output__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.generator-output__subtitle {
+  margin: 0.125rem 0 0;
+  color: var(--on-muted);
+  font-size: 0.75rem;
+}
+.generator-output__code {
+  display: block;
+  flex: 1;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  border-radius: 12px;
+  padding: 18px;
+  background: var(--bg-elevated);
+  color: var(--on-surface);
+  font: 0.875rem/1.5 var(--font-mono);
+}
+.generator-output__meta {
+  margin: 0;
+  color: var(--on-faint);
+  font: 0.75rem var(--font-mono);
+}
+
+@media (max-width: 900px) {
+  .generator-layout {
+    grid-template-columns: 1fr;
+  }
+  .generator-output {
+    min-height: 18rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .generator-form--two-column {
+    grid-template-columns: 1fr;
+  }
+}

@@ -21,6 +21,10 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   }),
   "json-to-yaml": async () => ({ default: (await import("./JsonToYamlTool")).JsonToYamlTool }),
   "yaml-to-json": async () => ({ default: (await import("./YamlToJsonTool")).YamlToJsonTool }),
+  "json-toolbox": async () => ({ default: (await import("./JsonToolboxTool")).JsonToolboxTool }),
+  "json-to-csv": async () => ({ default: (await import("./JsonToCsvTool")).JsonToCsvTool }),
+  "json-to-toml": async () => ({ default: (await import("./JsonToTomlTool")).JsonToTomlTool }),
+  "xml-formatter": async () => ({ default: (await import("./XmlFormatterTool")).XmlFormatterTool }),
   "html-entities": async () => ({
     default: (await import("./HtmlEntitiesTool")).HtmlEntitiesTool,
   }),
@@ -37,6 +41,12 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "text-reverser": async () => ({
     default: (await import("./TextReverserTool")).TextReverserTool,
   }),
+  "text-stats": async () => ({ default: (await import("./TextStatsTool")).TextStatsTool }),
+  "text-diff": async () => ({ default: (await import("./TextDiffTool")).TextDiffTool }),
+  "regex-tester": async () => ({ default: (await import("./RegexTesterTool")).RegexTesterTool }),
+  "lorem-ipsum": async () => ({ default: (await import("./LoremIpsumTool")).LoremIpsumTool }),
+  "random-port": async () => ({ default: (await import("./RandomPortTool")).RandomPortTool }),
+  "random-number": async () => ({ default: (await import("./RandomNumberTool")).RandomNumberTool }),
 } satisfies Record<AvailableToolSlug, ToolRendererLoader>);
 
 const rendererCache = new Map<AvailableToolSlug, ToolRenderer>();
