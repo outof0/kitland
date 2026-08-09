@@ -218,6 +218,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "NanoID Generator",
     "Generate compact custom-alphabet NanoID-style identifiers locally with secure browser randomness.",
   ),
+  "ulid-generator": localTransformSeo(
+    "ULID Generator",
+    "Generate time-sortable ULID identifiers locally with secure browser entropy.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

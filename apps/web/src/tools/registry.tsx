@@ -76,6 +76,9 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "nanoid-generator": async () => ({
     default: (await import("./NanoidGeneratorTool")).NanoidGeneratorTool,
   }),
+  "ulid-generator": async () => ({
+    default: (await import("./UlidGeneratorTool")).UlidGeneratorTool,
+  }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

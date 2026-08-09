@@ -264,4 +264,18 @@ export const waveFourTools = [
     designFrame: "NanoID Generator (h4DC8)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "ulid-generator",
+    slug: "ulid-generator",
+    name: "ULID Generator",
+    shortName: "ULID",
+    family: "generators",
+    pattern: "generate",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Generate sortable ULID identifiers locally.",
+    keywords: ["ulid", "id", "generate"],
+    designFrame: "ULID Generator (CnASb)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];
