@@ -210,6 +210,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "IP Subnet Calculator",
     "Calculate IPv4 CIDR network ranges, masks, and usable host counts locally.",
   ),
+  "password-generator": localTransformSeo(
+    "Password Generator",
+    "Generate a policy-controlled password locally with browser-provided secure randomness.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

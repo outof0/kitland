@@ -70,6 +70,9 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "ip-subnet-calculator": async () => ({
     default: (await import("./IpSubnetCalculatorTool")).IpSubnetCalculatorTool,
   }),
+  "password-generator": async () => ({
+    default: (await import("./PasswordGeneratorTool")).PasswordGeneratorTool,
+  }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

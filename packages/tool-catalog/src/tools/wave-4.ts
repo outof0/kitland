@@ -236,4 +236,18 @@ export const waveFourTools = [
     designFrame: "IP Subnet Calculator (CZ1jx)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "password-generator",
+    slug: "password-generator",
+    name: "Password Generator",
+    shortName: "Password Generator",
+    family: "generators",
+    pattern: "generate",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Generate policy-controlled passwords locally with Web Crypto.",
+    keywords: ["password", "random", "generate", "secret"],
+    designFrame: "Password Generator (DLGia)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];
