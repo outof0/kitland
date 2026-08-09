@@ -1,4 +1,4 @@
-import { HEX_TEXT_MAX_INPUT_CHARS } from "@kitland/core";
+import { HEX_TEXT_MAX_ENCODED_CHARS } from "@kitland/core";
 import { EncodingTransformWorkspace } from "./EncodingTransformWorkspace";
 
 export function HexTextTool() {
@@ -8,7 +8,7 @@ export function HexTextTool() {
       title="Hex Text"
       subtitle="Convert Unicode text to and from UTF-8 hexadecimal bytes locally."
       sample="Hello, 🍵"
-      inputLimit={HEX_TEXT_MAX_INPUT_CHARS}
+      inputLimit={HEX_TEXT_MAX_ENCODED_CHARS}
       formatLabel="Encode as"
       defaultFormat="spaced"
       formatChoices={[

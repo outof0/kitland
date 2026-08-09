@@ -105,12 +105,13 @@ export function EncodingTransformWorkspace({
 
   const moveResultToInput = useCallback(
     (nextMode: "encode" | "decode") => {
+      if (nextMode === mode) return;
       if (canSwap) setInput(result.value);
       setMode(nextMode);
       setCopied(null);
       setFeedback(null);
     },
-    [canSwap, result],
+    [canSwap, mode, result],
   );
 
   const inputLabel = mode === "encode" ? "Text input" : `${title} input`;

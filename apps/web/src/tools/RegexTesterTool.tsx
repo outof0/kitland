@@ -93,7 +93,7 @@ export function RegexTesterTool() {
             value={pattern}
             onChange={(event) => setPattern(event.target.value)}
             spellCheck={false}
-            placeholder="\d+"
+            placeholder={String.raw`\d+`}
           />
         </div>
         <div>

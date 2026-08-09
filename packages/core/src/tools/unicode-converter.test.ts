@@ -23,6 +23,16 @@ describe("unicode converter", () => {
     });
   });
 
+  it("decodes a valid large sequence without exceeding the engine argument limit", () => {
+    const count = 150_000;
+    const input = Array.from({ length: count }, () => "U+0041").join(" ");
+
+    expect(decodeUnicodeCodePoints(input)).toEqual({
+      ok: true,
+      value: "A".repeat(count),
+    });
+  });
+
   it.each(["0041", "U+41", "U+D800", "U+110000", "U+ZZZZ"])(
     "rejects malformed scalar values: %s",
     (input) => {

@@ -169,10 +169,52 @@ function parseInlineOrChild(
   depth: number,
   line: number,
 ): ToolResult<YamlValue> {
-  if (rest.length > 0) return parseYamlScalar(rest, line);
+  if (rest.length > 0) {
+    if (isInlineMapping(rest)) return parseSequenceMapping(state, rest, parentIndent, depth, line);
+    return parseYamlScalar(rest, line);
+  }
   const child = state.lines[state.index];
   if (!child || child.indent <= parentIndent) return ok(null);
   return parseBlock(state, child.indent, depth + 1);
+}
+
+/** Parse the common YAML sequence form `- key: value` plus its sibling keys. */
+function parseSequenceMapping(
+  state: ParseState,
+  source: string,
+  sequenceIndent: number,
+  depth: number,
+  line: number,
+): ToolResult<{ [key: string]: YamlValue }> {
+  const delimiter = findKeyDelimiter(source);
+  if (delimiter === -1) return syntaxError(line, "invalid sequence mapping");
+
+  const key = parseYamlKey(source.slice(0, delimiter).trim(), line);
+  if (!key.ok) return key;
+  const rest = source.slice(delimiter + 1).trimStart();
+  const value = rest ? parseYamlScalar(rest, line) : ok<YamlValue>(null);
+  if (!value.ok) return value;
+
+  const output: { [key: string]: YamlValue } = Object.create(null) as {
+    [key: string]: YamlValue;
+  };
+  output[key.value] = value.value;
+
+  const sibling = state.lines[state.index];
+  if (!sibling || sibling.indent <= sequenceIndent) return ok(output);
+  const mappingIndent = sequenceIndent + 2;
+  if (sibling.indent !== mappingIndent) {
+    return syntaxError(sibling.line, "unexpected indentation in sequence mapping");
+  }
+
+  const following = parseMapping(state, mappingIndent, depth + 1);
+  if (!following.ok) return following;
+  for (const [nextKey, nextValue] of Object.entries(following.value)) {
+    if (Object.hasOwn(output, nextKey))
+      return syntaxError(line, `duplicate key ${JSON.stringify(nextKey)}`);
+    output[nextKey] = nextValue;
+  }
+  return ok(output);
 }
 
 function prepareLines(source: string): ToolResult<readonly SourceLine[]> {
@@ -310,9 +352,18 @@ function findKeyDelimiter(content: string): number {
       else if (quote === null) quote = char;
       continue;
     }
-    if (char === ":" && quote === null) return index;
+    if (
+      char === ":" &&
+      quote === null &&
+      (index === content.length - 1 || /\s/u.test(content[index + 1] ?? ""))
+    )
+      return index;
   }
   return -1;
+}
+
+function isInlineMapping(content: string): boolean {
+  return findKeyDelimiter(content) !== -1;
 }
 
 function stripComment(line: string): string {

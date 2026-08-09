@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useJsonEscape } from "@/hooks/useJsonEscape";
 import { Textarea } from "@/components/ui/textarea";
-import { copyText } from "@/lib/clipboard";
+import { copyText, downloadText } from "@/lib/clipboard";
 import {
   JSON_ESCAPE_MAX_ENCODED_CHARS,
   JSON_ESCAPE_MAX_INPUT_CHARS,
@@ -16,6 +16,7 @@ import {
   Eraser,
   FileCode,
   FileInput,
+  Save,
 } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
 
@@ -223,6 +224,20 @@ export function JsonEscapeTool() {
               ) : (
                 <Copy aria-hidden="true" />
               )}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              className="tool-card__tb-btn"
+              onClick={() =>
+                downloadText(mode === "encode" ? "escaped-json.txt" : "unescaped-text.txt", output)
+              }
+              disabled={!output}
+              aria-label="Save result"
+              title="Download result as a text file"
+            >
+              <Save aria-hidden="true" />
             </Button>
           </div>
           <div className="tool-card__body">

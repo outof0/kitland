@@ -30,4 +30,15 @@ describe("formatSql", () => {
     if (!result.ok) throw new Error(result.error.message);
     expect(result.value).toContain("LEFT JOIN profiles p");
   });
+
+  it("normalizes compound clauses and outer joins", () => {
+    const result = formatSql(
+      "select team,count(*) from users left outer join profiles p on p.user_id=users.id group by team order by team union all select team,0 from archived",
+    );
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.value).toContain("LEFT OUTER JOIN profiles p");
+    expect(result.value).toContain("GROUP BY team");
+    expect(result.value).toContain("ORDER BY team");
+    expect(result.value).toContain("UNION ALL");
+  });
 });

@@ -60,10 +60,14 @@ function tokenizeXml(
 ): ToolResult<{ tokens: XmlToken[]; elementCount: number; maxDepth: number }> {
   const tokens: XmlToken[] = [];
   const open: Array<{ readonly name: string; readonly index: number }> = [];
-  const pattern = /<!\[CDATA\[[\s\S]*?\]\]>|<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<\/[^>]*>|<[^>]*>/g;
+  // Quoted attribute values may legally contain `>`, so a plain `<[^>]*>`
+  // matcher incorrectly splits otherwise valid XML tags.
+  const pattern =
+    /<!\[CDATA\[[\s\S]*?\]\]>|<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<\/[^>]*>|<(?:[^<>"']+|"[^"]*"|'[^']*')*>/g;
   let cursor = 0;
   let elementCount = 0;
   let maxDepth = 0;
+  let documentElementCount = 0;
 
   for (const match of source.matchAll(pattern)) {
     const index = match.index ?? 0;
@@ -71,6 +75,9 @@ function tokenizeXml(
     if (before) {
       const text = validateText(before, lineAt(source, cursor));
       if (!text.ok) return text;
+      if (open.length === 0 && before.trim()) {
+        return xmlError(lineAt(source, cursor), "text is not allowed outside the document element");
+      }
       const openIndex = open.at(-1)?.index ?? null;
       tokens.push({ type: "text", raw: before, openIndex });
       if (before.trim() && openIndex !== null) {
@@ -83,6 +90,14 @@ function tokenizeXml(
     const parsed = parseMarkup(raw, line, open);
     if (!parsed.ok) return parsed;
     if (parsed.value) {
+      if (parsed.value.type === "text" && open.length === 0) {
+        return xmlError(line, "CDATA is not allowed outside the document element");
+      }
+      if (parsed.value.type === "start" && open.length === 0) {
+        documentElementCount += 1;
+        if (documentElementCount > 1)
+          return xmlError(line, "multiple document elements are not allowed");
+      }
       tokens.push(parsed.value);
       if (parsed.value.type === "start" && !parsed.value.selfClosing) {
         open.push({ name: parsed.value.name, index: tokens.length - 1 });
@@ -112,6 +127,9 @@ function tokenizeXml(
   if (trailing) {
     const text = validateText(trailing, lineAt(source, cursor));
     if (!text.ok) return text;
+    if (open.length === 0 && trailing.trim()) {
+      return xmlError(lineAt(source, cursor), "text is not allowed outside the document element");
+    }
     const openIndex = open.at(-1)?.index ?? null;
     tokens.push({ type: "text", raw: trailing, openIndex });
     if (trailing.trim() && openIndex !== null) {
@@ -120,7 +138,8 @@ function tokenizeXml(
     }
   }
   if (open.length > 0) return xmlError(1, `unclosed element <${open.at(-1)?.name ?? "?"}>`);
-  if (tokens.length === 0 || elementCount === 0) return xmlError(1, "expected an XML element");
+  if (tokens.length === 0 || elementCount === 0 || documentElementCount !== 1)
+    return xmlError(1, "expected exactly one XML document element");
   return ok({ tokens, elementCount, maxDepth });
 }
 
@@ -130,7 +149,8 @@ function parseMarkup(
   open: Array<{ readonly name: string; readonly index: number }>,
 ): ToolResult<XmlToken | null> {
   if (raw.startsWith("<!--")) {
-    return raw.includes("--", 4) && !raw.endsWith("-->")
+    const body = raw.slice(4, -3);
+    return body.includes("--") || body.endsWith("-")
       ? xmlError(line, "invalid comment")
       : ok({ type: "misc", raw });
   }

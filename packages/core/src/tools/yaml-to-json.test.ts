@@ -23,6 +23,25 @@ describe("yamlToJson", () => {
     });
   });
 
+  it("accepts common inline mappings within a sequence", () => {
+    expect(
+      yamlToJson(
+        "items:\n  - name: Widget\n    enabled: true\n  - name: Gadget\n    enabled: false\n",
+      ),
+    ).toEqual({
+      ok: true,
+      value:
+        '{\n  "items": [\n    {\n      "name": "Widget",\n      "enabled": true\n    },\n    {\n      "name": "Gadget",\n      "enabled": false\n    }\n  ]\n}',
+    });
+  });
+
+  it("does not mistake a scalar URL for a mapping", () => {
+    expect(yamlToJson("https://kitland.dev\n")).toEqual({
+      ok: true,
+      value: '"https://kitland.dev"',
+    });
+  });
+
   it("round-trips the YAML emitted by jsonToYaml", () => {
     const input = '{"name":"Widget","flags":[true,false],"meta":{"build":2}}';
     const yaml = jsonToYaml(input);

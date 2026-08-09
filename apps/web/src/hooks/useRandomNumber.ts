@@ -5,6 +5,11 @@ import { useCallback, useState } from "react";
 export function useRandomNumber() {
   const [output, setOutput] = useState<readonly number[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [generatedOptions, setGeneratedOptions] = useState<{
+    from: number;
+    to: number;
+    decimals: number;
+  } | null>(null);
   const generate = useCallback((options: RandomNumberOptions) => {
     const result = generateRandomNumbers(options, secureRandomUint32);
     if (!result.ok) {
@@ -12,7 +17,12 @@ export function useRandomNumber() {
       return;
     }
     setOutput(result.value.values);
+    setGeneratedOptions({
+      from: options.from,
+      to: options.to,
+      decimals: result.value.decimals,
+    });
     setError(null);
   }, []);
-  return { output, error, generate };
+  return { output, error, generate, generatedOptions };
 }

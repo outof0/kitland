@@ -22,6 +22,7 @@ const CLAUSE_START = new Set([
   "VALUES",
 ]);
 const JOIN_PREFIXES = new Set(["JOIN", "INNER", "LEFT", "RIGHT", "FULL", "CROSS"]);
+const JOIN_MODIFIERS = new Set(["INNER", "LEFT", "RIGHT", "FULL", "CROSS", "OUTER"]);
 const LOGICAL = new Set(["AND", "OR"]);
 const KEYWORDS = new Set([
   ...CLAUSE_START,
@@ -46,6 +47,9 @@ const KEYWORDS = new Set([
   "FIRST",
   "LAST",
   "WITH",
+  "BY",
+  "ALL",
+  "OUTER",
 ]);
 
 /** Format common SQL while preserving literals, quoted identifiers, and comments. */
@@ -73,7 +77,11 @@ export function formatSql(source: string, options: SqlFormatOptions = {}): ToolR
   };
   const append = (value: string, spaced = true) => {
     if (!current) current = value;
-    else current += spaced ? ` ${value}` : value;
+    else {
+      const requiresSpace =
+        spaced && !current.endsWith(".") && !current.endsWith("::") && !current.endsWith("(");
+      current += requiresSpace ? ` ${value}` : value;
+    }
   };
 
   for (const token of tokens) {
@@ -86,12 +94,12 @@ export function formatSql(source: string, options: SqlFormatOptions = {}): ToolR
     if (token.kind === "word" && KEYWORDS.has(upper)) {
       const value = keywordCase === "lower" ? upper.toLowerCase() : upper;
       if (upper === "JOIN") {
-        if (current && !/\b(?:INNER|LEFT|RIGHT|FULL|CROSS)$/iu.test(current)) flush();
+        if (current && !/\b(?:INNER|LEFT|RIGHT|FULL|CROSS|OUTER)$/iu.test(current)) flush();
         append(value);
         continue;
       }
-      if (["INNER", "LEFT", "RIGHT", "FULL", "CROSS"].includes(upper)) {
-        flush();
+      if (JOIN_MODIFIERS.has(upper)) {
+        if (current && !/\b(?:INNER|LEFT|RIGHT|FULL|CROSS|OUTER)$/iu.test(current)) flush();
         append(value);
         continue;
       }

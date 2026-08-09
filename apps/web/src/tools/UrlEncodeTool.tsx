@@ -37,6 +37,7 @@ export function UrlEncodeTool() {
   const [scope, setScope] = useState<UrlEncodingScope>("component");
   const [input, setInput] = useState(SAMPLE_INPUT);
   const [copied, setCopied] = useState<"input" | "output" | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
   const { result, isProcessing } = useUrlTransform(mode, scope, input);
   const inputLimitError =
     input.length > URL_TRANSFORM_MAX_INPUT_CHARS
@@ -59,6 +60,7 @@ export function UrlEncodeTool() {
   );
 
   const showCopied = useCallback((target: "input" | "output") => {
+    setFeedback(null);
     setCopied(target);
     if (copyTimer.current !== undefined) window.clearTimeout(copyTimer.current);
     copyTimer.current = window.setTimeout(() => {
@@ -69,9 +71,17 @@ export function UrlEncodeTool() {
 
   const copy = useCallback(
     async (target: "input" | "output", value: string) => {
-      if (!value) return;
+      if (!value) {
+        setFeedback("There is no text to copy yet.");
+        return;
+      }
       const copiedResult = await copyText(value);
-      if (copiedResult.ok) showCopied(target);
+      if (copiedResult.ok) {
+        showCopied(target);
+      } else {
+        setCopied(null);
+        setFeedback(copiedResult.message);
+      }
     },
     [showCopied],
   );
@@ -88,6 +98,7 @@ export function UrlEncodeTool() {
     setInput(result.value);
     setMode((current) => (current === "encode" ? "decode" : "encode"));
     setCopied(null);
+    setFeedback(null);
   }, [inputLimitError, isProcessing, result]);
 
   const onModeChange = useCallback(
@@ -107,6 +118,7 @@ export function UrlEncodeTool() {
       }
       setMode(nextMode);
       setCopied(null);
+      setFeedback(null);
     },
     [inputLimitError, isProcessing, mode, result],
   );
@@ -134,6 +146,7 @@ export function UrlEncodeTool() {
               setScope("component");
               setInput(SAMPLE_INPUT);
               setCopied(null);
+              setFeedback(null);
               inputRef.current?.focus();
             }}
           >
@@ -177,7 +190,11 @@ export function UrlEncodeTool() {
                 : "tool-format__seg"
             }
             aria-pressed={scope === "component"}
-            onClick={() => setScope("component")}
+            onClick={() => {
+              setScope("component");
+              setCopied(null);
+              setFeedback(null);
+            }}
             title="Escapes URI delimiters such as /, ?, &, =, and #"
           >
             Component
@@ -190,7 +207,11 @@ export function UrlEncodeTool() {
               scope === "url" ? "tool-format__seg tool-format__seg--active" : "tool-format__seg"
             }
             aria-pressed={scope === "url"}
-            onClick={() => setScope("url")}
+            onClick={() => {
+              setScope("url");
+              setCopied(null);
+              setFeedback(null);
+            }}
             title="Keeps URI delimiters readable and structurally meaningful"
           >
             Full URL
@@ -204,6 +225,13 @@ export function UrlEncodeTool() {
           : "Full URL keeps : / ? & = and # as URL structure."}{" "}
         A + sign remains +; this tool does not guess HTML form encoding.
       </p>
+      <output
+        className={feedback ? "tool-feedback tool-feedback--error" : "tool-feedback"}
+        role={feedback ? "alert" : undefined}
+        aria-live="polite"
+      >
+        {feedback ?? ""}
+      </output>
 
       <div className="tool-editor">
         <EditorCard
@@ -215,6 +243,7 @@ export function UrlEncodeTool() {
           onClear={() => {
             setInput("");
             setCopied(null);
+            setFeedback(null);
             inputRef.current?.focus();
           }}
           hint={
@@ -239,6 +268,7 @@ export function UrlEncodeTool() {
             onChange={(event) => {
               setInput(event.target.value);
               setCopied(null);
+              setFeedback(null);
             }}
             spellCheck={false}
             aria-invalid={transformError ? true : undefined}

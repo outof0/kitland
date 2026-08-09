@@ -1,6 +1,9 @@
 import { defineConfig } from "@playwright/test";
 
-const baseURL = "http://127.0.0.1:4321";
+// Use a dedicated preview port and never attach to an arbitrary process that
+// happens to be listening there. Reusing a server made local test runs capable
+// of exercising a different checkout and reporting a false green result.
+const baseURL = "http://127.0.0.1:45123";
 const isCI = Boolean(process.env.CI);
 
 /**
@@ -26,13 +29,13 @@ export default defineConfig({
     video: "retain-on-failure",
   },
   webServer: {
-    command: "pnpm exec astro preview --host 127.0.0.1 --port 4321",
+    command: "pnpm exec astro preview --host 127.0.0.1 --port 45123",
     // Astro detects coding-agent environments and otherwise backgrounds its
     // preview process. Playwright needs to own the foreground process so it
     // can reliably wait for readiness and shut it down after the suite.
     env: { ...process.env, ASTRO_PREVIEW_BACKGROUND: "1" },
     url: `${baseURL}/explore/base64`,
-    reuseExistingServer: !isCI,
+    reuseExistingServer: false,
     timeout: 30_000,
   },
 });

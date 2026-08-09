@@ -4,6 +4,7 @@ export type UnicodeConverterMode = "encode" | "decode";
 
 export const UNICODE_CONVERTER_MAX_INPUT_CHARS = 2_000_000;
 export const UNICODE_CONVERTER_MAX_CODE_POINTS = 500_000;
+const CODE_POINT_CHUNK_SIZE = 8_192;
 
 /** Format every Unicode scalar value as an explicit `U+XXXX` code point. */
 export function encodeUnicodeCodePoints(input: string): ToolResult<string> {
@@ -54,7 +55,13 @@ export function decodeUnicodeCodePoints(input: string): ToolResult<string> {
     }
     codePoints[index] = codePoint;
   }
-  return ok(String.fromCodePoint(...codePoints));
+  // A valid input can contain more code points than JavaScript permits as
+  // arguments to one function call. Build the result in bounded batches.
+  const output: string[] = [];
+  for (let index = 0; index < codePoints.length; index += CODE_POINT_CHUNK_SIZE) {
+    output.push(String.fromCodePoint(...codePoints.slice(index, index + CODE_POINT_CHUNK_SIZE)));
+  }
+  return ok(output.join(""));
 }
 
 export function runUnicodeConverter(mode: UnicodeConverterMode, input: string): ToolResult<string> {

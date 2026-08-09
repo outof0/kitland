@@ -9,8 +9,10 @@ export function RandomNumberTool() {
   const [to, setTo] = useState(100);
   const [decimals, setDecimals] = useState(0);
   const [count, setCount] = useState(1);
-  const { output, error, generate } = useRandomNumber();
-  const result = output.map((value) => value.toFixed(decimals)).join("\n");
+  const { output, error, generate, generatedOptions } = useRandomNumber();
+  const result = output
+    .map((value) => value.toFixed(generatedOptions?.decimals ?? decimals))
+    .join("\n");
 
   return (
     <GeneratorResult
@@ -20,8 +22,8 @@ export function RandomNumberTool() {
       output={result}
       outputLabel="Random Number"
       outputMeta={
-        output.length
-          ? `${from}–${to} · ${decimals} decimals · uniform`
+        output.length && generatedOptions
+          ? `${generatedOptions.from}–${generatedOptions.to} · ${generatedOptions.decimals} decimals · uniform`
           : "Values are generated only when you request them"
       }
       error={error}

@@ -20,6 +20,28 @@ describe("formatXml", () => {
     });
   });
 
+  it("accepts quoted attributes containing a greater-than character", () => {
+    expect(formatXml('<root label="1 > 0"><item/></root>')).toMatchObject({
+      ok: true,
+      value: { output: '<root label="1 > 0">\n  <item/>\n</root>\n' },
+    });
+  });
+
+  it("rejects content outside a single document element", () => {
+    expect(formatXml("before<root/>after")).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_XML" },
+    });
+    expect(formatXml("<first/><second/>")).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_XML" },
+    });
+    expect(formatXml("<!-- bad -- comment --><root/>")).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_XML" },
+    });
+  });
+
   it("rejects malformed markup, entity mistakes, DOCTYPE and oversized input", () => {
     expect(formatXml("<a><b></a>")).toMatchObject({ ok: false, error: { code: "INVALID_XML" } });
     expect(formatXml("<a>Fish & chips</a>")).toMatchObject({

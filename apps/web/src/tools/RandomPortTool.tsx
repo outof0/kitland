@@ -8,9 +8,8 @@ export function RandomPortTool() {
   const [range, setRange] = useState<"dynamic" | "ephemeral">("dynamic");
   const [protocol, setProtocol] = useState<"tcp" | "udp">("tcp");
   const [count, setCount] = useState(1);
-  const { output, error, generate } = useRandomPort();
+  const { output, error, generate, generatedOptions } = useRandomPort();
   const result = output.join("\n");
-  const rangeText = range === "dynamic" ? "1024–65535" : "49152–65535";
 
   return (
     <GeneratorResult
@@ -20,8 +19,8 @@ export function RandomPortTool() {
       output={result}
       outputLabel="Random Port"
       outputMeta={
-        output.length
-          ? `${rangeText} · ${protocol.toUpperCase()} · not availability-checked`
+        output.length && generatedOptions
+          ? `${generatedOptions.min}–${generatedOptions.max} · ${generatedOptions.protocol.toUpperCase()} · not availability-checked`
           : "A generated port may already be in use"
       }
       error={error}
