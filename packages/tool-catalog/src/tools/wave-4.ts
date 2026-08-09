@@ -208,4 +208,18 @@ export const waveFourTools = [
     designFrame: "cURL Converter (J2LJzD)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "cron-parser",
+    slug: "cron-parser",
+    name: "Cron Parser",
+    shortName: "Cron Parser",
+    family: "time-network",
+    pattern: "inspect",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Explain five-field Unix cron schedules and preview their local-time runs.",
+    keywords: ["cron", "schedule", "time", "parser"],
+    designFrame: "Cron Parser (XENy7)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

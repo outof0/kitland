@@ -158,6 +158,13 @@ export {
   type CurlRequest,
 } from "./tools/curl-converter";
 export {
+  getNextCronRuns,
+  parseCronExpression,
+  CRON_MAX_INPUT_CHARS,
+  CRON_MAX_NEXT_RUNS,
+  type ParsedCron,
+} from "./tools/cron-parser";
+export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
   type CaseFormat,

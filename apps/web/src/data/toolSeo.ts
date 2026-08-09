@@ -202,6 +202,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "cURL Converter",
     "Turn a portable cURL command into Fetch code locally without sending or running the request.",
   ),
+  "cron-parser": localTransformSeo(
+    "Cron Parser",
+    "Explain a standard five-field Unix cron expression and preview its upcoming local-time runs.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

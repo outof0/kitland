@@ -66,6 +66,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "curl-converter": async () => ({
     default: (await import("./CurlConverterTool")).CurlConverterTool,
   }),
+  "cron-parser": async () => ({ default: (await import("./CronParserTool")).CronParserTool }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),
