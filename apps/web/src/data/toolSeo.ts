@@ -230,6 +230,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "Mock Data",
     "Generate bounded fixture records and JSON previews locally.",
   ),
+  "qr-code": localTransformSeo(
+    "QR Code",
+    "Generate downloadable QR codes locally from text or URLs.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

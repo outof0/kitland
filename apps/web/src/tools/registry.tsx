@@ -83,6 +83,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
     default: (await import("./ObjectIdGeneratorTool")).ObjectIdGeneratorTool,
   }),
   "mock-data": async () => ({ default: (await import("./MockDataTool")).MockDataTool }),
+  "qr-code": async () => ({ default: (await import("./QrCodeTool")).QrCodeTool }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

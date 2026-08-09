@@ -306,4 +306,18 @@ export const waveFourTools = [
     designFrame: "Mock Data (nmkdk)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "qr-code",
+    slug: "qr-code",
+    name: "QR Code",
+    shortName: "QR Code",
+    family: "generators",
+    pattern: "generate",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Generate QR codes locally from text or URLs.",
+    keywords: ["qr", "code", "generate", "url"],
+    designFrame: "QR Code (ryifn)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

@@ -70,7 +70,8 @@ const toolDefinitions = [
   toolAt(waveFourTools, 20),
   toolAt(waveTwoTools, 8),
   toolAt(waveTwoTools, 9),
-  ...plannedTools.slice(48, 61),
+  toolAt(waveFourTools, 21),
+  ...plannedTools.slice(49, 61),
   toolAt(waveThreeTools, 3),
   ...plannedTools.slice(62),
 ] as const satisfies readonly ToolDefinition[];
