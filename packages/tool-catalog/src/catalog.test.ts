@@ -61,6 +61,8 @@ describe("tool catalog", () => {
       "uuid-id",
       "url-parser",
       "http-status-codes",
+      "mime-types",
+      "user-agent-parser",
       "basic-auth-header",
       "text-stats",
       "text-diff",
@@ -156,8 +158,8 @@ describe("tool catalog", () => {
     expect(CANONICAL_TOOL_INVENTORY).toHaveLength(64);
     expect(tools.map(({ id, slug }) => ({ id, slug }))).toEqual(CANONICAL_TOOL_INVENTORY);
     expect(tools.every((tool) => tool.designFrame)).toBe(true);
-    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(25);
-    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(38);
+    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(23);
+    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(40);
   });
 
   it("keeps the committed inventory in Pencil artboard order", () => {

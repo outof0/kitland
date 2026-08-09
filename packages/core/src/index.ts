@@ -128,6 +128,14 @@ export { pem, validateRsaOptions, RSA_MIN_MODULUS, RSA_MAX_MODULUS } from "./too
 export { parseUrl, URL_PARSER_MAX_INPUT_CHARS, type ParsedUrl } from "./tools/url-parser";
 export { findHttpStatuses, HTTP_STATUS_CODES, type HttpStatus } from "./tools/http-status-codes";
 export {
+  parseUserAgent,
+  USER_AGENT_MAX_INPUT_CHARS,
+  type UserAgentComponent,
+  type UserAgentDevice,
+  type UserAgentDeviceType,
+  type UserAgentInspection,
+} from "./tools/user-agent-parser";
+export {
   lookupMimeTypes,
   MIME_TYPES,
   MIME_TYPES_MAX_QUERY_CHARS,

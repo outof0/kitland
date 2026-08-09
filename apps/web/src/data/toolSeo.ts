@@ -186,6 +186,14 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "HTTP Status Codes",
     "Look up common HTTP response status codes locally.",
   ),
+  "mime-types": localTransformSeo(
+    "MIME Types",
+    "Look up media types from an extension, filename, or Content-Type value locally.",
+  ),
+  "user-agent-parser": localTransformSeo(
+    "User Agent Parser",
+    "Inspect the browser, engine, operating system, and device signals in a user-agent string locally.",
+  ),
   "basic-auth-header": localTransformSeo(
     "Basic Auth Header",
     "Build and decode Basic Authorization headers locally; use HTTPS for credentials.",

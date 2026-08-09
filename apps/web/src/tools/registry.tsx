@@ -56,6 +56,10 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "http-status-codes": async () => ({
     default: (await import("./HttpStatusCodesTool")).HttpStatusCodesTool,
   }),
+  "mime-types": async () => ({ default: (await import("./MimeTypesTool")).MimeTypesTool }),
+  "user-agent-parser": async () => ({
+    default: (await import("./UserAgentParserTool")).UserAgentParserTool,
+  }),
   "basic-auth-header": async () => ({
     default: (await import("./BasicAuthHeaderTool")).BasicAuthHeaderTool,
   }),
