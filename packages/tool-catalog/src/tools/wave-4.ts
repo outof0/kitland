@@ -194,4 +194,18 @@ export const waveFourTools = [
     designFrame: "Basic Auth Header (eYC3i)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "curl-converter",
+    slug: "curl-converter",
+    name: "cURL Converter",
+    shortName: "cURL Converter",
+    family: "time-network",
+    pattern: "transform",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Convert a portable cURL request into copy-ready Fetch code locally.",
+    keywords: ["curl", "http", "request", "fetch", "convert"],
+    designFrame: "cURL Converter (J2LJzD)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

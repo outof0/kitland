@@ -150,6 +150,14 @@ export {
   BASIC_AUTH_MAX_INPUT_CHARS,
 } from "./tools/basic-auth-header";
 export {
+  formatFetchRequest,
+  parseCurlCommand,
+  CURL_CONVERTER_MAX_INPUT_CHARS,
+  CURL_CONVERTER_MAX_TOKENS,
+  type CurlHeader,
+  type CurlRequest,
+} from "./tools/curl-converter";
+export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
   type CaseFormat,

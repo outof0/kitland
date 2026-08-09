@@ -63,6 +63,9 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "basic-auth-header": async () => ({
     default: (await import("./BasicAuthHeaderTool")).BasicAuthHeaderTool,
   }),
+  "curl-converter": async () => ({
+    default: (await import("./CurlConverterTool")).CurlConverterTool,
+  }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

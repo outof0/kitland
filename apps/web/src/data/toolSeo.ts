@@ -198,6 +198,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "Basic Auth Header",
     "Build and decode Basic Authorization headers locally; use HTTPS for credentials.",
   ),
+  "curl-converter": localTransformSeo(
+    "cURL Converter",
+    "Turn a portable cURL command into Fetch code locally without sending or running the request.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",
