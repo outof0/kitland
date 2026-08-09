@@ -214,6 +214,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "Password Generator",
     "Generate a policy-controlled password locally with browser-provided secure randomness.",
   ),
+  "nanoid-generator": localTransformSeo(
+    "NanoID Generator",
+    "Generate compact custom-alphabet NanoID-style identifiers locally with secure browser randomness.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

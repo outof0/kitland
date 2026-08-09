@@ -76,6 +76,7 @@ describe("tool catalog", () => {
       "text-reverser",
       "regex-tester",
       "password-generator",
+      "nanoid-generator",
       "random-port",
       "random-number",
       "json-escape",
@@ -162,8 +163,8 @@ describe("tool catalog", () => {
     expect(CANONICAL_TOOL_INVENTORY).toHaveLength(64);
     expect(tools.map(({ id, slug }) => ({ id, slug }))).toEqual(CANONICAL_TOOL_INVENTORY);
     expect(tools.every((tool) => tool.designFrame)).toBe(true);
-    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(19);
-    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(44);
+    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(18);
+    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(45);
   });
 
   it("keeps the committed inventory in Pencil artboard order", () => {

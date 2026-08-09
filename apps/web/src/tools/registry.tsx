@@ -73,6 +73,9 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "password-generator": async () => ({
     default: (await import("./PasswordGeneratorTool")).PasswordGeneratorTool,
   }),
+  "nanoid-generator": async () => ({
+    default: (await import("./NanoidGeneratorTool")).NanoidGeneratorTool,
+  }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

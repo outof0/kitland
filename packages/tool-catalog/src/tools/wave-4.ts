@@ -250,4 +250,18 @@ export const waveFourTools = [
     designFrame: "Password Generator (DLGia)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "nanoid-generator",
+    slug: "nanoid-generator",
+    name: "NanoID Generator",
+    shortName: "NanoID",
+    family: "generators",
+    pattern: "generate",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Generate compact NanoID-style identifiers locally.",
+    keywords: ["nanoid", "id", "random", "generate"],
+    designFrame: "NanoID Generator (h4DC8)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];
