@@ -56,6 +56,9 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "http-status-codes": async () => ({
     default: (await import("./HttpStatusCodesTool")).HttpStatusCodesTool,
   }),
+  "basic-auth-header": async () => ({
+    default: (await import("./BasicAuthHeaderTool")).BasicAuthHeaderTool,
+  }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

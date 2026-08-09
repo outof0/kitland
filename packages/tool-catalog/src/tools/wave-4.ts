@@ -152,4 +152,18 @@ export const waveFourTools = [
     designFrame: "HTTP Status Codes (LjXun)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "basic-auth-header",
+    slug: "basic-auth-header",
+    name: "Basic Auth Header",
+    shortName: "Basic Auth",
+    family: "hash-crypto",
+    pattern: "transform",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Build or inspect a Basic Authorization header locally.",
+    keywords: ["basic", "auth", "header", "authorization"],
+    designFrame: "Basic Auth Header (eYC3i)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

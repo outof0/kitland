@@ -186,6 +186,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "HTTP Status Codes",
     "Look up common HTTP response status codes locally.",
   ),
+  "basic-auth-header": localTransformSeo(
+    "Basic Auth Header",
+    "Build and decode Basic Authorization headers locally; use HTTPS for credentials.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",
