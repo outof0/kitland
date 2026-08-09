@@ -222,6 +222,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "ULID Generator",
     "Generate time-sortable ULID identifiers locally with secure browser entropy.",
   ),
+  "objectid-generator": localTransformSeo(
+    "ObjectID Generator",
+    "Generate MongoDB-compatible ObjectID values locally with secure browser entropy.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

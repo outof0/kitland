@@ -79,6 +79,9 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "ulid-generator": async () => ({
     default: (await import("./UlidGeneratorTool")).UlidGeneratorTool,
   }),
+  "objectid-generator": async () => ({
+    default: (await import("./ObjectIdGeneratorTool")).ObjectIdGeneratorTool,
+  }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

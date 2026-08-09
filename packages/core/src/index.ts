@@ -193,6 +193,13 @@ export {
   type UlidRandomBytes,
 } from "./tools/ulid-generator";
 export {
+  generateObjectId,
+  OBJECT_ID_LENGTH,
+  OBJECT_ID_MAX_COUNTER,
+  type ObjectIdParts,
+  type ObjectIdRandomBytes,
+} from "./tools/objectid-generator";
+export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
   type CaseFormat,

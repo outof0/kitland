@@ -278,4 +278,18 @@ export const waveFourTools = [
     designFrame: "ULID Generator (CnASb)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "objectid-generator",
+    slug: "objectid-generator",
+    name: "ObjectID Generator",
+    shortName: "ObjectID",
+    family: "generators",
+    pattern: "generate",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Generate MongoDB-compatible ObjectID values locally.",
+    keywords: ["objectid", "mongodb", "id", "generate"],
+    designFrame: "ObjectID Generator (Rl1Bm)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];
