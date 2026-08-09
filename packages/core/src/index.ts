@@ -117,6 +117,12 @@ export {
   type AesGcmHost,
 } from "./tools/aes-cipher";
 export {
+  validateBcryptRequest,
+  BCRYPT_MAX_INPUT_BYTES,
+  BCRYPT_MIN_COST,
+  BCRYPT_MAX_COST,
+} from "./tools/bcrypt-hash";
+export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
   type CaseFormat,

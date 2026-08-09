@@ -46,6 +46,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
     default: (await import("./HmacGeneratorTool")).HmacGeneratorTool,
   }),
   "aes-cipher": async () => ({ default: (await import("./AesCipherTool")).AesCipherTool }),
+  "bcrypt-hash": async () => ({ default: (await import("./BcryptHashTool")).BcryptHashTool }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

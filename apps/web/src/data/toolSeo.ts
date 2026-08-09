@@ -162,6 +162,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "AES-256-GCM Cipher",
     "Encrypt and decrypt local UTF-8 text with an explicit AES-256 key and nonce packet.",
   ),
+  "bcrypt-hash": localTransformSeo(
+    "Bcrypt Hash",
+    "Create and verify bcrypt password hashes locally in your browser.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",
