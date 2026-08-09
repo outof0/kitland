@@ -200,6 +200,13 @@ export {
   type ObjectIdRandomBytes,
 } from "./tools/objectid-generator";
 export {
+  generateMockData,
+  MOCK_DATA_MAX_ROWS,
+  type MockDataOptions,
+  type MockDataRandomBytes,
+  type MockDataRecord,
+} from "./tools/mock-data";
+export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
   type CaseFormat,

@@ -82,6 +82,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "objectid-generator": async () => ({
     default: (await import("./ObjectIdGeneratorTool")).ObjectIdGeneratorTool,
   }),
+  "mock-data": async () => ({ default: (await import("./MockDataTool")).MockDataTool }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

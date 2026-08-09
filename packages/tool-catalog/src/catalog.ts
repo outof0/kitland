@@ -67,7 +67,7 @@ const toolDefinitions = [
   toolAt(waveFourTools, 17),
   toolAt(waveFourTools, 18),
   toolAt(waveFourTools, 19),
-  ...plannedTools.slice(45, 46),
+  toolAt(waveFourTools, 20),
   toolAt(waveTwoTools, 8),
   toolAt(waveTwoTools, 9),
   ...plannedTools.slice(48, 61),

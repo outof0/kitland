@@ -292,4 +292,18 @@ export const waveFourTools = [
     designFrame: "ObjectID Generator (Rl1Bm)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "mock-data",
+    slug: "mock-data",
+    name: "Mock Data",
+    shortName: "Mock Data",
+    family: "generators",
+    pattern: "generate",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Generate bounded local fixture records.",
+    keywords: ["mock", "fixture", "data", "generate"],
+    designFrame: "Mock Data (nmkdk)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

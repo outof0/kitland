@@ -226,6 +226,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "ObjectID Generator",
     "Generate MongoDB-compatible ObjectID values locally with secure browser entropy.",
   ),
+  "mock-data": localTransformSeo(
+    "Mock Data",
+    "Generate bounded fixture records and JSON previews locally.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",
