@@ -170,6 +170,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "JWT Decoder",
     "Decode JWT header and claims locally without claiming signature verification.",
   ),
+  "token-generator": localTransformSeo(
+    "Token Generator",
+    "Create cryptographically secure random tokens locally with Web Crypto.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

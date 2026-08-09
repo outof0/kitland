@@ -123,6 +123,7 @@ export {
   BCRYPT_MAX_COST,
 } from "./tools/bcrypt-hash";
 export { inspectJwt, JWT_MAX_INPUT_CHARS, type JwtInspection } from "./tools/jwt-decoder";
+export { generateToken, TOKEN_MAX_LENGTH, type TokenFormat } from "./tools/token-generator";
 export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
