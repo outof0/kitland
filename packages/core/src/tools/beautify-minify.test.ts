@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   BEAUTIFY_MINIFY_MAX_INPUT_CHARS,
+  detectCodeLanguage,
+  formatCode,
+  formatCss,
+  formatHtml,
+  formatJs,
   formatJson,
   type JsonFormatMode,
 } from "./beautify-minify";
@@ -37,5 +42,57 @@ describe("formatJson", () => {
       ok: false,
       error: { code: "INVALID_MODE" },
     });
+  });
+});
+
+describe("detectCodeLanguage", () => {
+  it("detects HTML, XML, CSS, JavaScript, SQL, and JSON correctly", () => {
+    expect(detectCodeLanguage("<div><span>Hello</span></div>")).toBe("html");
+    expect(detectCodeLanguage('<?xml version="1.0"?><root></root>')).toBe("xml");
+    expect(detectCodeLanguage("body { background: #fff; color: red; }")).toBe("css");
+    expect(detectCodeLanguage("const a = 1; function test() { return a; }")).toBe("javascript");
+    expect(detectCodeLanguage("SELECT id, name FROM users WHERE active = 1")).toBe("sql");
+    expect(detectCodeLanguage('{"key": "value"}')).toBe("json");
+  });
+});
+
+describe("formatCode multi-language support", () => {
+  it("formats and minifies CSS", () => {
+    const css = "body{color:red;background:blue;}";
+    const beautified = formatCss(css, "beautify", { indent: 2 });
+    expect(beautified).toEqual(expect.objectContaining({ ok: true }));
+    expect((beautified as { value: string }).value).toContain("body {");
+    expect((beautified as { value: string }).value).toContain("  color: red;");
+
+    const minified = formatCss("body {\n  color: red;\n  background: blue;\n}", "minify");
+    expect(minified).toEqual(
+      expect.objectContaining({ ok: true, value: "body{color:red;background:blue}" }),
+    );
+  });
+
+  it("formats and minifies HTML", () => {
+    const html = "<div><p>Hello</p></div>";
+    const beautified = formatHtml(html, "beautify", { indent: 2 });
+    expect(beautified.ok).toBe(true);
+
+    const minified = formatHtml("<div>\n  <p>\n    Hello\n  </p>\n</div>", "minify");
+    expect(minified).toEqual(
+      expect.objectContaining({ ok: true, value: "<div><p> Hello </p></div>" }),
+    );
+  });
+
+  it("formats and minifies JavaScript", () => {
+    const js = "function hello(){console.log('hi');}";
+    const beautified = formatJs(js, "beautify", { indent: 2 });
+    expect(beautified.ok).toBe(true);
+
+    const minified = formatJs("function hello() {\n  console.log('hi');\n}", "minify");
+    expect(minified.ok).toBe(true);
+  });
+
+  it("handles formatCode with auto-detection", () => {
+    const res = formatCode("SELECT * FROM users", "auto", "beautify");
+    expect(res).toEqual(expect.objectContaining({ ok: true }));
+    expect((res as { value: { detectedLanguage: string } }).value.detectedLanguage).toBe("sql");
   });
 });

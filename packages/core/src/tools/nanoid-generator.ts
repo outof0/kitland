@@ -45,5 +45,5 @@ export function generateNanoid(
 }
 
 function uniqueCharacters(value: string): string {
-  return [...new Set([...value])].join("");
+  return [...new Set(value)].join("");
 }

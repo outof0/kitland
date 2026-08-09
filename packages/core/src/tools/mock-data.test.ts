@@ -7,10 +7,10 @@ describe("mock data", () => {
       (n) => Uint8Array.from({ length: n }, (_, i) => i),
     );
     expect(r).toMatchObject({ ok: true });
-    if (r.ok) {
-      expect(r.value).toHaveLength(2);
-      expect(r.value[0]?.email).toContain("@example.test");
-    }
+    if (!r.ok) throw new Error("Expected mock data generation to succeed.");
+
+    expect(r.value).toHaveLength(2);
+    expect(r.value[0]?.email).toContain("@example.test");
   });
   it("requires a schema", () =>
     expect(

@@ -34,10 +34,17 @@ describe("hex text", () => {
 
   it("rejects malformed Unicode and bounded source input", () => {
     expect(encodeHexText("\udc00").ok).toBe(false);
-    expect(encodeHexText("x".repeat(HEX_TEXT_MAX_INPUT_CHARS + 1)).ok).toBe(false);
+    expect(encodeHexText("x".repeat(HEX_TEXT_MAX_INPUT_CHARS + 1))).toMatchObject({
+      ok: false,
+      error: { code: "INPUT_TOO_LARGE" },
+    });
   });
 
-  it("dispatches modes", () => {
+  it("round-trips encode then decode for Unicode and dispatches modes", () => {
+    const encoded = encodeHexText("Hi 🍵");
+    expect(encoded.ok).toBe(true);
+    if (!encoded.ok) return;
+    expect(decodeHexText(encoded.value)).toEqual({ ok: true, value: "Hi 🍵" });
     expect(runHexTextTransform("decode", "41")).toEqual({
       ok: true,
       value: "A",

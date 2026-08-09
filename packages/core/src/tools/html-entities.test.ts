@@ -69,6 +69,26 @@ describe("runHtmlEntityTransform", () => {
       value: "&",
     });
     expect(runHtmlEntityTransform("unexpected" as HtmlEntityMode, "x").ok).toBe(false);
-    expect(encodeHtmlEntities("x".repeat(HTML_ENTITIES_MAX_INPUT_CHARS + 1)).ok).toBe(false);
+    expect(encodeHtmlEntities("x".repeat(HTML_ENTITIES_MAX_INPUT_CHARS + 1))).toMatchObject({
+      ok: false,
+      error: { code: "INPUT_TOO_LARGE" },
+    });
+    expect(
+      runHtmlEntityTransform("decode", "x".repeat(HTML_ENTITIES_MAX_INPUT_CHARS + 1)),
+    ).toMatchObject({
+      ok: false,
+      error: { code: "INPUT_TOO_LARGE" },
+    });
+  });
+
+  it("round-trips named encode then decode for Unicode markup", () => {
+    const source = `<p title="tea">🍵</p>`;
+    const encoded = runHtmlEntityTransform("encode", source, { format: "named" });
+    expect(encoded.ok).toBe(true);
+    if (!encoded.ok) return;
+    expect(runHtmlEntityTransform("decode", encoded.value)).toEqual({
+      ok: true,
+      value: source,
+    });
   });
 });

@@ -39,12 +39,25 @@ export {
 export {
   BEAUTIFY_MINIFY_MAX_INPUT_CHARS,
   BEAUTIFY_MINIFY_MAX_OUTPUT_CHARS,
+  detectCodeLanguage,
+  formatCode,
+  formatCss,
+  formatHtml,
+  formatJs,
   formatJson,
+  type BeautifyMinifyLanguage,
+  type BeautifyMinifyMode,
+  type BeautifyMinifyOptions,
   type JsonFormatMode,
   type JsonFormatOptions,
 } from "./tools/beautify-minify";
 export { jsonToYaml, JSON_TO_YAML_MAX_INPUT_CHARS } from "./tools/json-to-yaml";
-export { yamlToJson, YAML_TO_JSON_MAX_OUTPUT_CHARS } from "./tools/yaml-to-json";
+export { repairJson } from "./tools/json-repair";
+export {
+  yamlToJson,
+  YAML_TO_JSON_MAX_INPUT_CHARS,
+  YAML_TO_JSON_MAX_OUTPUT_CHARS,
+} from "./tools/yaml-to-json";
 export { YAML_CODEC_MAX_INPUT_CHARS, YAML_CODEC_MAX_OUTPUT_CHARS } from "./tools/yaml-codec";
 export {
   decodeHtmlEntities,
@@ -126,7 +139,13 @@ export { inspectJwt, JWT_MAX_INPUT_CHARS, type JwtInspection } from "./tools/jwt
 export { generateToken, TOKEN_MAX_LENGTH, type TokenFormat } from "./tools/token-generator";
 export { pem, validateRsaOptions, RSA_MIN_MODULUS, RSA_MAX_MODULUS } from "./tools/rsa-key-pair";
 export { parseUrl, URL_PARSER_MAX_INPUT_CHARS, type ParsedUrl } from "./tools/url-parser";
-export { findHttpStatuses, HTTP_STATUS_CODES, type HttpStatus } from "./tools/http-status-codes";
+export {
+  findHttpStatuses,
+  getHttpStatus,
+  HTTP_STATUS_CODES,
+  type HttpStatus,
+  type HttpStatusCategory,
+} from "./tools/http-status-codes";
 export {
   parseUserAgent,
   USER_AGENT_MAX_INPUT_CHARS,
@@ -139,6 +158,7 @@ export {
   lookupMimeTypes,
   MIME_TYPES,
   MIME_TYPES_MAX_QUERY_CHARS,
+  type MimeCategory,
   type MimeLookupKind,
   type MimeLookupResult,
   type MimeType,
@@ -152,6 +172,8 @@ export {
 export {
   formatFetchRequest,
   parseCurlCommand,
+  formatCurlCommand,
+  parseFetchSource,
   CURL_CONVERTER_MAX_INPUT_CHARS,
   CURL_CONVERTER_MAX_TOKENS,
   type CurlHeader,
@@ -235,12 +257,13 @@ export {
 } from "./tools/text-reverser";
 export {
   inspectJson,
-  JSON_TOOLBOX_MAX_DEPTH,
-  JSON_TOOLBOX_MAX_INPUT_CHARS,
-  JSON_TOOLBOX_MAX_NODES,
+  JSON_FORMATTER_MAX_DEPTH,
+  JSON_FORMATTER_MAX_INPUT_CHARS,
+  JSON_FORMATTER_MAX_NODES,
+  JSON_FORMATTER_MAX_OUTPUT_CHARS,
   type JsonInspection,
   type JsonRootType,
-} from "./tools/json-toolbox";
+} from "./tools/json-formatter";
 export {
   jsonToCsv,
   JSON_TO_CSV_MAX_COLUMNS,
@@ -327,3 +350,78 @@ export {
   MARKDOWN_PREVIEW_MAX_OUTPUT_CHARS,
   type MarkdownPreview,
 } from "./tools/markdown-preview";
+export {
+  MORSE_CODE_MAX_INPUT_CHARS,
+  decodeMorse,
+  encodeMorse,
+  runMorseCode,
+  type MorseMode,
+} from "./tools/morse-code";
+export {
+  SPLIT_TO_NEWLINES_MAX_INPUT_CHARS,
+  splitToNewlines,
+  type SplitDelimiter,
+  type SplitToNewlinesOptions,
+} from "./tools/split-to-newlines";
+export {
+  NUMBER_BASE_MAX_INPUT_CHARS,
+  convertNumberBase,
+  type NumberBaseResult,
+} from "./tools/number-base";
+export {
+  TEMPERATURE_MAX_INPUT_CHARS,
+  convertTemperature,
+  type TemperatureResult,
+  type TemperatureUnit,
+} from "./tools/temperature";
+export {
+  DATA_SIZE_MAX_INPUT_CHARS,
+  convertDataSize,
+  type DataSizeResult,
+  type DataSizeUnit,
+} from "./tools/data-size";
+export {
+  COLOR_CONVERTER_MAX_INPUT_CHARS,
+  convertColor,
+  type ColorResult,
+} from "./tools/color-converter";
+export {
+  DURATION_FORMATTER_MAX_INPUT_CHARS,
+  formatDurationSeconds,
+  type DurationResult,
+} from "./tools/duration-formatter";
+export {
+  DATE_CALCULATOR_MAX_INPUT_CHARS,
+  addDaysToIsoDate,
+  diffIsoDates,
+  type DateAddResult,
+  type DateDiffResult,
+} from "./tools/date-calculator";
+export {
+  AGE_CALCULATOR_MAX_INPUT_CHARS,
+  calculateAge,
+  type AgeResult,
+} from "./tools/age-calculator";
+export {
+  SUPPORTED_TIMEZONES,
+  TIMEZONE_CONVERTER_MAX_INPUT_CHARS,
+  convertTimezone,
+  type SupportedTimezone,
+  type TimezoneConvertResult,
+} from "./tools/timezone-converter";
+export {
+  JSON_TO_TYPESCRIPT_MAX_DEPTH,
+  JSON_TO_TYPESCRIPT_MAX_INPUT_CHARS,
+  jsonToTypescript,
+} from "./tools/json-to-typescript";
+export { JSON_TO_JS_CONST_MAX_INPUT_CHARS, jsonToJsConst } from "./tools/json-to-js-const";
+export { HTML_TO_JSX_MAX_INPUT_CHARS, htmlToJsx } from "./tools/html-to-jsx";
+export { QR_CODE_MAX_INPUT_CHARS, validateQrPayload, type QrCodeValidation } from "./tools/qr-code";
+export {
+  HOST_TRANSFORM_SPECS,
+  HOST_TRANSFORM_SLUGS,
+  getHostTransformSpec,
+  type HostTransformRequest,
+  type HostTransformSpec,
+} from "./host-transforms";
+export { createWebCryptoHostRuntime, type HostRuntime } from "./host-runtime";

@@ -10,11 +10,12 @@ describe("MIME type lookup", () => {
         value: expect.objectContaining({ kind: "extension" }),
       }),
     );
-    if (result.ok)
-      expect(result.value.matches.map((entry) => entry.mime)).toEqual([
-        "application/xml",
-        "text/xml",
-      ]);
+    if (!result.ok) throw new Error("Expected MIME type lookup to succeed.");
+
+    expect(result.value.matches.map((entry) => entry.mime)).toEqual([
+      "application/xml",
+      "text/xml",
+    ]);
   });
 
   it("normalizes a MIME type with parameters", () => {
@@ -47,12 +48,16 @@ describe("MIME type lookup", () => {
   });
 
   it("keeps the local registry structurally valid", () => {
-    expect(MIME_TYPES.length).toBeGreaterThanOrEqual(50);
+    expect(MIME_TYPES.length).toBeGreaterThanOrEqual(100);
     expect(MIME_TYPES.every((entry) => entry.mime === `${entry.type}/${entry.subtype}`)).toBe(true);
     expect(
       MIME_TYPES.every((entry) =>
         entry.extensions.every((extension) => !extension.startsWith(".")),
       ),
     ).toBe(true);
+    const categories = new Set(MIME_TYPES.map((entry) => entry.category));
+    expect(categories).toEqual(
+      new Set(["application", "text", "image", "audio", "video", "font", "model", "multipart"]),
+    );
   });
 });

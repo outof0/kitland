@@ -52,7 +52,15 @@ describe("yamlToJson", () => {
     });
   });
 
-  it("rejects malformed indentation, duplicate keys, and unsafe YAML features", () => {
+  it("rejects empty, malformed indentation, duplicate keys, and unsafe YAML features", () => {
+    expect(yamlToJson("")).toMatchObject({
+      ok: false,
+      error: { code: "EMPTY_INPUT" },
+    });
+    expect(yamlToJson("   \n")).toMatchObject({
+      ok: false,
+      error: { code: "EMPTY_INPUT" },
+    });
     expect(yamlToJson("item:\n  child: 1\n child: 2")).toMatchObject({
       ok: false,
       error: { code: "INVALID_YAML" },

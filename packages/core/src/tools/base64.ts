@@ -35,6 +35,8 @@ const STANDARD_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0
 const URL_SAFE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 const STANDARD_BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/;
 const URL_SAFE_BASE64_PATTERN = /^[A-Za-z0-9_-]*={0,2}$/;
+// oxlint-disable-next-line eslint/no-control-regex -- Only ASCII transport whitespace is valid.
+const ASCII_BASE64_WHITESPACE_PATTERN = /[\x09-\x0D\x20]+/g;
 
 const UTF8_ENCODER = new TextEncoder();
 // Keep a leading U+FEFF as data so encode/decode remains a true text
@@ -112,14 +114,15 @@ export function encodeBase64(input: string, options: Base64Options = {}): ToolRe
  * Decode standard or URL-safe Base64 to UTF-8 text.
  *
  * Standard Base64 requires canonical padding. URL-safe Base64 accepts omitted,
- * otherwise-canonical padding. In both variants, explicit padding and unused
- * bits must be canonical so malformed input is never silently repaired.
+ * otherwise-canonical padding. ASCII U+0009–U+000D and U+0020 are ignored;
+ * non-ASCII Unicode whitespace is rejected. In both variants, explicit padding
+ * and unused bits must be canonical so malformed input is never silently repaired.
  */
 export function decodeBase64(input: string, options: Base64Options = {}): ToolResult<string> {
   const size = assertEncodedInputSize(input);
   if (!size.ok) return size;
 
-  const compact = input.replace(/\s+/g, "");
+  const compact = input.replace(ASCII_BASE64_WHITESPACE_PATTERN, "");
   if (compact.length === 0) {
     return ok("");
   }
@@ -128,13 +131,19 @@ export function decodeBase64(input: string, options: Base64Options = {}): ToolRe
   const normalized = normalizeBase64(compact, urlSafe);
   if (!normalized.ok) return normalized;
 
+  let bytes: Uint8Array;
   try {
-    const bytes = base64ToBytes(normalized.value);
+    bytes = base64ToBytes(normalized.value);
+  } catch {
+    return err("DECODE_FAILED", "Base64 decoding failed unexpectedly. Please try again.");
+  }
+
+  try {
     return ok(UTF8_DECODER.decode(bytes));
   } catch {
-    return invalidBase64(
-      urlSafe,
-      "Could not decode as UTF-8 text. Input may be binary or corrupted.",
+    return err(
+      "INVALID_UTF8",
+      "Base64 decoded successfully, but the payload is not valid UTF-8 text.",
     );
   }
 }

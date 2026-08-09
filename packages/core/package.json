@@ -7,11 +7,14 @@
     "src"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
-    }
+    },
+    "./result": "./src/result.ts",
+    "./tools/*": "./src/tools/*.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit --pretty false",

@@ -34,6 +34,13 @@ describe("encodeBase64", () => {
     expect(decodeBase64(encoded.value)).toEqual({ ok: true, value: input });
   });
 
+  it.each(["\uD800", "\uDC00"])(
+    "uses TextEncoder replacement semantics for an unpaired surrogate",
+    (input) => {
+      expect(encodeBase64(input)).toEqual({ ok: true, value: "77+9" });
+    },
+  );
+
   it("encodes URL-safe without padding", () => {
     const result = encodeBase64("subjects?_d", { urlSafe: true });
     expect(result.ok).toBe(true);
@@ -79,8 +86,45 @@ describe("decodeBase64", () => {
     expect(decodeBase64("aGVsbG8=")).toEqual({ ok: true, value: "hello" });
   });
 
-  it("accepts whitespace inside a payload", () => {
-    expect(decodeBase64("aGVs\nbG8=")).toEqual({ ok: true, value: "hello" });
+  it.each([
+    { label: "U+0009", value: "\t" },
+    { label: "U+000A", value: "\n" },
+    { label: "U+000B", value: "\v" },
+    { label: "U+000C", value: "\f" },
+    { label: "U+000D", value: "\r" },
+    { label: "U+0020", value: " " },
+  ])("accepts ASCII formatting whitespace $label inside a payload", ({ value }) => {
+    expect(decodeBase64(`aGVs${value}bG8=`)).toEqual({ ok: true, value: "hello" });
+  });
+
+  it.each([
+    { label: "U+00A0", value: String.fromCodePoint(0x00a0) },
+    { label: "U+2003", value: String.fromCodePoint(0x2003) },
+    { label: "U+2028", value: String.fromCodePoint(0x2028) },
+    { label: "U+2029", value: String.fromCodePoint(0x2029) },
+    { label: "U+FEFF", value: String.fromCodePoint(0xfeff) },
+  ])("rejects non-ASCII Unicode whitespace $label", ({ value }) => {
+    const result = decodeBase64(`aGVs${value}bG8=`);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("INVALID_BASE64");
+  });
+
+  it("accepts raw input exactly at the encoded-input cap", () => {
+    expect(decodeBase64(" ".repeat(BASE64_MAX_ENCODED_CHARS))).toEqual({
+      ok: true,
+      value: "",
+    });
+  });
+
+  it("distinguishes valid Base64 containing non-UTF-8 bytes", () => {
+    expect(decodeBase64("/w==")).toEqual({
+      ok: false,
+      error: {
+        code: "INVALID_UTF8",
+        message: "Base64 decoded successfully, but the payload is not valid UTF-8 text.",
+      },
+    });
   });
 
   it("requires canonical padding for standard Base64", () => {

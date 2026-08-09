@@ -1,0 +1,171 @@
+/*
+ * Shared Tailwind theme for all hosts rendering @kitland/ui or Kitland chrome.
+ * Single source of truth: hosts import this after `@import "tailwindcss";`
+ * to compile utilities against the standard Kitland design tokens.
+ *
+ *   @import "tailwindcss";
+ *   @import "@kitland/ui/theme.css";
+ *
+ * Hosts that also mount shared React components add sources.css.
+ */
+@import "./tokens.css";
+
+/* Kitland theme switching is data-theme driven, not media driven. */
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-background: var(--bg);
+  --color-foreground: var(--on-surface);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--on-surface);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--on-surface);
+  --color-primary: var(--primary);
+  /* Filled primary actions use the design `$on-primary` ink (dark ink on the
+   * sky-blue primary in dark mode, white in light mode). */
+  --color-primary-foreground: var(--on-primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--surface-low);
+  --color-secondary-foreground: var(--on-surface);
+  --color-muted: var(--surface-low);
+  --color-muted-foreground: var(--on-muted);
+  --color-destructive: var(--error);
+  --color-border: var(--outline);
+  --color-input: var(--outline);
+  --color-ring: var(--primary);
+  --color-sidebar: var(--bg-elevated);
+  --color-sidebar-foreground: var(--on-surface);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-strong: var(--warning-strong);
+  --color-warning-soft: var(--warning-soft);
+  --color-error: var(--error);
+  --color-error-soft: var(--error-soft);
+  --color-danger: var(--error);
+  --color-danger-soft: var(--error-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-surface: var(--surface);
+  --color-surface-low: var(--surface-low);
+  --color-surface-high: var(--surface-high);
+  --color-outline: var(--outline);
+  --color-outline-strong: var(--outline-strong);
+  --color-on-surface: var(--on-surface);
+  --color-on-muted: var(--on-muted);
+  --color-on-faint: var(--on-faint);
+  --color-ink-dark: var(--ink-dark);
+  --color-code-key: var(--code-key);
+  --color-code-string: var(--code-string);
+  --color-code-number: var(--code-number);
+  --color-code-punct: var(--code-punct);
+  --color-text-secondary: var(--text-secondary);
+
+  --font-sans: var(--font-ui);
+  --font-ui: var(--font-ui);
+  --font-heading: var(--font-display);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+  --shadow-primary: var(--shadow-primary);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+    border-color: var(--outline);
+  }
+
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+  }
+
+  button,
+  [type="button"],
+  [type="reset"],
+  [type="submit"] {
+    appearance: button;
+    background-color: transparent;
+    background-image: none;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  a:focus-visible,
+  [tabindex="-1"]:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Shared component styles used by WorkspaceShell and the host loading states.
+ * Kept here so every host rendering @kitland/ui components renders identically
+ * without per-host CSS copies. */
+.brand-mark {
+  position: relative;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  grid-template-columns: 7px 11px;
+  grid-template-rows: 7px 7px;
+  gap: 2.5px;
+}
+
+.brand-mark i,
+.brand-mark b {
+  display: block;
+  border-radius: 2px;
+  background: var(--primary);
+}
+
+.brand-mark b {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  border-radius: 2px 7px 7px 2px;
+}
+
+.loading-pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 var(--primary-soft);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgb(37 99 235 / 0%);
+  }
+  100% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgb(37 99 235 / 0%);
+  }
+}

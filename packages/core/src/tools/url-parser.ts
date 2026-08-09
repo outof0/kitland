@@ -32,7 +32,7 @@ export function parseUrl(input: string): ToolResult<ParsedUrl> {
   } catch {
     return err(
       "INVALID_URL",
-      "Enter an absolute URL including its protocol, for example https://kitland.dev/.",
+      "Enter an absolute URL including its scheme and host (for example an https URL to example.test).",
     );
   }
 }

@@ -1,0 +1,65 @@
+/*
+ * Shared workbench stylesheet for web /explore, the browser extension, and
+ * the VS Code webview. Hosts import Tailwind first (they own the compiler),
+ * then this file, then fonts and @source paths. Do not @import "tailwindcss"
+ * here: PostCSS resolves that package from this directory, and @kitland/ui
+ * does not depend on it.
+ */
+@import "./theme.css";
+@import "./src/styles.css";
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+html {
+  font-family: var(--font-ui);
+}
+
+body {
+  min-height: 100%;
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  background: var(--bg);
+  color: var(--on-surface);
+}
+
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+
+/* Mouse click must not leave a stuck highlight. Keyboard still gets a ring. */
+button:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button:not(:disabled):active,
+[role="button"]:not(:disabled):active {
+  filter: brightness(0.92);
+}
+
+.kitland-clipboard-fallback {
+  position: fixed;
+  top: 0;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.kitland-file-picker {
+  display: none;
+}
