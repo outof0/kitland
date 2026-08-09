@@ -1,6 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { copyText } from "@/lib/clipboard";
-import { ArrowRight, Check, ClipboardCopy, Eraser, FileInput, type LucideIcon } from "lucide-react";
+import { copyText, downloadText } from "@/lib/clipboard";
+import {
+  ArrowRight,
+  Check,
+  ClipboardCopy,
+  Download,
+  Eraser,
+  FileInput,
+  type LucideIcon,
+} from "lucide-react";
 import { useCallback, useId, useRef, useState, type ReactNode } from "react";
 import type { DeferredTextTransformState } from "@/hooks/useDeferredTextTransform";
 
@@ -71,6 +79,15 @@ export function TextTransformEditor({
     setCopied(true);
     setFeedback("Result copied to clipboard.");
     window.setTimeout(() => setCopied(false), 900);
+  }, [output]);
+
+  const downloadOutput = useCallback(() => {
+    if (!output) {
+      setFeedback("Create a valid result before downloading it.");
+      return;
+    }
+    downloadText("kitland-result.txt", output);
+    setFeedback("");
   }, [output]);
 
   const status = state.isProcessing
@@ -189,6 +206,18 @@ export function TextTransformEditor({
                 ) : (
                   <ClipboardCopy aria-hidden="true" />
                 )}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="tool-card__tb-btn"
+                onClick={downloadOutput}
+                disabled={!output}
+                aria-label="Download result"
+                title="Download result as a text file"
+              >
+                <Download aria-hidden="true" />
               </Button>
             </div>
           </div>

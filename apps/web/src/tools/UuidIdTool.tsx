@@ -143,14 +143,16 @@ export function UuidIdTool() {
               className="h-8 min-w-[78px] gap-1.5"
               onClick={() => current && void onCopy(current)}
               disabled={!current}
-              aria-label={copiedValue === current ? "UUID copied" : "Copy generated UUID"}
+              aria-label={
+                current && copiedValue === current ? "UUID copied" : "Copy generated UUID"
+              }
             >
-              {copiedValue === current ? (
+              {current && copiedValue === current ? (
                 <CircleCheck aria-hidden="true" />
               ) : (
                 <Copy aria-hidden="true" />
               )}
-              {copiedValue === current ? "Copied" : "Copy"}
+              {current && copiedValue === current ? "Copied" : "Copy"}
             </Button>
           </div>
 

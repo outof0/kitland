@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { copyText } from "@/lib/clipboard";
-import { CircleCheck, Copy, FileCode, type LucideIcon } from "lucide-react";
+import { copyText, downloadText } from "@/lib/clipboard";
+import { CircleCheck, Copy, Download, FileCode, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 const COPY_CONFIRMATION_MS = 900;
@@ -54,6 +54,15 @@ export function GeneratorResult({
     }, COPY_CONFIRMATION_MS);
   }, [output]);
 
+  const onDownload = useCallback(() => {
+    if (!output) {
+      setCopyError("Generate a value before downloading it.");
+      return;
+    }
+    downloadText("kitland-generated.txt", output);
+    setCopyError("");
+  }, [output]);
+
   return (
     <>
       <div className="tool-header">
@@ -81,16 +90,29 @@ export function GeneratorResult({
               <h3 className="generator-output__title">{outputLabel}</h3>
               <p className="generator-output__subtitle">Generated locally on this device</p>
             </div>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => void onCopy()}
-              disabled={!output}
-              aria-label={copied ? `${outputLabel} copied` : `Copy ${outputLabel}`}
-            >
-              {copied ? <CircleCheck aria-hidden="true" /> : <Copy aria-hidden="true" />}
-              {copied ? "Copied" : "Copy"}
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => void onCopy()}
+                disabled={!output}
+                aria-label={copied ? `${outputLabel} copied` : `Copy ${outputLabel}`}
+              >
+                {copied ? <CircleCheck aria-hidden="true" /> : <Copy aria-hidden="true" />}
+                {copied ? "Copied" : "Copy"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={onDownload}
+                disabled={!output}
+                aria-label={`Download ${outputLabel}`}
+                title="Download result as a text file"
+              >
+                <Download aria-hidden="true" />
+              </Button>
+            </div>
           </div>
           <code className="generator-output__code">
             {output || "Generate a value to see it here."}
