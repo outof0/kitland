@@ -41,6 +41,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   }),
   "binary-text": async () => ({ default: (await import("./BinaryTextTool")).BinaryTextTool }),
   "rot13-caesar": async () => ({ default: (await import("./Rot13CaesarTool")).Rot13CaesarTool }),
+  "sha-hash": async () => ({ default: (await import("./ShaHashTool")).ShaHashTool }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

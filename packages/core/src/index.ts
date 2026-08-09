@@ -90,6 +90,16 @@ export {
   type Rot13CaesarMode,
 } from "./tools/rot13-caesar";
 export {
+  hashSha256,
+  SHA_HASH_ALGORITHM,
+  SHA_HASH_DIGEST_BYTES,
+  SHA_HASH_MAX_INPUT_CHARS,
+  type ShaDigest,
+  type ShaHashEncoding,
+  type ShaHashOptions,
+  type ShaHashResult,
+} from "./tools/sha-hash";
+export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
   type CaseFormat,

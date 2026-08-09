@@ -10,7 +10,7 @@ const webTransformPlatforms = Object.freeze({
   "vscode-extension": { status: "planned" as const, capabilities: ["transform-text"] as const },
 });
 
-/** First individually verified post-foundation tool. */
+/** Individually verified post-foundation tools. */
 export const waveFourTools = [
   defineTool({
     id: "rot13-caesar",
@@ -24,6 +24,20 @@ export const waveFourTools = [
     description: "Apply ROT13 and Caesar text shifts locally.",
     keywords: ["rot13", "caesar", "cipher"],
     designFrame: "ROT13 Caesar (QiDpT)",
+    platforms: webTransformPlatforms,
+  }),
+  defineTool({
+    id: "sha-hash",
+    slug: "sha-hash",
+    name: "Hash (SHA)",
+    shortName: "SHA Hash",
+    family: "hash-crypto",
+    pattern: "transform",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Compute SHA-256 digests locally for supplied UTF-8 text.",
+    keywords: ["sha", "hash", "sha256", "digest"],
+    designFrame: "Hash (SHA) (U1lUQ0)",
     platforms: webTransformPlatforms,
   }),
 ] as const satisfies readonly ToolDefinition[];
