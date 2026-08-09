@@ -32,7 +32,21 @@ describe("tool catalog", () => {
   });
 
   it("lists available tools and family filter", () => {
-    expect(listAvailableTools().some((t) => t.slug === "base64")).toBe(true);
+    const availableSlugs = listAvailableTools().map((tool) => tool.slug);
+    expect(availableSlugs).toEqual([
+      "beautify-minify",
+      "json-to-yaml",
+      "yaml-to-json",
+      "base64",
+      "html-entities",
+      "hex-text",
+      "unicode-converter",
+      "binary-text",
+      "case-converter",
+      "sort-lines",
+      "dedupe-lines",
+      "text-reverser",
+    ]);
     expect(listToolsByFamily("encoding-text").some((t) => t.slug === "base64")).toBe(true);
   });
 
@@ -115,7 +129,8 @@ describe("tool catalog", () => {
     expect(CANONICAL_TOOL_INVENTORY).toHaveLength(64);
     expect(tools.map(({ id, slug }) => ({ id, slug }))).toEqual(CANONICAL_TOOL_INVENTORY);
     expect(tools.every((tool) => tool.designFrame)).toBe(true);
-    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(63);
+    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(52);
+    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(11);
   });
 
   it("keeps the committed inventory in Pencil artboard order", () => {

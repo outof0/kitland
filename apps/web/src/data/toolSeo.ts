@@ -11,6 +11,35 @@ export type ToolSeoContent = {
   }[];
 };
 
+function localTransformSeo(toolName: string, detail: string): ToolSeoContent {
+  return {
+    heading: `${toolName} runs locally in your browser`,
+    introduction: `${detail} Kitland processes the text locally, so ordinary inputs do not leave your device.`,
+    steps: [
+      "Paste or type a value in the input editor.",
+      "Choose the available format or direction options when the tool offers them.",
+      "Review the derived result, then copy it when it is ready.",
+    ],
+    useCases: [
+      "Quickly inspect or transform developer text without opening a project.",
+      "Keep configuration, snippets, and notes in the browser while working locally.",
+      "Validate a result before moving it into another editor or terminal.",
+    ],
+    faqs: [
+      {
+        question: "Does Kitland upload my input?",
+        answer:
+          "No. These transformations run in the browser. Avoid sharing screenshots or copied results that contain secrets.",
+      },
+      {
+        question: "What happens when the input is invalid?",
+        answer:
+          "The tool keeps the input visible and reports a typed validation message instead of producing a misleading result.",
+      },
+    ],
+  };
+}
+
 /**
  * Indexable tool copy lives beside the catalog rather than inside a client
  * component. A new public tool must supply real explanatory content; this
@@ -49,6 +78,50 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
       },
     ],
   },
+  "beautify-minify": localTransformSeo(
+    "JSON Beautify / Minify",
+    "Format JSON for review or compact it for transport while preserving its data.",
+  ),
+  "json-to-yaml": localTransformSeo(
+    "JSON to YAML",
+    "Convert JSON documents into a predictable, readable YAML subset.",
+  ),
+  "yaml-to-json": localTransformSeo(
+    "YAML to JSON",
+    "Convert supported YAML mappings and sequences into formatted JSON.",
+  ),
+  "html-entities": localTransformSeo(
+    "HTML Entities",
+    "Encode reserved characters or decode common named and numeric HTML entities.",
+  ),
+  "hex-text": localTransformSeo(
+    "Hex Text",
+    "Represent UTF-8 text as hexadecimal bytes or decode hexadecimal bytes back to text.",
+  ),
+  "unicode-converter": localTransformSeo(
+    "Unicode Converter",
+    "Inspect Unicode code points and turn explicit U+ notation back into text.",
+  ),
+  "binary-text": localTransformSeo(
+    "Binary Text",
+    "Represent UTF-8 text as binary bytes or decode binary bytes back into text.",
+  ),
+  "case-converter": localTransformSeo(
+    "Case Converter",
+    "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",
+  ),
+  "sort-lines": localTransformSeo(
+    "Sort Lines",
+    "Order line-oriented text with stable, deterministic comparison rules.",
+  ),
+  "dedupe-lines": localTransformSeo(
+    "Dedupe Lines",
+    "Remove repeated lines while retaining the first occurrence and original order.",
+  ),
+  "text-reverser": localTransformSeo(
+    "Text Reverser",
+    "Reverse characters, words, or lines with Unicode-aware handling.",
+  ),
 };
 
 export function getToolSeoContent(slug: string): ToolSeoContent | undefined {

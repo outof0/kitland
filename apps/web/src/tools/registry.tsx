@@ -16,6 +16,27 @@ export type ToolRenderer = LazyExoticComponent<ComponentType>;
  */
 const TOOL_RENDERER_LOADERS = Object.freeze({
   base64: async () => ({ default: (await import("./Base64Tool")).Base64Tool }),
+  "beautify-minify": async () => ({
+    default: (await import("./BeautifyMinifyTool")).BeautifyMinifyTool,
+  }),
+  "json-to-yaml": async () => ({ default: (await import("./JsonToYamlTool")).JsonToYamlTool }),
+  "yaml-to-json": async () => ({ default: (await import("./YamlToJsonTool")).YamlToJsonTool }),
+  "html-entities": async () => ({
+    default: (await import("./HtmlEntitiesTool")).HtmlEntitiesTool,
+  }),
+  "hex-text": async () => ({ default: (await import("./HexTextTool")).HexTextTool }),
+  "unicode-converter": async () => ({
+    default: (await import("./UnicodeConverterTool")).UnicodeConverterTool,
+  }),
+  "binary-text": async () => ({ default: (await import("./BinaryTextTool")).BinaryTextTool }),
+  "case-converter": async () => ({
+    default: (await import("./CaseConverterTool")).CaseConverterTool,
+  }),
+  "sort-lines": async () => ({ default: (await import("./SortLinesTool")).SortLinesTool }),
+  "dedupe-lines": async () => ({ default: (await import("./DedupeLinesTool")).DedupeLinesTool }),
+  "text-reverser": async () => ({
+    default: (await import("./TextReverserTool")).TextReverserTool,
+  }),
 } satisfies Record<AvailableToolSlug, ToolRendererLoader>);
 
 const rendererCache = new Map<AvailableToolSlug, ToolRenderer>();
@@ -28,7 +49,7 @@ export function getToolRenderer(slug: string): ToolRenderer | undefined {
   const cached = rendererCache.get(slug);
   if (cached) return cached;
 
-  const renderer = lazy(TOOL_RENDERER_LOADERS[slug]);
+  const renderer = lazy(TOOL_RENDERER_LOADERS[slug as keyof typeof TOOL_RENDERER_LOADERS]);
   rendererCache.set(slug, renderer);
   return renderer;
 }

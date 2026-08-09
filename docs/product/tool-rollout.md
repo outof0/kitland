@@ -1,6 +1,6 @@
 # 64-tool rollout playbook
 
-Status: foundation ready; canonical 64-tool inventory committed; 63 tool slices pending
+Status: foundation ready; canonical 64-tool inventory committed; 11 tool slices implemented; 52 planned
 Release policy: [ADR 0003](../adr/0003-release-the-complete-tool-suite.md)
 
 ## Product scope is committed

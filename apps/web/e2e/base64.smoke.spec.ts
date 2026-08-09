@@ -12,7 +12,7 @@ test("keeps the suite catalog separate from its Base64 reference implementation"
   await expect(page).toHaveURL(/\/explore$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("complete local workbench");
 
-  await page.getByRole("link", { name: "Open tool" }).click();
+  await page.locator('a[href="/explore/base64"]').click();
   await expect(page).toHaveURL(/\/explore\/base64$/);
   await expect(page.getByTestId("tool-title")).toHaveText("Base64");
 });
