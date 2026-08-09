@@ -206,6 +206,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "Cron Parser",
     "Explain a standard five-field Unix cron expression and preview its upcoming local-time runs.",
   ),
+  "ip-subnet-calculator": localTransformSeo(
+    "IP Subnet Calculator",
+    "Calculate IPv4 CIDR network ranges, masks, and usable host counts locally.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

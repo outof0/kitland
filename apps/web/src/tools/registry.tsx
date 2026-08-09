@@ -67,6 +67,9 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
     default: (await import("./CurlConverterTool")).CurlConverterTool,
   }),
   "cron-parser": async () => ({ default: (await import("./CronParserTool")).CronParserTool }),
+  "ip-subnet-calculator": async () => ({
+    default: (await import("./IpSubnetCalculatorTool")).IpSubnetCalculatorTool,
+  }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

@@ -222,4 +222,18 @@ export const waveFourTools = [
     designFrame: "Cron Parser (XENy7)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "ip-subnet-calculator",
+    slug: "ip-subnet-calculator",
+    name: "IP Subnet Calculator",
+    shortName: "IP Subnet",
+    family: "time-network",
+    pattern: "inspect",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Calculate IPv4 CIDR ranges, masks, and usable host counts locally.",
+    keywords: ["ip", "subnet", "cidr", "network", "ipv4"],
+    designFrame: "IP Subnet Calculator (CZ1jx)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

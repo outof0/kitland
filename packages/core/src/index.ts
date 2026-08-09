@@ -165,6 +165,11 @@ export {
   type ParsedCron,
 } from "./tools/cron-parser";
 export {
+  calculateIpv4Subnet,
+  IP_SUBNET_MAX_INPUT_CHARS,
+  type Ipv4Subnet,
+} from "./tools/ip-subnet-calculator";
+export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
   type CaseFormat,
