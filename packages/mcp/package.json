@@ -1,0 +1,58 @@
+{
+  "name": "@kitland/mcp",
+  "version": "0.1.0",
+  "description": "Deterministic, local-only Model Context Protocol (MCP) server for Kitland developer tools.",
+  "homepage": "https://kitland.dev",
+  "bugs": {
+    "url": "https://github.com/OutOf0/kitland/issues"
+  },
+  "license": "MIT",
+  "author": "OutOf0 <hello.outof0@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OutOf0/kitland.git",
+    "directory": "packages/mcp"
+  },
+  "bin": {
+    "kitland-mcp": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "typecheck": "tsc --noEmit --pretty false",
+    "lint": "oxlint src test scripts --vitest-plugin --deny-warnings",
+    "test": "vitest run --config vitest.config.ts",
+    "test:protocol": "vitest run --config vitest.config.ts test/stdio-transcript.test.ts test/process-boundary.test.ts",
+    "package": "pnpm build && npm pack --dry-run",
+    "package:check": "pnpm build && node ./scripts/verify-package.mjs",
+    "release:verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm package:check"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "ajv": "^8.17.1"
+  },
+  "devDependencies": {
+    "@kitland/core": "workspace:*",
+    "@kitland/tools": "workspace:*",
+    "@types/node": "^22.15.0",
+    "esbuild": "^0.28.1",
+    "oxlint": "^1.77.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

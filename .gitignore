@@ -29,3 +29,9 @@ pnpm-debug.log*
 design/export/*.png
 *.zip
 *.tgz
+
+# Local planning and AI assistant state (not part of OSS distribution)
+.hermes/
+.claude/
+walkthrough.md
+design/design.pen.zip

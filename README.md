@@ -4,10 +4,11 @@
 
 Everyday developer tools, in one place — local-first, open source, no account.
 
-> **Pre-release development snapshot:** the first production release is gated on
-> the exact, product-approved 64-tool catalog across the repository's platform
-> contracts. Individual reference implementations do not make the suite
-> release-ready.
+> **Pre-release development snapshot:** the coordinated product launch remains
+> gated on the exact, product-approved 64-tool catalog across the repository's
+> platform contracts. Finished tools can be certified for rollout on a specific
+> surface without shrinking the public 64-tool catalog or publishing an
+> extension marketplace artifact.
 
 |             |                                   |
 | ----------- | --------------------------------- |
@@ -22,7 +23,7 @@ apps/web/                 Astro catalog/landing + lazy React tool islands
 apps/browser-extension/   Permission-free MV3 catalog + lazy tool adapters
 apps/vscode-extension/    Desktop/web extension host + secure tool panel
 packages/core/            Pure bounded tool logic (no platform APIs)
-packages/tool-catalog/    Identity, platform contracts, release readiness
+packages/tools/    Identity, platform contracts, release readiness
 brand/                    Logos, tokens, voice, and handoff rules
 design/                   Pencil source + committed export evidence
 docs/                     ADRs, architecture contracts, UX audit, rollout
@@ -44,14 +45,17 @@ pnpm quality:check         # normal incremental CI gate
 
 `pnpm release:verify` is deliberately stricter than normal CI. It stays red
 until all 64 Pencil-approved tools are release-ready with resolved platform
-contracts. The inventory is committed; 63 tool slices are intentionally still
-planned, so a partial suite cannot be deployed.
+contracts. `pnpm release:verify:rollout` is separate and certifies only the
+tools explicitly declared for the web surface in `releasePlatforms`. Each
+target must be canonical, `release-ready`, and available on that surface.
+Certification never changes the 64-tool landing page, Explore catalog, or
+which catalog-available editor routes ship in the web artifact.
 
 Start with the [64-tool rollout playbook](docs/product/tool-rollout.md),
 [interaction pattern contracts](docs/architecture/tool-patterns.md), and
 [platform capability contract](docs/architecture/platform-capabilities.md).
-The current Base64 route is a conformance fixture for the transform pattern,
-not the catalog scope.
+Each rollout target follows the same catalog and surface contract; no one tool
+defines the public catalog scope.
 
 ## Platform checks
 
@@ -62,18 +66,29 @@ pnpm --filter kitland-developer-tools package:smoke
 pnpm test:integration:vscode # downloads the pinned VS Code test host
 ```
 
-Production artifact creation is reserved for the coordinated release gate:
+Use the coordinated release gate for the complete product launch:
 
 ```bash
 pnpm artifacts:check # browser ZIP + VSIX package validation
 pnpm release:check   # quality + exact catalog gate + artifacts
 ```
 
+For a certified public web rollout, use the separate gate. It runs the normal
+quality suite first, then certifies the web targets against their host
+contracts. It deploys the normal full web artifact: every catalog-available
+tool keeps its editor route, while planned tools remain visible as planned:
+
+```bash
+pnpm release:check:rollout
+```
+
+This command does not publish the browser extension or VS Code extension.
+
 ## Deploy — Cloudflare Pages
 
 Two options (pick one).
 
-### A. Git integration (dashboard)
+### A. Git integration (dashboard, complete-suite launch only)
 
 1. [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages** → **Create** → **Pages** → connect GitHub repo.
 2. Build settings:
@@ -95,14 +110,17 @@ Cloudflare detects pnpm via `packageManager` in root `package.json`.
 
 4. Custom domain: project **Custom domains** → add `kitland.dev` (DNS on Cloudflare).
 
-### B. GitHub Actions (already wired)
+### B. GitHub Actions (complete suite or certified web rollout)
 
 Workflow: `.github/workflows/ci.yml`  
 On push to `main`: formatting → lint → typecheck → unit tests → dependency
 audit → all-surface builds → web/extension package budgets → web and browser
 extension smoke tests → pinned VS Code Extension Host tests → static SEO and
-delivery verification. Production deploy then runs the separate exact-suite
-gate before downloading and deploying the already verified web artifact.
+delivery verification. The `web-rollout` job downloads that same normal web
+artifact, verifies the web certification contract and full public route set,
+then smoke-tests it before it is eligible for deployment. The complete-suite
+deploy continues to run the separate exact-suite gate against the same normal
+web artifact.
 
 Run the normal development gate locally with `pnpm quality:check`. It expects
 the Playwright Chromium runtime installed; `pnpm --filter @kitland/web exec
@@ -116,11 +134,16 @@ Add repository secrets:
 | `CLOUDFLARE_API_TOKEN`  | Cloudflare → My Profile → API Tokens → create token with **Cloudflare Pages: Edit** |
 | `CLOUDFLARE_ACCOUNT_ID` | Workers & Pages right sidebar / Overview                                            |
 
-After both secrets exist, add the repository variable
-`CLOUDFLARE_PAGES_ENABLED=true`. Deployment is explicit opt-in; leaving the
-variable unset keeps the deploy job skipped while CI still verifies the build.
-Even when enabled, CI blocks production deployment until the machine-readable
-64-tool catalog release gate passes.
+For a certified web rollout, leave `CLOUDFLARE_PAGES_ENABLED` unset and add
+the repository variable `CLOUDFLARE_PAGES_ROLLOUT_ENABLED=true`. GitHub
+Actions then deploys the normal full-catalog web artifact after validating the
+web rollout targets. It never uploads the browser extension ZIP or VS Code
+VSIX to a marketplace.
+
+For the coordinated 64-tool product launch, unset
+`CLOUDFLARE_PAGES_ROLLOUT_ENABLED` and set `CLOUDFLARE_PAGES_ENABLED=true`.
+That deploy remains blocked until the machine-readable complete-suite catalog
+gate passes. Keeping both variables unset leaves all deploy jobs skipped.
 
 Create the Pages project once (name must match `kitland`):
 
@@ -129,6 +152,12 @@ pnpm install
 pnpm exec wrangler login
 pnpm exec wrangler pages project create kitland --production-branch=main
 pnpm pages:deploy
+```
+
+For a local web deployment after the rollout gate passes:
+
+```bash
+pnpm pages:deploy:rollout
 ```
 
 Local preview of the production build:
