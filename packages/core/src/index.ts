@@ -122,6 +122,7 @@ export {
   BCRYPT_MIN_COST,
   BCRYPT_MAX_COST,
 } from "./tools/bcrypt-hash";
+export { inspectJwt, JWT_MAX_INPUT_CHARS, type JwtInspection } from "./tools/jwt-decoder";
 export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,

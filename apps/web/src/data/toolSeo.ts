@@ -166,6 +166,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "Bcrypt Hash",
     "Create and verify bcrypt password hashes locally in your browser.",
   ),
+  "jwt-decoder": localTransformSeo(
+    "JWT Decoder",
+    "Decode JWT header and claims locally without claiming signature verification.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

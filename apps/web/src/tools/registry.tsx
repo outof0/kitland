@@ -47,6 +47,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   }),
   "aes-cipher": async () => ({ default: (await import("./AesCipherTool")).AesCipherTool }),
   "bcrypt-hash": async () => ({ default: (await import("./BcryptHashTool")).BcryptHashTool }),
+  "jwt-decoder": async () => ({ default: (await import("./JwtDecoderTool")).JwtDecoderTool }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),
