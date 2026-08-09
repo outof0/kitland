@@ -124,4 +124,18 @@ export const waveFourTools = [
     designFrame: "RSA Key Pair (Oi5nT)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "url-parser",
+    slug: "url-parser",
+    name: "URL Parser",
+    shortName: "URL Parser",
+    family: "time-network",
+    pattern: "inspect",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Inspect URL parts and query parameters locally.",
+    keywords: ["url", "parse", "query", "host"],
+    designFrame: "URL Parser (H1TZfA)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

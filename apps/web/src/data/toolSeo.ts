@@ -178,6 +178,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "RSA Key Pair",
     "Generate RSA-OAEP public and private PEM keys locally with Web Crypto.",
   ),
+  "url-parser": localTransformSeo(
+    "URL Parser",
+    "Inspect URL components and query parameters locally without making a network request.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",
