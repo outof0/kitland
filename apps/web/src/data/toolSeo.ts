@@ -46,6 +46,30 @@ function localTransformSeo(toolName: string, detail: string): ToolSeoContent {
  * prevents 64 thin, near-duplicate landing pages from entering the sitemap.
  */
 export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
+  "json-diff": localTransformSeo(
+    "JSON Diff",
+    "Compare two JSON documents and inspect bounded structural changes.",
+  ),
+  "sql-formatter": localTransformSeo(
+    "SQL Formatter",
+    "Format common SQL queries while preserving strings and comments.",
+  ),
+  "markdown-preview": localTransformSeo(
+    "Markdown Preview",
+    "Preview a safe Markdown subset locally without executing raw HTML.",
+  ),
+  "json-escape": localTransformSeo(
+    "JSON Escape",
+    "Escape plain text into JSON string literals or decode them safely.",
+  ),
+  "url-encode": localTransformSeo(
+    "URL Encode",
+    "Encode or decode URL components locally with explicit scope controls.",
+  ),
+  "uuid-id": localTransformSeo(
+    "UUID / ID",
+    "Generate UUID identifiers with secure host-provided entropy.",
+  ),
   base64: {
     heading: "Encode and decode Base64 without sending your text anywhere",
     introduction:

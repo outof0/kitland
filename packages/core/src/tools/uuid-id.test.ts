@@ -49,6 +49,20 @@ describe("generateUuidV4", () => {
     });
   });
 
+  it("rejects a non-Uint8Array source at the host boundary", () => {
+    const result = generateUuidV4(
+      () => new ArrayBuffer(UUID_V4_BYTE_LENGTH) as unknown as Uint8Array,
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      error: {
+        code: "INVALID_ENTROPY",
+        message: "The random-byte source must return exactly 16 bytes.",
+      },
+    });
+  });
+
   it("maps a random-source exception to an actionable, host-neutral error", () => {
     const result = generateUuidV4(() => {
       throw new Error("blocked");

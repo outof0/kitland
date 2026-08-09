@@ -16,6 +16,7 @@ export type ToolRenderer = LazyExoticComponent<ComponentType>;
  */
 const TOOL_RENDERER_LOADERS = Object.freeze({
   base64: async () => ({ default: (await import("./Base64Tool")).Base64Tool }),
+  "json-diff": async () => ({ default: (await import("./JsonDiffTool")).JsonDiffTool }),
   "beautify-minify": async () => ({
     default: (await import("./BeautifyMinifyTool")).BeautifyMinifyTool,
   }),
@@ -25,6 +26,12 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "json-to-csv": async () => ({ default: (await import("./JsonToCsvTool")).JsonToCsvTool }),
   "json-to-toml": async () => ({ default: (await import("./JsonToTomlTool")).JsonToTomlTool }),
   "xml-formatter": async () => ({ default: (await import("./XmlFormatterTool")).XmlFormatterTool }),
+  "sql-formatter": async () => ({ default: (await import("./SqlFormatterTool")).SqlFormatterTool }),
+  "markdown-preview": async () => ({
+    default: (await import("./MarkdownPreviewTool")).MarkdownPreviewTool,
+  }),
+  "url-encode": async () => ({ default: (await import("./UrlEncodeTool")).UrlEncodeTool }),
+  "uuid-id": async () => ({ default: (await import("./UuidIdTool")).UuidIdTool }),
   "html-entities": async () => ({
     default: (await import("./HtmlEntitiesTool")).HtmlEntitiesTool,
   }),
@@ -47,6 +54,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "lorem-ipsum": async () => ({ default: (await import("./LoremIpsumTool")).LoremIpsumTool }),
   "random-port": async () => ({ default: (await import("./RandomPortTool")).RandomPortTool }),
   "random-number": async () => ({ default: (await import("./RandomNumberTool")).RandomNumberTool }),
+  "json-escape": async () => ({ default: (await import("./JsonEscapeTool")).JsonEscapeTool }),
 } satisfies Record<AvailableToolSlug, ToolRendererLoader>);
 
 const rendererCache = new Map<AvailableToolSlug, ToolRenderer>();

@@ -185,7 +185,7 @@ export function JsonDiffTool() {
         />
       </div>
 
-      <section className="tool-card" aria-labelledby={resultId} style={{ flex: "0 0 220px" }}>
+      <section className="tool-card flex-[0_0_220px]" aria-labelledby={resultId}>
         <div className="tool-card__header">
           <div className="tool-card__title-group">
             <span className="tool-card__dot tool-card__dot--out" aria-hidden="true" />
@@ -224,10 +224,7 @@ export function JsonDiffTool() {
           ) : comparison?.summary.total === 0 ? (
             <p className="tool-header__subtitle">The documents are structurally identical.</p>
           ) : (
-            <ol
-              aria-label="JSON differences"
-              style={{ margin: 0, overflow: "auto", paddingLeft: "1.25rem" }}
-            >
+            <ol aria-label="JSON differences" className="m-0 max-h-[28rem] overflow-auto pl-5">
               {visibleEntries.map((entry) => (
                 <DiffEntry key={`${entry.operation}:${entry.path}`} entry={entry} />
               ))}

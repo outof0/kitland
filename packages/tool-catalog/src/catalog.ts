@@ -3,6 +3,7 @@ import { CANONICAL_TOOL_INVENTORY } from "./inventory";
 import { plannedTools } from "./tools/planned";
 import { waveOneTools } from "./tools/wave-1";
 import { waveTwoTools } from "./tools/wave-2";
+import { waveThreeTools } from "./tools/wave-3";
 import { evaluateCatalogReleaseReadiness } from "./release";
 import type {
   ToolDefinition,
@@ -20,21 +21,24 @@ import type {
 // 11, despite being the first implementation added to the repository.
 const toolDefinitions = [
   toolAt(waveOneTools, 0),
-  toolAt(plannedTools, 1),
+  toolAt(waveThreeTools, 0),
   toolAt(waveTwoTools, 0),
   toolAt(waveOneTools, 1),
   toolAt(waveOneTools, 2),
   toolAt(waveTwoTools, 1),
   toolAt(waveTwoTools, 2),
   toolAt(waveTwoTools, 3),
-  ...plannedTools.slice(8, 10),
+  toolAt(waveThreeTools, 1),
+  toolAt(waveThreeTools, 2),
   base64Tool,
-  toolAt(plannedTools, 10),
+  toolAt(waveThreeTools, 4),
   toolAt(waveOneTools, 3),
   toolAt(waveOneTools, 4),
   toolAt(waveOneTools, 5),
   toolAt(waveOneTools, 6),
-  ...plannedTools.slice(15, 33),
+  ...plannedTools.slice(15, 24),
+  toolAt(waveThreeTools, 5),
+  ...plannedTools.slice(25, 33),
   toolAt(waveTwoTools, 4),
   toolAt(waveTwoTools, 5),
   toolAt(waveOneTools, 7),
@@ -46,7 +50,9 @@ const toolDefinitions = [
   ...plannedTools.slice(41, 46),
   toolAt(waveTwoTools, 8),
   toolAt(waveTwoTools, 9),
-  ...plannedTools.slice(48),
+  ...plannedTools.slice(48, 61),
+  toolAt(waveThreeTools, 3),
+  ...plannedTools.slice(62),
 ] as const satisfies readonly ToolDefinition[];
 assertUniqueCatalogKeys(toolDefinitions);
 

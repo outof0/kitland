@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Wave 2 tool renderers", () => {
+test.describe("Catalog-registered tool renderers", () => {
   for (const tool of [
     { slug: "json-toolbox", title: "JSON Toolbox", input: "JSON input" },
     { slug: "text-stats", title: "Text Stats", input: "Text to measure", copy: false },

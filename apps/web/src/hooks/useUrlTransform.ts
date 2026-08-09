@@ -1,5 +1,10 @@
-import { runUrlTransform, type UrlEncodingScope, type UrlTransformMode } from "@kitland/core";
-import { err, type ToolResult } from "@kitland/core";
+import {
+  err,
+  runUrlTransform,
+  type ToolResult,
+  type UrlEncodingScope,
+  type UrlTransformMode,
+} from "@kitland/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type TransformQuery = {
@@ -86,15 +91,18 @@ export function useUrlTransform(
   }, []);
 
   useEffect(() => {
-    if (query.input.length === 0 || sameQuery(completed.query, query)) return;
+    if (query.input.length === 0) return;
 
     if (workerState === "failed") {
+      if (sameQuery(completed.query, query) && isWorkerUnavailable(completed.result)) return;
       setCompleted({
         query,
         result: err("WORKER_UNAVAILABLE", WORKER_UNAVAILABLE_MESSAGE),
       });
       return;
     }
+
+    if (sameQuery(completed.query, query)) return;
 
     const worker = workerRef.current;
     if (workerState !== "ready" || !worker) return;
@@ -117,7 +125,7 @@ export function useUrlTransform(
     }, DEBOUNCE_MS);
 
     return () => window.clearTimeout(timeout);
-  }, [completed.query, query, workerState]);
+  }, [completed.query, completed.result, query, workerState]);
 
   if (query.input.length === 0) return { result: { ok: true, value: "" }, isProcessing: false };
 
@@ -135,4 +143,11 @@ function isWorkerResult(value: unknown): value is WorkerResult {
   if (!value || typeof value !== "object") return false;
   const response = value as Record<string, unknown>;
   return response.type === "result" && typeof response.id === "number" && "result" in response;
+}
+
+function isWorkerUnavailable(result: ToolResult<string>): boolean {
+  return (
+    !result.ok &&
+    (result.error.code === "WORKER_UNAVAILABLE" || result.error.code === "WORKER_POST_FAILED")
+  );
 }

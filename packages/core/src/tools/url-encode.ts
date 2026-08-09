@@ -28,8 +28,13 @@ function assertInputSize(input: string): ToolResult<string> {
   return ok(input);
 }
 
-function getScope(options: UrlTransformOptions): UrlEncodingScope {
-  return options.scope ?? "component";
+function getScope(options: UrlTransformOptions): ToolResult<UrlEncodingScope> {
+  const scope = options.scope ?? "component";
+  if (scope !== "component" && scope !== "url") {
+    return err("INVALID_SCOPE", "URL scope must be either component or url.");
+  }
+
+  return ok(scope);
 }
 
 /**
@@ -44,9 +49,10 @@ export function encodeUrl(input: string, options: UrlTransformOptions = {}): Too
   if (!checkedInput.ok) return checkedInput;
 
   const scope = getScope(options);
+  if (!scope.ok) return scope;
 
   try {
-    return ok(scope === "url" ? encodeURI(input) : encodeURIComponent(input));
+    return ok(scope.value === "url" ? encodeURI(input) : encodeURIComponent(input));
   } catch (cause) {
     // Native URI encoders reject unpaired UTF-16 surrogate code units. Surface
     // that data issue instead of replacing it silently and changing the input.
@@ -74,9 +80,10 @@ export function decodeUrl(input: string, options: UrlTransformOptions = {}): Too
   if (!checkedInput.ok) return checkedInput;
 
   const scope = getScope(options);
+  if (!scope.ok) return scope;
 
   try {
-    return ok(scope === "url" ? decodeURI(input) : decodeURIComponent(input));
+    return ok(scope.value === "url" ? decodeURI(input) : decodeURIComponent(input));
   } catch (cause) {
     if (cause instanceof URIError) {
       return err(

@@ -4,6 +4,7 @@ import {
   decodeUrl,
   encodeUrl,
   runUrlTransform,
+  type UrlEncodingScope,
   type UrlTransformMode,
 } from "./url-encode";
 
@@ -51,6 +52,16 @@ describe("encodeUrl", () => {
       },
     });
   });
+
+  it("rejects invalid runtime scopes instead of silently treating them as components", () => {
+    expect(encodeUrl("https://example.test/a", { scope: "other" as UrlEncodingScope })).toEqual({
+      ok: false,
+      error: {
+        code: "INVALID_SCOPE",
+        message: "URL scope must be either component or url.",
+      },
+    });
+  });
 });
 
 describe("decodeUrl", () => {
@@ -88,6 +99,27 @@ describe("decodeUrl", () => {
       });
     },
   );
+
+  it("enforces the same input bound while decoding", () => {
+    const oversized = "%".repeat(URL_TRANSFORM_MAX_INPUT_CHARS + 1);
+    expect(decodeUrl(oversized)).toEqual({
+      ok: false,
+      error: {
+        code: "INPUT_TOO_LARGE",
+        message: `URL input exceeds ${URL_TRANSFORM_MAX_INPUT_CHARS.toLocaleString()} characters.`,
+      },
+    });
+  });
+
+  it("rejects invalid runtime scopes while decoding", () => {
+    expect(decodeUrl("a%20b", { scope: "other" as UrlEncodingScope })).toEqual({
+      ok: false,
+      error: {
+        code: "INVALID_SCOPE",
+        message: "URL scope must be either component or url.",
+      },
+    });
+  });
 });
 
 describe("runUrlTransform", () => {

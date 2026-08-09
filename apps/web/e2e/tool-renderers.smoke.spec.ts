@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Wave 1 tool renderers", () => {
+test.describe("Representative tool renderers", () => {
   for (const tool of [
     { slug: "beautify-minify", title: "Beautify / Minify", input: "JSON input" },
     { slug: "html-entities", title: "HTML Entities", input: "Text input" },

@@ -183,3 +183,23 @@ export {
   type RandomNumberOptions,
   type RandomNumberResult,
 } from "./tools/random-number";
+export {
+  escapeJson,
+  unescapeJson,
+  runJsonEscape,
+  JSON_ESCAPE_MAX_INPUT_CHARS,
+  JSON_ESCAPE_MAX_ENCODED_CHARS,
+  type JsonEscapeMode,
+} from "./tools/json-escape";
+export {
+  formatSql,
+  SQL_FORMATTER_MAX_INPUT_CHARS,
+  SQL_FORMATTER_MAX_OUTPUT_CHARS,
+  type SqlFormatOptions,
+} from "./tools/sql-formatter";
+export {
+  renderMarkdown,
+  MARKDOWN_PREVIEW_MAX_INPUT_CHARS,
+  MARKDOWN_PREVIEW_MAX_OUTPUT_CHARS,
+  type MarkdownPreview,
+} from "./tools/markdown-preview";

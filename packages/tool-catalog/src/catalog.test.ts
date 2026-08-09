@@ -35,17 +35,22 @@ describe("tool catalog", () => {
     const availableSlugs = listAvailableTools().map((tool) => tool.slug);
     expect(availableSlugs).toEqual([
       "beautify-minify",
+      "json-diff",
       "json-toolbox",
       "json-to-yaml",
       "yaml-to-json",
       "json-to-csv",
       "json-to-toml",
       "xml-formatter",
+      "sql-formatter",
+      "markdown-preview",
       "base64",
+      "url-encode",
       "html-entities",
       "hex-text",
       "unicode-converter",
       "binary-text",
+      "uuid-id",
       "text-stats",
       "text-diff",
       "case-converter",
@@ -56,6 +61,7 @@ describe("tool catalog", () => {
       "regex-tester",
       "random-port",
       "random-number",
+      "json-escape",
     ]);
     expect(listToolsByFamily("encoding-text").some((t) => t.slug === "base64")).toBe(true);
   });
@@ -139,8 +145,8 @@ describe("tool catalog", () => {
     expect(CANONICAL_TOOL_INVENTORY).toHaveLength(64);
     expect(tools.map(({ id, slug }) => ({ id, slug }))).toEqual(CANONICAL_TOOL_INVENTORY);
     expect(tools.every((tool) => tool.designFrame)).toBe(true);
-    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(42);
-    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(21);
+    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(36);
+    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(27);
   });
 
   it("keeps the committed inventory in Pencil artboard order", () => {

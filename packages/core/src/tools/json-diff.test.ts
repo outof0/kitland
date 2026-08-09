@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { JSON_DIFF_MAX_INPUT_CHARS, diffJson, type JsonDiffResult } from "./json-diff";
+import {
+  JSON_DIFF_MAX_DEPTH,
+  JSON_DIFF_MAX_ENTRIES,
+  JSON_DIFF_MAX_INPUT_CHARS,
+  JSON_DIFF_MAX_NODES,
+  diffJson,
+  type JsonDiffResult,
+} from "./json-diff";
 
 function expectResult(left: string, right: string): JsonDiffResult {
   const result = diffJson(left, right);
@@ -50,6 +57,13 @@ describe("diffJson", () => {
     ]);
   });
 
+  it("handles prototype-like object keys as ordinary JSON data", () => {
+    expect(expectResult('{"__proto__":{"safe":false}}', '{"__proto__":{"safe":true}}')).toEqual({
+      entries: [{ path: "/__proto__/safe", operation: "changed", before: false, after: true }],
+      summary: { added: 0, removed: 0, changed: 1, total: 1 },
+    });
+  });
+
   it("treats a type change at the root as one changed entry", () => {
     expect(expectResult("[]", "{}").entries).toEqual([
       { path: "", operation: "changed", before: [], after: {} },
@@ -72,6 +86,32 @@ describe("diffJson", () => {
     const tooLarge = `${" ".repeat(JSON_DIFF_MAX_INPUT_CHARS)}0`;
     const result = diffJson(tooLarge, "0");
     expect(result).toMatchObject({ ok: false, error: { code: "LEFT_INPUT_TOO_LARGE" } });
+  });
+
+  it("rejects documents deeper than the traversal limit", () => {
+    const left = `${"[".repeat(JSON_DIFF_MAX_DEPTH + 1)}0${"]".repeat(JSON_DIFF_MAX_DEPTH + 1)}`;
+    const right = `${"[".repeat(JSON_DIFF_MAX_DEPTH + 1)}1${"]".repeat(JSON_DIFF_MAX_DEPTH + 1)}`;
+    expect(diffJson(left, right)).toMatchObject({
+      ok: false,
+      error: { code: "DIFF_TOO_DEEP" },
+    });
+  });
+
+  it("rejects comparisons that visit too many values", () => {
+    const values = JSON.stringify(Array.from({ length: JSON_DIFF_MAX_NODES + 1 }, () => 0));
+    expect(diffJson(values, values)).toMatchObject({
+      ok: false,
+      error: { code: "DIFF_TOO_COMPLEX" },
+    });
+  });
+
+  it("stops before retaining more than the difference output limit", () => {
+    const before = JSON.stringify(Array.from({ length: JSON_DIFF_MAX_ENTRIES + 1 }, () => 0));
+    const after = JSON.stringify(Array.from({ length: JSON_DIFF_MAX_ENTRIES + 1 }, () => 1));
+    expect(diffJson(before, after)).toMatchObject({
+      ok: false,
+      error: { code: "TOO_MANY_DIFFERENCES" },
+    });
   });
 });
 
