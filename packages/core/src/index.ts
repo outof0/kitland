@@ -109,6 +109,14 @@ export {
   type HmacSigner,
 } from "./tools/hmac-generator";
 export {
+  decryptAesGcm,
+  encryptAesGcm,
+  AES_CIPHER_MAX_INPUT_CHARS,
+  AES_GCM_KEY_BYTES,
+  AES_GCM_NONCE_BYTES,
+  type AesGcmHost,
+} from "./tools/aes-cipher";
+export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
   type CaseFormat,

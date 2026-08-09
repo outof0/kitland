@@ -53,6 +53,7 @@ describe("tool catalog", () => {
       "rot13-caesar",
       "sha-hash",
       "hmac-generator",
+      "aes-cipher",
       "uuid-id",
       "text-stats",
       "text-diff",
@@ -148,8 +149,8 @@ describe("tool catalog", () => {
     expect(CANONICAL_TOOL_INVENTORY).toHaveLength(64);
     expect(tools.map(({ id, slug }) => ({ id, slug }))).toEqual(CANONICAL_TOOL_INVENTORY);
     expect(tools.every((tool) => tool.designFrame)).toBe(true);
-    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(33);
-    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(30);
+    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(32);
+    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(31);
   });
 
   it("keeps the committed inventory in Pencil artboard order", () => {
