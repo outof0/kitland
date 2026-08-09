@@ -182,6 +182,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "URL Parser",
     "Inspect URL components and query parameters locally without making a network request.",
   ),
+  "http-status-codes": localTransformSeo(
+    "HTTP Status Codes",
+    "Look up common HTTP response status codes locally.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

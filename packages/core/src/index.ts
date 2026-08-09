@@ -126,6 +126,7 @@ export { inspectJwt, JWT_MAX_INPUT_CHARS, type JwtInspection } from "./tools/jwt
 export { generateToken, TOKEN_MAX_LENGTH, type TokenFormat } from "./tools/token-generator";
 export { pem, validateRsaOptions, RSA_MIN_MODULUS, RSA_MAX_MODULUS } from "./tools/rsa-key-pair";
 export { parseUrl, URL_PARSER_MAX_INPUT_CHARS, type ParsedUrl } from "./tools/url-parser";
+export { findHttpStatuses, HTTP_STATUS_CODES, type HttpStatus } from "./tools/http-status-codes";
 export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,

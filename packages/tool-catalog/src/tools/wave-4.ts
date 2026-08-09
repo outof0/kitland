@@ -138,4 +138,18 @@ export const waveFourTools = [
     designFrame: "URL Parser (H1TZfA)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "http-status-codes",
+    slug: "http-status-codes",
+    name: "HTTP Status Codes",
+    shortName: "HTTP Status",
+    family: "time-network",
+    pattern: "inspect",
+    status: "available",
+    releaseStage: "implemented",
+    description: "Look up and filter HTTP response status codes.",
+    keywords: ["http", "status", "response", "codes"],
+    designFrame: "HTTP Status Codes (LjXun)",
+    platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

@@ -53,6 +53,9 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   }),
   "rsa-key-pair": async () => ({ default: (await import("./RsaKeyPairTool")).RsaKeyPairTool }),
   "url-parser": async () => ({ default: (await import("./UrlParserTool")).UrlParserTool }),
+  "http-status-codes": async () => ({
+    default: (await import("./HttpStatusCodesTool")).HttpStatusCodesTool,
+  }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),
