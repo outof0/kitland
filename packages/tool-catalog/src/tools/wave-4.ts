@@ -320,4 +320,10 @@ export const waveFourTools = [
     designFrame: "QR Code (ryifn)",
     platforms: webTransformPlatforms,
   }),
+  defineTool({
+    id: "unix-timestamp", slug: "unix-timestamp", name: "Unix Timestamp", shortName: "Unix Timestamp",
+    family: "time-network", pattern: "transform", status: "available", releaseStage: "implemented",
+    description: "Convert Unix timestamps locally.", keywords: ["unix", "timestamp", "date", "epoch"],
+    designFrame: "Unix Timestamp (p3FVq)", platforms: webTransformPlatforms,
+  }),
 ] as const satisfies readonly ToolDefinition[];

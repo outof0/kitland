@@ -234,6 +234,7 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "QR Code",
     "Generate downloadable QR codes locally from text or URLs.",
   ),
+  "unix-timestamp": localTransformSeo("Unix Timestamp", "Convert Unix seconds or milliseconds to ISO time locally."),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

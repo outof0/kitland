@@ -206,6 +206,7 @@ export {
   type MockDataRandomBytes,
   type MockDataRecord,
 } from "./tools/mock-data";
+export { parseUnixTimestamp, type UnixTimestamp } from "./tools/unix-timestamp";
 export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,

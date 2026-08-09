@@ -84,6 +84,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   }),
   "mock-data": async () => ({ default: (await import("./MockDataTool")).MockDataTool }),
   "qr-code": async () => ({ default: (await import("./QrCodeTool")).QrCodeTool }),
+  "unix-timestamp": async () => ({ default: (await import("./UnixTimestampTool")).UnixTimestampTool }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),
