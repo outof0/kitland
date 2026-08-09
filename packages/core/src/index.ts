@@ -84,6 +84,12 @@ export {
   type BinaryTextMode,
 } from "./tools/binary-text";
 export {
+  rotateCaesar,
+  runRot13Caesar,
+  ROT13_CAESAR_MAX_INPUT_CHARS,
+  type Rot13CaesarMode,
+} from "./tools/rot13-caesar";
+export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
   type CaseFormat,

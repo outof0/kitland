@@ -12,6 +12,7 @@ import {
   FileCode,
   FileInput,
   Save,
+  type LucideIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,7 @@ type EncodingTransformWorkspaceProps = {
   tool: EncodingTextTool;
   title: string;
   subtitle: string;
+  icon?: LucideIcon;
   sample: string;
   inputLimit: number;
   formatLabel?: string;
@@ -42,6 +44,7 @@ export function EncodingTransformWorkspace({
   tool,
   title,
   subtitle,
+  icon,
   sample,
   inputLimit,
   formatLabel,
@@ -116,7 +119,7 @@ export function EncodingTransformWorkspace({
 
   const inputLabel = mode === "encode" ? "Text input" : `${title} input`;
   const outputLabel = mode === "encode" ? `${title} result` : "Text result";
-  const Icon = tool === "binary-text" ? Binary : Braces;
+  const Icon = icon ?? (tool === "binary-text" ? Binary : Braces);
 
   return (
     <>

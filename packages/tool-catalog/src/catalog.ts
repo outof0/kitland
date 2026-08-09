@@ -4,6 +4,7 @@ import { plannedTools } from "./tools/planned";
 import { waveOneTools } from "./tools/wave-1";
 import { waveTwoTools } from "./tools/wave-2";
 import { waveThreeTools } from "./tools/wave-3";
+import { waveFourTools } from "./tools/wave-4";
 import { evaluateCatalogReleaseReadiness } from "./release";
 import type {
   ToolDefinition,
@@ -36,7 +37,8 @@ const toolDefinitions = [
   toolAt(waveOneTools, 4),
   toolAt(waveOneTools, 5),
   toolAt(waveOneTools, 6),
-  ...plannedTools.slice(15, 24),
+  toolAt(waveFourTools, 0),
+  ...plannedTools.slice(16, 24),
   toolAt(waveThreeTools, 5),
   ...plannedTools.slice(25, 33),
   toolAt(waveTwoTools, 4),

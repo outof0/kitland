@@ -52,7 +52,8 @@ function isTransformRequest(value: unknown): value is TransformRequest {
     (request.tool === "html-entities" ||
       request.tool === "hex-text" ||
       request.tool === "unicode-converter" ||
-      request.tool === "binary-text") &&
+      request.tool === "binary-text" ||
+      request.tool === "rot13-caesar") &&
     (request.mode === "encode" || request.mode === "decode") &&
     typeof request.input === "string" &&
     (request.format === undefined ||

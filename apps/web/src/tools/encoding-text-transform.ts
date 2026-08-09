@@ -2,9 +2,15 @@ import { runHtmlEntityTransform, type HtmlEntityFormat } from "@kitland/core";
 import { runHexTextTransform, type HexTextFormat } from "@kitland/core";
 import { runUnicodeConverter } from "@kitland/core";
 import { runBinaryTextTransform } from "@kitland/core";
+import { runRot13Caesar } from "@kitland/core";
 import { err, type ToolResult } from "@kitland/core";
 
-export type EncodingTextTool = "html-entities" | "hex-text" | "unicode-converter" | "binary-text";
+export type EncodingTextTool =
+  | "html-entities"
+  | "hex-text"
+  | "unicode-converter"
+  | "binary-text"
+  | "rot13-caesar";
 export type EncodingTextMode = "encode" | "decode";
 export type EncodingTextFormat = HtmlEntityFormat | HexTextFormat | undefined;
 
@@ -28,6 +34,8 @@ export function runEncodingTextTransform(
       return runUnicodeConverter(mode, input);
     case "binary-text":
       return runBinaryTextTransform(mode, input);
+    case "rot13-caesar":
+      return runRot13Caesar(mode, input);
     default:
       return err("UNKNOWN_TOOL", "This text transformation is not available.");
   }

@@ -146,6 +146,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "Binary Text",
     "Represent UTF-8 text as binary bytes or decode binary bytes back into text.",
   ),
+  "rot13-caesar": localTransformSeo(
+    "ROT13 Caesar",
+    "Apply the fixed ROT13 Caesar shift to ASCII letters while preserving all other characters.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",

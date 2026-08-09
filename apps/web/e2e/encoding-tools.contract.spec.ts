@@ -83,6 +83,23 @@ test.describe("encoding tool contracts", () => {
     await expect(page.getByRole("alert")).toContainText("eight-bit groups");
   });
 
+  test("ROT13 Caesar encodes, decodes, and preserves non-Latin text", async ({ page }) => {
+    await page.goto("/explore/rot13-caesar");
+
+    const input = page.getByRole("textbox", { name: "Text input" });
+    const output = page.getByRole("textbox", { name: "ROT13 Caesar result" });
+    await input.fill("Hello world 🍵");
+    await expect(output).toHaveValue("Uryyb jbeyq 🍵");
+
+    await page.getByRole("button", { name: "Decode", exact: true }).click();
+    const decodedInput = page.getByRole("textbox", { name: "ROT13 Caesar input" });
+    await expect(decodedInput).toHaveValue("Uryyb jbeyq 🍵");
+    await expect(page.getByRole("textbox", { name: "Text result" })).toHaveValue("Hello world 🍵");
+
+    await page.getByRole("button", { name: "Decode", exact: true }).click();
+    await expect(decodedInput).toHaveValue("Uryyb jbeyq 🍵");
+  });
+
   test("JSON Escape round-trips one JSON string literal and rejects other JSON values", async ({
     page,
   }) => {

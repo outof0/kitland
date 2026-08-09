@@ -40,6 +40,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
     default: (await import("./UnicodeConverterTool")).UnicodeConverterTool,
   }),
   "binary-text": async () => ({ default: (await import("./BinaryTextTool")).BinaryTextTool }),
+  "rot13-caesar": async () => ({ default: (await import("./Rot13CaesarTool")).Rot13CaesarTool }),
   "case-converter": async () => ({
     default: (await import("./CaseConverterTool")).CaseConverterTool,
   }),

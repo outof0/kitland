@@ -50,6 +50,7 @@ describe("tool catalog", () => {
       "hex-text",
       "unicode-converter",
       "binary-text",
+      "rot13-caesar",
       "uuid-id",
       "text-stats",
       "text-diff",
@@ -145,8 +146,8 @@ describe("tool catalog", () => {
     expect(CANONICAL_TOOL_INVENTORY).toHaveLength(64);
     expect(tools.map(({ id, slug }) => ({ id, slug }))).toEqual(CANONICAL_TOOL_INVENTORY);
     expect(tools.every((tool) => tool.designFrame)).toBe(true);
-    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(36);
-    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(27);
+    expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(35);
+    expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(28);
   });
 
   it("keeps the committed inventory in Pencil artboard order", () => {
