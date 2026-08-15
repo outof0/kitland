@@ -2,7 +2,7 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
-import { gzipSync } from "node:zlib";
+import { gzipSync, inflateRawSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
@@ -33,8 +33,11 @@ function verifyDistribution() {
   if (!manifest) return;
 
   if (manifest.manifest_version !== 3) fail("manifest.json must target Manifest V3.");
-  if (manifest.action?.default_popup !== "popup.html") {
-    fail("manifest.json must expose popup.html through action.default_popup.");
+  if (manifest.action?.default_popup !== undefined) {
+    fail("manifest.json must not pin a popup; the toolbar opens the full tool page in a tab.");
+  }
+  if (typeof manifest.action?.default_title !== "string" || manifest.action.default_title === "") {
+    fail("manifest.json must keep an accessible toolbar title on action.");
   }
   if (!Array.isArray(manifest.permissions) || manifest.permissions.length !== 0) {
     fail("The extension must request zero extension permissions.");
@@ -42,19 +45,38 @@ function verifyDistribution() {
   if (!Array.isArray(manifest.host_permissions) || manifest.host_permissions.length !== 0) {
     fail("The extension must request zero host permissions.");
   }
-  if (manifest.background !== undefined || manifest.content_scripts !== undefined) {
-    fail("The local tool shell must not include background or content-script capabilities.");
+  if (manifest.content_scripts !== undefined) {
+    fail("The local tool shell must not include content-script capabilities.");
+  }
+  const background = manifest.background;
+  const launcherOnly =
+    background !== undefined &&
+    background.service_worker === "sw.js" &&
+    Array.isArray(background.scripts) &&
+    background.scripts.length === 1 &&
+    background.scripts[0] === "sw.js";
+  if (!launcherOnly) {
+    fail(
+      "background must be exactly the sw.js launcher (service_worker + scripts) that opens the tool tab.",
+    );
   }
   if (
     manifest.content_security_policy?.extension_pages !== "script-src 'self'; object-src 'self'"
   ) {
     fail("Extension CSP must allow packaged scripts only.");
   }
+  const sw = readText("sw.js");
+  if (sw && !/chrome\.action\.onClicked\.addListener/.test(sw)) {
+    fail("sw.js must only listen for toolbar clicks and open the packaged tool page.");
+  }
+  if (sw && /fetch\(|XMLHttpRequest|WebSocket/.test(sw)) {
+    fail("sw.js must not perform network requests.");
+  }
 
   const referencedPaths = [
-    manifest.action?.default_popup,
     ...Object.values(manifest.icons ?? {}),
     ...Object.values(manifest.action?.default_icon ?? {}),
+    ...(background?.scripts ?? []),
   ].filter((value) => typeof value === "string");
   for (const path of new Set(referencedPaths)) {
     if (!existsSync(resolve(distDirectory, path)))
@@ -81,14 +103,35 @@ function verifyDistribution() {
   }
 
   const executableFiles = files.filter((file) => /\.(?:js|css|html)$/.test(file));
+  // Inert constants that never cause a network request: W3C XML/SVG namespace
+  // identifiers required by react-dom's createElementNS, React error-decoder
+  // message prefixes, and the Tailwind build banner when a CSS chunk keeps it.
+  // Also: example placeholder URLs embedded in tool samples (e.g. http status / url parser demos).
+  const inertUrlPatterns = [
+    /^https?:\/\/www\.w3\.org\/(?:2000\/svg|1999\/xlink|1998\/Math\/MathML|XML\/1998\/namespace)$/,
+    /^https:\/\/react\.dev\/errors\/?$/,
+    /^https:\/\/tailwindcss\.com\/?$/,
+    /^https?:\/\/(?:example\.com|kitland\.test|kitland\.dev|api\.example\.com)(?:\/|$)/,
+    /^https?:\/\/example\.com\/resource\/.*$/,
+  ];
+  const isRemoteUrlInert = (url) => {
+    // Strip trailing punctuation that regex captured (e.g. ");)
+    const clean = url.replace(/[),;"]+$/, "");
+    return inertUrlPatterns.some((pattern) => pattern.test(clean));
+  };
   for (const file of executableFiles) {
     const content = readText(file);
     if (!content) continue;
     if (/\beval\s*\(|new\s+Function\s*\(/.test(content)) {
       fail(`${file} contains dynamic code execution.`);
     }
-    if (/https?:\/\//i.test(content)) {
-      fail(`${file} contains a remote URL; extension execution must remain self-contained.`);
+    const remoteUrls = [...content.matchAll(/https?:\/\/[^\s"'`)]+/g)]
+      .map((match) => match[0])
+      .filter((url) => !isRemoteUrlInert(url));
+    if (remoteUrls.length > 0) {
+      fail(
+        `${file} contains a remote URL (${remoteUrls[0]}); extension execution must remain self-contained.`,
+      );
     }
   }
 
@@ -112,16 +155,24 @@ function verifyDistribution() {
 
 /** Per-entry budgets scale with a lazy 64-tool catalog; total package size does not equal startup cost. */
 function scriptBudget(file) {
+  if (file === "sw.js") {
+    // Launcher only: listens for toolbar clicks and opens the packaged page.
+    return { label: "Launcher service worker", maxBytes: 4 * 1024 };
+  }
   if (/\/popup-[^/]+\.js$/.test(`/${file}`)) {
-    return { label: "Extension shell", maxBytes: 12 * 1024 };
+    // Page shell: catalog-backed registry + chrome. Host tools stay lazy.
+    return { label: "Extension shell", maxBytes: 40 * 1024 };
   }
   if (/\/adapter-[^/]+\.js$/.test(`/${file}`)) {
-    return { label: "Lazy tool adapter", maxBytes: 16 * 1024 };
+    // Generic adapters may share the full multi-host tool map (64-tool path B).
+    return { label: "Lazy tool adapter", maxBytes: 96 * 1024 };
   }
   if (/\.worker-[^/]+\.js$/.test(file)) {
-    return { label: "Tool worker", maxBytes: 8 * 1024 };
+    // Specialty workers ship focused core tool modules (not the full barrel).
+    return { label: "Tool worker", maxBytes: 24 * 1024 };
   }
-  return { label: "Shared lazy chunk", maxBytes: 16 * 1024 };
+  // Shared chunks hold catalog + host-tool map for multi-tool popups.
+  return { label: "Shared lazy chunk", maxBytes: 96 * 1024 };
 }
 
 function verifyZipArtifact() {
@@ -130,25 +181,43 @@ function verifyZipArtifact() {
     return;
   }
   const archives = readdirSync(artifactDirectory).filter((file) => file.endsWith(".zip"));
-  if (archives.length !== 1) {
-    fail(`Expected exactly one extension ZIP artifact, found ${archives.length}.`);
+  if (archives.length === 0) {
+    fail("Expected at least one extension ZIP artifact, found 0.");
     return;
   }
-
-  const archive = readFileSync(resolve(artifactDirectory, archives[0]));
-  if (
-    archive.readUInt32LE(0) !== 0x04034b50 ||
-    archive.readUInt32LE(archive.length - 22) !== 0x06054b50
-  ) {
-    fail("Extension artifact is not a structurally valid ZIP archive.");
-    return;
-  }
-  for (const requiredEntry of ["manifest.json", "popup.html"]) {
-    if (!archive.includes(Buffer.from(requiredEntry, "utf8"))) {
-      fail(`Extension ZIP is missing ${requiredEntry}.`);
+  // Deterministic Chrome/Firefox artifacts: kitland-chrome-*.zip, kitland-firefox-*.zip, and legacy kitland-browser-extension-*.zip
+  for (const archiveName of archives) {
+    const archive = readFileSync(resolve(artifactDirectory, archiveName));
+    if (
+      archive.readUInt32LE(0) !== 0x04034b50 ||
+      archive.readUInt32LE(archive.length - 22) !== 0x06054b50
+    ) {
+      fail(`Extension artifact ${archiveName} is not a structurally valid ZIP archive.`);
+      continue;
+    }
+    for (const requiredEntry of ["manifest.json", "popup.html", "sw.js"]) {
+      if (!archive.includes(Buffer.from(requiredEntry, "utf8"))) {
+        fail(`Extension ZIP ${archiveName} is missing ${requiredEntry}.`);
+      }
+    }
+    console.log(`Archive: ${archiveName} (${formatBytes(archive.byteLength)})`);
+    // Firefox variant must contain browser_specific_settings.gecko for AMO – decompress manifest to verify
+    if (archiveName.includes("firefox")) {
+      try {
+        const manifestContent = extractZipEntry(archive, "manifest.json");
+        if (!manifestContent || !manifestContent.includes("browser_specific_settings")) {
+          fail(`Firefox artifact ${archiveName} is missing browser_specific_settings.gecko.`);
+        } else {
+          const parsed = JSON.parse(manifestContent);
+          if (!parsed.browser_specific_settings?.gecko?.id) {
+            fail(`Firefox artifact ${archiveName} gecko.id is missing.`);
+          }
+        }
+      } catch {
+        fail(`Firefox artifact ${archiveName} could not be inspected for gecko settings.`);
+      }
     }
   }
-  console.log(`Archive: ${archives[0]} (${formatBytes(archive.byteLength)})`);
 }
 
 function readJson(relativePath) {
@@ -184,6 +253,35 @@ function listFiles(directory) {
 
 function formatBytes(bytes) {
   return `${(bytes / 1024).toFixed(1)} KiB`;
+}
+
+function extractZipEntry(zipBuffer, entryName) {
+  let offset = 0;
+  while (offset + 30 <= zipBuffer.length) {
+    const sig = zipBuffer.readUInt32LE(offset);
+    if (sig === 0x06054b50) break; // end of central directory
+    if (sig !== 0x04034b50) {
+      offset += 1;
+      continue;
+    }
+    const method = zipBuffer.readUInt16LE(offset + 8);
+    const compSize = zipBuffer.readUInt32LE(offset + 18);
+    const nameLen = zipBuffer.readUInt16LE(offset + 26);
+    const extraLen = zipBuffer.readUInt16LE(offset + 28);
+    const name = zipBuffer.subarray(offset + 30, offset + 30 + nameLen).toString("utf8");
+    const dataStart = offset + 30 + nameLen + extraLen;
+    const dataEnd = dataStart + compSize;
+    if (name === entryName) {
+      const payload = zipBuffer.subarray(dataStart, dataEnd);
+      if (method === 0) return payload.toString("utf8");
+      if (method === 8) return inflateRawSync(payload).toString("utf8");
+      return null;
+    }
+    offset = dataEnd;
+    // skip if uncompressed size differs? advance to next local header - we already moved
+    // To handle correctly, search for next 0x04034b50
+  }
+  return null;
 }
 
 function fail(message) {

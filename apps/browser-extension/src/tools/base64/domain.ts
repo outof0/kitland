@@ -1,11 +1,11 @@
+import type { ToolResult } from "@kitland/core/result.ts";
 import {
   BASE64_MAX_ENCODED_CHARS,
   BASE64_MAX_INPUT_CHARS,
   BASE64_MAX_UTF8_BYTES,
   runBase64,
   type Base64Mode,
-  type ToolResult,
-} from "@kitland/core";
+} from "@kitland/core/tools/base64.ts";
 
 export type Base64Format = "standard" | "url-safe";
 

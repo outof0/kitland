@@ -19,7 +19,16 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@kitland/core": ["../../packages/core/src/index.ts"],
+      "@kitland/core/*": ["../../packages/core/src/*"],
+      "@kitland/tools": ["../../packages/tools/src/index.ts"],
+      "@kitland/ui": ["../../packages/ui/src/index.ts"],
+      "@kitland/ui/catalog": ["../../packages/ui/src/tools/shared-catalog-tools.tsx"],
+      "@kitland/ui/tools/*": ["../../packages/ui/src/tools/*"]
+    },
+    "jsx": "react-jsx"
   },
   "include": [
     "src",

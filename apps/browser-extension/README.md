@@ -1,24 +1,26 @@
 # Kitland Browser Extension
 
-The permission-free Manifest V3 host for the Kitland developer tool suite. The
-extension is designed for the 64-tool catalog; Base64 is the first reference
-adapter used to prove the shell, renderer, privacy, accessibility, worker, and
-packaging contracts. It is not the extension's product identity or release
-scope.
+The permission-free Manifest V3 host for the Kitland developer tool suite.
+Catalog metadata is the authority: only tools declared `available` on
+`browser-extension` appear in the full-page tab. Web availability never implies an
+extension adapter.
 
-Kitland will ship the extension only when the full planned tool set and release
-gates are complete. Until then, the artifact in this directory is a foundation
-and development fixture.
+Specialty adapters (Base64, cURL Converter, JSON Formatter) ship dedicated UIs.
+Other catalog-available pure transforms share a lazy generic local transform
+mount powered by `@kitland/core` host-transform specs. Generators, diff tools,
+many inspectors, and crypto stay catalog-planned on this host until specialized
+adapters exist.
 
 ## Architecture
 
 ```text
-popup.html + main.ts             Generic searchable catalog and tool host
+popup.html + main.ts             Generic searchable catalog and tool host (full-page tab)
+sw.js                            Toolbar launcher: opens the tool page in a tab
 registry.ts                      Explicit metadata + lazy renderer registrations
 tools/<slug>/adapter.ts          One host adapter, mounted only when selected
 tools/<slug>/domain.ts           Thin orchestration around shared core logic
 tools/<slug>/*.worker.ts         Optional route-local compute worker
-@kitland/tool-catalog            Host-neutral identity/capability metadata
+@kitland/tools            Host-neutral identity/capability metadata
 @kitland/core                    Platform-neutral operations
 ```
 
@@ -29,7 +31,8 @@ tool: extension registration remains an explicit, reviewable decision.
 
 ## Privacy and platform boundary
 
-- Chromium-first, using only common MV3 popup primitives supported by Firefox.
+- Chromium-first, using only common MV3 primitives supported by Firefox and Safari;
+  the toolbar opens the tool page as a full tab (no popup).
 - No `permissions` or `host_permissions`.
 - No network calls, analytics, remote code, account, or payload storage.
 - No background worker or content script.
@@ -65,7 +68,7 @@ pnpm --filter @kitland/browser-extension package
 
 1. Implement and test pure operations in `@kitland/core`.
 2. Add host-neutral metadata, capabilities, and explicit browser-extension
-   availability in `@kitland/tool-catalog`.
+   availability in `@kitland/tools`.
 3. Add `src/tools/<slug>/adapter.ts`; keep browser APIs inside that adapter.
 4. Register one lazy loader in `src/registry.ts`.
 5. Add adapter unit/smoke tests, maximum-input tests, cleanup tests, and review
@@ -112,7 +115,7 @@ Load unpacked `dist/` in clean Chromium and Firefox profiles, then verify:
 
 ## Release integration remaining
 
-Workspace build, unit, production-popup smoke, package verification, CI artifact
+Workspace build, unit, production-page smoke, package verification, CI artifact
 upload, per-entry budgets, and catalog ↔ renderer exhaustiveness are wired. The
 remaining release work is deliberately external to the runtime foundation:
 

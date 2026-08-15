@@ -1,60 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark" class="min-h-full">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark light" />
     <title>Kitland Developer Tools</title>
-    <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body>
-    <a class="skip-link" href="#tool-host">Skip to active tool</a>
-    <div class="app-shell">
-      <header class="app-header">
-        <div class="brand" aria-label="Kitland developer tools">
-          <span class="brand-mark" aria-hidden="true"><i></i><i></i><b></b></span>
-          <span>Kitland</span>
-        </div>
-        <span class="privacy-badge" title="No extension or website permissions requested">
-          <span aria-hidden="true"></span>
-          LOCAL · NO PERMISSIONS
-        </span>
-      </header>
-
-      <div class="workspace-shell">
-        <aside class="catalog-panel" aria-label="Developer tool catalog">
-          <div class="catalog-heading">
-            <div>
-              <p>WORKBENCH</p>
-              <h1>Tools</h1>
-            </div>
-            <output id="tool-count" aria-live="polite"></output>
-          </div>
-          <label class="search-field" for="tool-search">
-            <span class="sr-only">Search registered tools</span>
-            <span aria-hidden="true">⌕</span>
-            <input
-              id="tool-search"
-              type="search"
-              placeholder="Search tools…"
-              autocomplete="off"
-              aria-controls="tool-list"
-            />
-          </label>
-          <nav aria-label="Registered tools">
-            <ul id="tool-list" class="tool-list"></ul>
-          </nav>
-          <p class="catalog-note">Tool code loads only when selected.</p>
-        </aside>
-
-        <main id="tool-host" class="tool-host" tabindex="-1" aria-busy="true">
-          <div class="tool-loading" role="status">
-            <span aria-hidden="true"></span>
-            Loading local tool…
-          </div>
-        </main>
-      </div>
-    </div>
+  <body class="m-0 min-h-full w-full bg-bg text-on-surface">
+    <div id="root" class="min-h-dvh w-full"></div>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>
