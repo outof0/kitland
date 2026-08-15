@@ -1,0 +1,33 @@
+/*
+ * Shared Kitland tool shell styles.
+ * Single token source is @kitland/ui/tokens.css (design.pen variables).
+ * Hosts import this once to also receive the shadcn/ui semantic aliases
+ * used by generated primitives; structure comes from Tailwind utilities.
+ */
+
+@import "../tokens.css";
+
+:root,
+:root[data-theme="light"],
+:root[data-theme="dark"] {
+  /* Shadcn semantic token aliases */
+  --background: var(--bg);
+  --foreground: var(--on-surface);
+  --card: var(--surface);
+  --card-foreground: var(--on-surface);
+  --popover: var(--surface);
+  --popover-foreground: var(--on-surface);
+  --primary-foreground: var(--on-primary);
+  --secondary: var(--surface-low);
+  --secondary-foreground: var(--on-surface);
+  --muted: var(--surface-low);
+  --muted-foreground: var(--on-muted);
+  --destructive: var(--error);
+  --destructive-foreground: #ffffff;
+  --border: var(--outline);
+  --input: var(--outline);
+  --ring: var(--primary);
+  --sidebar: var(--bg-elevated);
+  --sidebar-foreground: var(--on-surface);
+  --radius: 0.625rem;
+}

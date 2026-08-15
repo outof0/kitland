@@ -1,65 +1,115 @@
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/manrope/wght.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
 @import "tailwindcss";
-@import "./tokens.css";
-@import "./motion.css";
+@import "@kitland/ui/workspace.css";
+@source "../../../../packages/ui/src";
 
-@theme {
-  --color-bg: var(--bg);
-  --color-bg-elevated: var(--bg-elevated);
-  --color-surface-low: var(--surface-low);
-  --color-surface: var(--surface);
-  --color-surface-high: var(--surface-high);
-  --color-outline: var(--outline);
-  --color-outline-strong: var(--outline-strong);
-  --color-on-surface: var(--on-surface);
-  --color-on-muted: var(--on-muted);
-  --color-on-faint: var(--on-faint);
-  --color-primary: var(--primary);
-  --color-primary-strong: var(--primary-strong);
-  --color-primary-soft: var(--primary-soft);
-  --color-accent: var(--accent);
-  --color-accent-lime: var(--accent-lime);
-  --color-success: var(--success);
-  --color-info: var(--info);
-  --color-rail: var(--rail);
-  --color-ink-dark: var(--ink-dark);
-  --color-code-key: var(--code-key);
-  --color-code-string: var(--code-string);
-  --color-code-number: var(--code-number);
-  --color-code-punct: var(--code-punct);
-  --color-text-secondary: var(--text-secondary);
-  --font-ui: var(--font-ui);
-  --font-display: var(--font-display);
-  --font-mono: var(--font-mono);
-  --shadow-primary: var(--shadow-primary);
+/* Marketing palette. The landing/catalog intentionally keep a fixed dark
+ * canvas, but JSX must still consume named Tailwind tokens rather than raw
+ * hex values. */
+@theme inline {
+  --color-marketing-canvas: #0b0c10;
+  --color-marketing-shell: #0d0f13;
+  --color-marketing-panel: #0f172a;
+  --color-marketing-recessed: #101216;
+  --color-marketing-panel-deep: #101827;
+  --color-marketing-raised: #111318;
+  --color-marketing-panel-indigo: #111a2c;
+  --color-marketing-surface: #15171c;
+  --color-marketing-surface-hover: #1a1d24;
+  --color-marketing-success-bg: #1a2e12;
+  --color-marketing-primary-soft: #1e3a8a;
+  --color-marketing-warning-bg: #211d12;
+  --color-marketing-divider: #20232b;
+  --color-marketing-divider-strong: #22304c;
+  --color-marketing-divider-blue: #24324d;
+  --color-marketing-border-blue: #26314a;
+  --color-marketing-border-indigo: #263551;
+  --color-marketing-border-recessed: #292d37;
+  --color-marketing-border: #2a2e38;
+  --color-marketing-border-subtle: #303440;
+  --color-marketing-state-border: #30405e;
+  --color-marketing-state-border-strong: #30477d;
+  --color-marketing-icon-border: #314263;
+  --color-marketing-border-card: #343946;
+  --color-marketing-success-border: #365314;
+  --color-marketing-border-strong: #3a3f4b;
+  --color-marketing-warning-border: #4c3f20;
+  --color-marketing-border-hover: #515867;
+  --color-marketing-primary: #2563eb;
+  --color-marketing-primary-hover: #1d4ed8;
+  --color-marketing-on-primary: #ffffff;
+  --color-marketing-primary-light: #60a5fa;
+  --color-marketing-text-faint: #8490a3;
+  --color-marketing-text-muted: #94a3b8;
+  --color-marketing-success: #86efac;
+  --color-marketing-text-quiet: #8e97a7;
+  --color-marketing-text-primary: #93c5fd;
+  --color-marketing-text-cool: #94a3b8;
+  --color-marketing-text-secondary: #9aa3b2;
+  --color-marketing-text-soft: #aab1be;
+  --color-marketing-text-menu: #b4bbc7;
+  --color-marketing-accent: #bef264;
+  --color-marketing-text-strong: #cbd5e1;
+  --color-marketing-foreground: #edeff3;
+  --color-marketing-danger: #fb7185;
+  --color-marketing-warning: #fbbf24;
+  --color-marketing-release-ready: #14532d;
+  --color-marketing-release-ready-bg: #102619;
+  --shadow-marketing-primary: 0 10px 28px -12px rgb(37 99 235 / 60%);
+  --shadow-marketing-primary-hover: 0 14px 34px -12px rgb(37 99 235 / 72%);
+  --shadow-marketing-card: 0 24px 48px -28px rgb(37 99 235 / 50%);
+  --shadow-marketing-preview: 0 36px 90px -36px rgb(37 99 235 / 55%);
+  --background-image-marketing-grid:
+    linear-gradient(rgb(96 165 250 / 4.5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(96 165 250 / 4.5%) 1px, transparent 1px);
+  --background-image-marketing-radial: radial-gradient(
+    circle at 50% 120%,
+    rgb(37 99 235 / 35%),
+    transparent 48%
+  );
+  /* Shadcn semantic aliases. Do not reuse --accent here: Kitland uses that
+   * name for its lime brand accent, whereas Shadcn uses it as a surface. */
+  --font-sans: var(--font-ui);
+  --font-heading: var(--font-display);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@utility sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-@utility not-sr-only {
-  position: static;
-  width: auto;
-  height: auto;
-  padding: 0;
-  margin: 0;
-  overflow: visible;
-  clip: auto;
-  white-space: normal;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 html {
@@ -80,74 +130,279 @@ html {
   }
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: Inter, system-ui, sans-serif;
-  color: #edeff3;
-  background: #0b0c10;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+summary::-webkit-details-marker {
+  display: none;
 }
 
-.font-display {
-  font-family: var(--font-display);
-}
-
-.font-mono {
-  font-family: var(--font-mono);
-}
-
-.font-ui {
-  font-family: var(--font-ui);
-}
-
-#root {
-  min-height: 100vh;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button {
-  font: inherit;
-  cursor: pointer;
-  border: none;
-  background: none;
-  padding: 0;
-  color: inherit;
-}
-
-img {
-  display: block;
-  max-width: 100%;
-}
-
-:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-/* Marquee for tool rail */
-@keyframes kitland-marquee {
+@keyframes marketing-fade-up {
   from {
-    transform: translateX(0);
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
   }
   to {
-    transform: translateX(-50%);
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
-.kitland-marquee-track {
-  display: flex;
-  width: max-content;
-  animation: kitland-marquee 40s linear infinite;
+@keyframes marketing-highlight-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .kitland-marquee-track {
-    animation: none;
+@keyframes marketing-workbench-in {
+  from {
+    opacity: 0.7;
+    transform: translate3d(0, 14px, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes marketing-input-ready {
+  0%,
+  100% {
+    border-color: var(--color-marketing-border-recessed);
+  }
+  45% {
+    border-color: var(--color-marketing-primary-light);
+    box-shadow: inset 0 0 0 1px rgb(96 165 250 / 18%);
+  }
+}
+
+@keyframes marketing-transform-run {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  45% {
+    transform: translate3d(7px, 0, 0);
+  }
+}
+
+@keyframes marketing-output-ready {
+  0%,
+  100% {
+    border-color: var(--color-marketing-border-recessed);
+  }
+  45% {
+    border-color: var(--color-marketing-success-border);
+    background-color: rgb(16 38 25 / 58%);
+  }
+}
+
+@keyframes marketing-success-ready {
+  0% {
+    color: var(--color-marketing-text-strong);
+  }
+  50% {
+    color: var(--color-marketing-accent);
+  }
+  100% {
+    color: var(--color-marketing-text-strong);
+  }
+}
+
+@keyframes marketing-reveal-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes marketing-reveal-scale {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes marketing-counter-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-hero-copy {
+    animation: marketing-fade-up 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-hero-highlight {
+    animation: marketing-highlight-in 360ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-workbench {
+    animation: marketing-workbench-in 360ms 180ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-stage-input {
+    animation: marketing-input-ready 560ms 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-stage-transform {
+    animation: marketing-transform-run 420ms 860ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-stage-output {
+    animation: marketing-output-ready 620ms 1120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-stage-success {
+    animation: marketing-success-ready 520ms 1540ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  /* ---- Scroll-reveal: hidden by default, animate on [data-revealed] ---- */
+  .marketing-reveal {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+
+  .marketing-reveal[data-revealed] {
+    animation: marketing-reveal-up 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-reveal-card {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.97);
+  }
+
+  .marketing-reveal-card[data-revealed] {
+    animation: marketing-reveal-scale 440ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-reveal-counter {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+
+  .marketing-reveal-counter[data-revealed] {
+    animation: marketing-counter-up 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Stagger delays for children — apply marketing-reveal-stagger-N as additional classes */
+  .marketing-reveal-stagger-1[data-revealed] {
+    animation-delay: 60ms;
+  }
+  .marketing-reveal-stagger-2[data-revealed] {
+    animation-delay: 120ms;
+  }
+  .marketing-reveal-stagger-3[data-revealed] {
+    animation-delay: 180ms;
+  }
+  .marketing-reveal-stagger-4[data-revealed] {
+    animation-delay: 240ms;
+  }
+  .marketing-reveal-stagger-5[data-revealed] {
+    animation-delay: 300ms;
+  }
+  .marketing-reveal-stagger-6[data-revealed] {
+    animation-delay: 360ms;
+  }
+  .marketing-reveal-stagger-7[data-revealed] {
+    animation-delay: 420ms;
+  }
+  .marketing-reveal-stagger-8[data-revealed] {
+    animation-delay: 480ms;
+  }
+
+  @keyframes marketing-pulse-glow {
+    0%,
+    100% {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.65;
+      transform: scale(1.04);
+    }
+  }
+
+  .marketing-glow-pulse {
+    animation: marketing-pulse-glow 6s ease-in-out infinite;
+  }
+
+  .marketing-glow-pulse-delayed {
+    animation: marketing-pulse-glow 6s ease-in-out infinite;
+    animation-delay: 3s;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .marketing-action-arrow {
+    transform: translate3d(3px, 0, 0);
+  }
+}
+
+/* Semantic variables consumed by the generated Shadcn components. Values are
+ * aliases rather than a parallel palette, so the existing light/dark toggle
+ * updates both custom layout styles and Shadcn controls together. */
+:root,
+:root[data-theme="light"] {
+  --background: var(--bg);
+  --foreground: var(--on-surface);
+  --card: var(--surface);
+  --card-foreground: var(--on-surface);
+  --popover: var(--surface);
+  --popover-foreground: var(--on-surface);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-low);
+  --secondary-foreground: var(--on-surface);
+  --muted: var(--surface-low);
+  --muted-foreground: var(--on-muted);
+  --ui-accent: var(--surface-high);
+  --accent-foreground: var(--on-surface);
+  --destructive: var(--error);
+  --border: var(--outline);
+  --input: var(--outline);
+  --ring: var(--primary);
+  --radius: 0.625rem;
+  --sidebar: var(--bg-elevated);
+  --sidebar-foreground: var(--on-surface);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--surface-low);
+  --sidebar-accent-foreground: var(--on-surface);
+  --sidebar-border: var(--outline);
+  --sidebar-ring: var(--primary);
+}
+
+:root[data-theme="dark"] {
+  --primary-foreground: var(--on-primary);
+  --sidebar-primary-foreground: var(--on-primary);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
   }
 }

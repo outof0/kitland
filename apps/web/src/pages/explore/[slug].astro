@@ -1,0 +1,109 @@
+---
+import { listWebAvailableTools } from "@/lib/release-scope";
+import type { ToolDefinition } from "@kitland/tools";
+import ToolSeoGuide from "@/components/seo/ToolSeoGuide.astro";
+import {
+  requireToolSeoContent,
+  type ToolSeoContent,
+} from "@/data/toolSeo";
+import { ToolWorkspaceIsland } from "@/islands/ToolWorkspaceIsland";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+type Props = {
+  tool: ToolDefinition;
+  content: ToolSeoContent;
+};
+
+export function getStaticPaths() {
+  return listWebAvailableTools().map((tool) => ({
+    params: { slug: tool.slug },
+    props: { tool, content: requireToolSeoContent(tool) },
+  }));
+}
+
+const { tool, content } = Astro.props;
+const canonicalPath = `/explore/${tool.slug}`;
+const canonicalUrl = new URL(canonicalPath, Astro.site).toString();
+const faqs = content.faqs.map((faq) => ({
+  "@type": "Question",
+  name: faq.question,
+  acceptedAnswer: {
+    "@type": "Answer",
+    text: faq.answer,
+  },
+}));
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: tool.name,
+    description: tool.description,
+    url: canonicalUrl,
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Any",
+    browserRequirements: "Requires JavaScript for the interactive tool workspace.",
+    isAccessibleForFree: true,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Kitland",
+        item: "https://kitland.dev/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Explore",
+        item: "https://kitland.dev/explore",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: tool.name,
+        item: canonicalUrl,
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs,
+  },
+];
+---
+
+<BaseLayout
+  title={`${tool.name} — Tools out. Work on. | Kitland`}
+  description={tool.description}
+  canonicalPath={canonicalPath}
+  socialImageAlt={`Kitland ${tool.name} — Tools out. Work on.`}
+  structuredData={structuredData}
+>
+  <!--
+    Tool renderers are route-loaded client chunks. The static fallback keeps a
+    visible, crawlable h1 without asking React SSR to emit streaming scripts for
+    a lazy component; the full SEO guide below remains canonical static HTML.
+  -->
+  <ToolWorkspaceIsland slug={tool.slug} client:only="react" transition:persist="kitland-workspace">
+    <section
+      slot="fallback"
+      class="min-h-dvh bg-bg font-ui text-on-surface"
+      aria-labelledby={`${tool.slug}-fallback-title`}
+    >
+      <h1
+        id={`${tool.slug}-fallback-title`}
+        class="m-0 px-6 py-5 font-display text-2xl font-bold tracking-tight text-on-surface"
+      >
+        {tool.shortName ?? tool.name}
+      </h1>
+      <p class="sr-only">{tool.description}</p>
+    </section>
+  </ToolWorkspaceIsland>
+  <div data-kitland-after-tool>
+    <ToolSeoGuide tool={tool} content={content} />
+  </div>
+</BaseLayout>

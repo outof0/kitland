@@ -1,0 +1,12 @@
+# Default ownership. More specific paths document the review domain even while
+# Kitland has a single maintainer; add owners here before delegating releases.
+* @outof0
+
+/.github/ @outof0
+/packages/core/ @outof0
+/packages/tool-catalog/ @outof0
+/apps/web/ @outof0
+/apps/browser-extension/ @outof0
+/apps/vscode-extension/ @outof0
+/docs/architecture/ @outof0
+/SECURITY.md @outof0

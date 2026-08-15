@@ -1,0 +1,5660 @@
+[
+  {
+    "name": "kitland_aes_decrypt",
+    "title": "AES Decrypt",
+    "description": "Decrypt a v1 Base64 packet using AES-256-GCM with the corresponding 256-bit key.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packet", "keyHex"],
+      "properties": {
+        "packet": {
+          "type": "string",
+          "description": "v1 Base64 ciphertext packet to decrypt."
+        },
+        "keyHex": {
+          "type": "string",
+          "description": "64-character hexadecimal key (32 bytes / 256 bits)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["plaintext"],
+          "properties": {
+            "plaintext": {
+              "type": "string",
+              "description": "Decrypted UTF-8 plaintext."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_aes_encrypt",
+    "title": "AES Encrypt",
+    "description": "Encrypt plaintext using AES-256-GCM into a self-contained Base64 packet.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plaintext", "keyHex"],
+      "properties": {
+        "plaintext": {
+          "type": "string",
+          "description": "UTF-8 plaintext to encrypt."
+        },
+        "keyHex": {
+          "type": "string",
+          "description": "64-character hexadecimal key (32 bytes / 256 bits)."
+        },
+        "nonceHex": {
+          "type": "string",
+          "description": "Optional 24-character hex nonce (12 bytes). Auto-generated if omitted."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["packet"],
+          "properties": {
+            "packet": {
+              "type": "string",
+              "description": "v1 Base64 ciphertext packet."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_age_calculate",
+    "title": "Age Calculator",
+    "description": "Calculate exact age breakdown (years, months, days, total days) between dates.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["birthDate"],
+      "properties": {
+        "birthDate": {
+          "type": "string",
+          "description": "Birth date in YYYY-MM-DD format."
+        },
+        "referenceDate": {
+          "type": "string",
+          "description": "Optional reference date in YYYY-MM-DD format (default today)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["years", "months", "days", "totalDays"],
+          "properties": {
+            "years": {
+              "type": "integer"
+            },
+            "months": {
+              "type": "integer"
+            },
+            "days": {
+              "type": "integer"
+            },
+            "totalDays": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_base64_decode",
+    "title": "Base64 Decode",
+    "description": "Decode standard or URL-safe Base64 to UTF-8 text.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        },
+        "urlSafe": {
+          "type": "boolean",
+          "description": "When true, use or expect URL-safe Base64 alphabet (- and _)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "format"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed string output."
+            },
+            "format": {
+              "type": "string",
+              "enum": ["standard", "url-safe"],
+              "description": "Format variant produced or decoded."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_base64_encode",
+    "title": "Base64 Encode",
+    "description": "Encode UTF-8 text to standard or URL-safe Base64.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        },
+        "urlSafe": {
+          "type": "boolean",
+          "description": "When true, use or expect URL-safe Base64 alphabet (- and _)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "format"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed string output."
+            },
+            "format": {
+              "type": "string",
+              "enum": ["standard", "url-safe"],
+              "description": "Format variant produced or decoded."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_basic_auth_decode",
+    "title": "Basic Auth Decode",
+    "description": "Decode an HTTP Basic Authorization header into username and password credentials.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["username", "password"],
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_basic_auth_encode",
+    "title": "Basic Auth Encode",
+    "description": "Encode username and password credentials into an HTTP Basic Authorization header.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["username", "password"],
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "Basic Auth username."
+        },
+        "password": {
+          "type": "string",
+          "description": "Basic Auth password."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["header"],
+          "properties": {
+            "header": {
+              "type": "string",
+              "description": "Authorization: Basic header value."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_bcrypt_hash",
+    "title": "Bcrypt Hash",
+    "description": "Create a salted bcrypt password hash with configurable cost factor.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["password"],
+      "properties": {
+        "password": {
+          "type": "string",
+          "description": "Password to hash (up to 72 UTF-8 bytes)."
+        },
+        "cost": {
+          "type": "integer",
+          "minimum": 4,
+          "maximum": 14,
+          "description": "Work factor / cost (default 10)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["hash", "cost"],
+          "properties": {
+            "hash": {
+              "type": "string",
+              "description": "Generated bcrypt hash string."
+            },
+            "cost": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_bcrypt_verify",
+    "title": "Bcrypt Verify",
+    "description": "Verify a password against a bcrypt hash string.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["password", "hash"],
+      "properties": {
+        "password": {
+          "type": "string",
+          "description": "Password plaintext to verify."
+        },
+        "hash": {
+          "type": "string",
+          "description": "Bcrypt hash string to compare against."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["match"],
+          "properties": {
+            "match": {
+              "type": "boolean",
+              "description": "True if password matches the hash."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_beautify_code",
+    "title": "Beautify Code",
+    "description": "Format and pretty-print source code (JSON, HTML, XML, CSS, JS, SQL).",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Source code to beautify/format."
+        },
+        "language": {
+          "type": "string",
+          "enum": ["auto", "json", "javascript", "html", "xml", "css", "sql"],
+          "description": "Code language (default 'auto')."
+        },
+        "indent": {
+          "type": "integer",
+          "enum": [2, 4],
+          "description": "Indentation spaces (2 or 4, default 2)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "detectedLanguage"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Formatted/minified code output."
+            },
+            "detectedLanguage": {
+              "type": "string",
+              "description": "Language applied or detected."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_binary_text_decode",
+    "title": "Binary Text Decode",
+    "description": "Decode 8-bit binary strings back to UTF-8 text.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_binary_text_encode",
+    "title": "Binary Text Encode",
+    "description": "Convert UTF-8 text to 8-bit binary strings.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_case_convert",
+    "title": "Case Converter",
+    "description": "Convert text between camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, Title Case, and Sentence case.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input", "targetCase"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text to convert case."
+        },
+        "targetCase": {
+          "type": "string",
+          "enum": ["camel", "pascal", "snake", "kebab", "constant", "title", "sentence"],
+          "description": "Target naming convention."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "targetCase"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Case-converted text."
+            },
+            "targetCase": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_color_convert",
+    "title": "Color Converter",
+    "description": "Convert CSS colors between hex, rgb(), and hsl() notations with RGB channels.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["hex", "rgb", "hsl", "r", "g", "b"],
+          "properties": {
+            "hex": {
+              "type": "string"
+            },
+            "rgb": {
+              "type": "string"
+            },
+            "hsl": {
+              "type": "string"
+            },
+            "r": {
+              "type": "integer"
+            },
+            "g": {
+              "type": "integer"
+            },
+            "b": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_cron_parse",
+    "title": "Cron Parser",
+    "description": "Explain Unix 5-field cron schedules and preview next scheduled execution times.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expression"],
+      "properties": {
+        "expression": {
+          "type": "string",
+          "description": "Five-field Unix cron expression (e.g. '*/5 * * * *')."
+        },
+        "nextRunsCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "description": "Number of upcoming executions to compute (default 5)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["expression", "description", "nextRuns"],
+          "properties": {
+            "expression": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "nextRuns": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_curl_to_fetch",
+    "title": "cURL to Fetch Converter",
+    "description": "Convert a cURL command into equivalent JavaScript fetch() code.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_data_size_convert",
+    "title": "Data Size Converter",
+    "description": "Convert data sizes across SI decimal (KB, MB, GB, TB) and binary (KiB, MiB, GiB, TiB) units.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "fromUnit"],
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "Data size quantity."
+        },
+        "fromUnit": {
+          "type": "string",
+          "enum": ["B", "KB", "MB", "GB", "TB", "KiB", "MiB", "GiB", "TiB"],
+          "description": "Source unit."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bytes", "si", "binary"],
+          "properties": {
+            "bytes": {
+              "type": "number"
+            },
+            "si": {
+              "type": "string"
+            },
+            "binary": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_date_add",
+    "title": "Date Add Calculator",
+    "description": "Add or subtract a number of days to/from a calendar date (YYYY-MM-DD).",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "days"],
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "Base date in YYYY-MM-DD format."
+        },
+        "days": {
+          "type": "integer",
+          "description": "Number of days to add (positive) or subtract (negative)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["date", "days"],
+          "properties": {
+            "date": {
+              "type": "string",
+              "description": "Resulting date in YYYY-MM-DD format."
+            },
+            "days": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_date_diff",
+    "title": "Date Difference Calculator",
+    "description": "Calculate the exact day difference between two calendar dates (YYYY-MM-DD).",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fromDate", "toDate"],
+      "properties": {
+        "fromDate": {
+          "type": "string",
+          "description": "Start date in YYYY-MM-DD format."
+        },
+        "toDate": {
+          "type": "string",
+          "description": "End date in YYYY-MM-DD format."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["days", "from", "to"],
+          "properties": {
+            "days": {
+              "type": "integer",
+              "description": "Difference in days (positive or negative)."
+            },
+            "from": {
+              "type": "string"
+            },
+            "to": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_dedupe_lines",
+    "title": "Dedupe Lines",
+    "description": "Remove duplicate lines while preserving first-seen order and line endings.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Lines of text to deduplicate."
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["exact", "trim"],
+          "description": "Comparison mode: 'exact' match or 'trim' whitespace (default 'exact')."
+        },
+        "caseSensitive": {
+          "type": "boolean",
+          "description": "Case-sensitive uniqueness (default true)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_duration_format",
+    "title": "Duration Formatter",
+    "description": "Format a second count into human-readable days, hours, minutes, and seconds.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seconds"],
+      "properties": {
+        "seconds": {
+          "type": "number",
+          "description": "Duration in seconds."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["seconds", "formatted"],
+          "properties": {
+            "seconds": {
+              "type": "number"
+            },
+            "formatted": {
+              "type": "string",
+              "description": "Formatted duration string (e.g. '1d 2h 3m 4s')."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_fetch_to_curl",
+    "title": "Fetch to cURL Converter",
+    "description": "Convert JavaScript fetch() code into an equivalent cURL command line.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_hex_text_decode",
+    "title": "Hex Text Decode",
+    "description": "Decode hexadecimal byte notation back to UTF-8 text.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_hex_text_encode",
+    "title": "Hex Text Encode",
+    "description": "Convert UTF-8 text to hexadecimal byte notation.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "UTF-8 text to encode as hex bytes."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["spaced", "compact"],
+          "description": "Format variant: 'spaced' (e.g. 48 65 6c) or 'compact' (48656c)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "format"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Hexadecimal byte representation."
+            },
+            "format": {
+              "type": "string",
+              "enum": ["spaced", "compact"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_hmac_generate",
+    "title": "HMAC Generator",
+    "description": "Generate HMAC-SHA-256 signatures from a message and secret key.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["message", "secret"],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Message content to sign."
+        },
+        "secret": {
+          "type": "string",
+          "description": "Secret key for HMAC signature."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["digest", "algorithm"],
+          "properties": {
+            "digest": {
+              "type": "string",
+              "description": "Hexadecimal HMAC-SHA-256 signature."
+            },
+            "algorithm": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_html_entities_decode",
+    "title": "HTML Entities Decode",
+    "description": "Decode HTML character entities to standard characters.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_html_entities_encode",
+    "title": "HTML Entities Encode",
+    "description": "Encode special characters to HTML character entities.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to encode into HTML entities."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["named", "decimal", "hexadecimal"],
+          "description": "Entity format: 'named' (&amp;), 'decimal' (&#38;), or 'hexadecimal' (&#x26;)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "format"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Encoded HTML entities string."
+            },
+            "format": {
+              "type": "string",
+              "enum": ["named", "decimal", "hexadecimal"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_html_to_jsx",
+    "title": "HTML to JSX",
+    "description": "Convert HTML markup into JSX format with attribute transformations.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_http_status_lookup",
+    "title": "HTTP Status Code Lookup",
+    "description": "Look up and search standard HTTP response status codes and RFC specifications.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query (status code, name, or description)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["matches"],
+          "properties": {
+            "matches": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "code",
+                  "name",
+                  "category",
+                  "description",
+                  "detail",
+                  "spec",
+                  "cacheable",
+                  "hasResponseBody"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "detail": {
+                    "type": "string"
+                  },
+                  "spec": {
+                    "type": "string"
+                  },
+                  "cacheable": {},
+                  "hasResponseBody": {},
+                  "commonHeaders": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_ip_subnet_calculate",
+    "title": "IP Subnet Calculator",
+    "description": "Calculate IPv4 subnet addresses, CIDR ranges, network/broadcast addresses, and host counts.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cidr",
+            "networkCidr",
+            "ipAddress",
+            "prefixLength",
+            "networkAddress",
+            "broadcastAddress",
+            "subnetMask",
+            "wildcardMask",
+            "firstHost",
+            "lastHost",
+            "totalAddresses",
+            "usableHosts"
+          ],
+          "properties": {
+            "cidr": {
+              "type": "string"
+            },
+            "networkCidr": {
+              "type": "string"
+            },
+            "ipAddress": {
+              "type": "string"
+            },
+            "prefixLength": {
+              "type": "integer"
+            },
+            "networkAddress": {
+              "type": "string"
+            },
+            "broadcastAddress": {
+              "type": "string"
+            },
+            "subnetMask": {
+              "type": "string"
+            },
+            "wildcardMask": {
+              "type": "string"
+            },
+            "firstHost": {
+              "type": "string"
+            },
+            "lastHost": {
+              "type": "string"
+            },
+            "totalAddresses": {
+              "type": "string"
+            },
+            "usableHosts": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_json_diff",
+    "title": "JSON Diff",
+    "description": "Compare two JSON documents and produce structured differences.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["original", "modified"],
+      "properties": {
+        "original": {
+          "type": "string",
+          "description": "Original JSON document (JSON string)."
+        },
+        "modified": {
+          "type": "string",
+          "description": "Modified JSON document (JSON string)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entries", "summary"],
+          "properties": {
+            "entries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["path", "operation"],
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "operation": {
+                    "type": "string",
+                    "enum": ["added", "removed", "changed"]
+                  },
+                  "before": {},
+                  "after": {}
+                }
+              }
+            },
+            "summary": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["added", "removed", "changed", "total"],
+              "properties": {
+                "added": {
+                  "type": "integer"
+                },
+                "removed": {
+                  "type": "integer"
+                },
+                "changed": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_json_escape",
+    "title": "JSON Escape",
+    "description": "Escape plain text into a JSON string literal with quotes.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_json_inspect",
+    "title": "JSON Inspect",
+    "description": "Inspect JSON structure, calculate node counts and depth, and format the output.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "JSON string to inspect."
+        },
+        "indent": {
+          "type": "integer",
+          "enum": [2, 4],
+          "description": "Indent spaces (default 2)."
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["beautify", "minify"],
+          "description": "Formatting mode."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "formatted",
+            "rootType",
+            "totalValues",
+            "objectCount",
+            "arrayCount",
+            "stringCount",
+            "numberCount",
+            "booleanCount",
+            "nullCount",
+            "maxDepth"
+          ],
+          "properties": {
+            "formatted": {
+              "type": "string"
+            },
+            "rootType": {
+              "type": "string",
+              "enum": ["object", "array", "string", "number", "boolean", "null"]
+            },
+            "totalValues": {
+              "type": "integer"
+            },
+            "objectCount": {
+              "type": "integer"
+            },
+            "arrayCount": {
+              "type": "integer"
+            },
+            "stringCount": {
+              "type": "integer"
+            },
+            "numberCount": {
+              "type": "integer"
+            },
+            "booleanCount": {
+              "type": "integer"
+            },
+            "nullCount": {
+              "type": "integer"
+            },
+            "maxDepth": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_json_repair",
+    "title": "JSON Repair",
+    "description": "Fix common JSON syntax errors (trailing commas, unquoted keys, comments, single quotes).",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "repaired"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Repaired JSON string."
+            },
+            "repaired": {
+              "type": "boolean",
+              "description": "True if modifications were made to repair JSON."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_json_to_csv",
+    "title": "JSON to CSV",
+    "description": "Convert JSON array or record to RFC 4180 CSV.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "JSON array of objects or single JSON object."
+        },
+        "escapeFormulae": {
+          "type": "boolean",
+          "description": "Prevent formula interpretation in spreadsheets (default true)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_json_to_js_const",
+    "title": "JSON to JavaScript Const",
+    "description": "Convert JSON to a declared JavaScript constant.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "JSON string to convert to JavaScript const."
+        },
+        "name": {
+          "type": "string",
+          "description": "Constant identifier name (default 'value')."
+        },
+        "indent": {
+          "type": "integer",
+          "enum": [2, 4],
+          "description": "Indent spaces (default 2)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_json_to_toml",
+    "title": "JSON to TOML",
+    "description": "Convert JSON object to TOML format.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_json_to_typescript",
+    "title": "JSON to TypeScript",
+    "description": "Generate TypeScript type definitions from JSON data.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "JSON string to generate TypeScript types from."
+        },
+        "typeName": {
+          "type": "string",
+          "description": "Root type identifier (default 'Root')."
+        },
+        "indent": {
+          "type": "integer",
+          "enum": [2, 4],
+          "description": "Indent spaces (default 2)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_json_to_yaml",
+    "title": "JSON to YAML",
+    "description": "Convert JSON to YAML format.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_json_unescape",
+    "title": "JSON Unescape",
+    "description": "Unescape a JSON string literal back to raw text.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_jwt_decode",
+    "title": "JWT Decoder",
+    "description": "Decode and inspect JSON Web Token header and payload claims.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token"],
+      "properties": {
+        "token": {
+          "type": "string",
+          "description": "JSON Web Token (JWT) string."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["header", "payload", "signature", "expiresAt", "issuedAt"],
+          "properties": {
+            "header": {
+              "type": "object",
+              "description": "Decoded JWT header."
+            },
+            "payload": {
+              "type": "object",
+              "description": "Decoded JWT claims payload."
+            },
+            "signature": {
+              "type": "string",
+              "description": "Raw signature segment."
+            },
+            "expiresAt": {
+              "type": ["string", "null"],
+              "description": "ISO timestamp of expiration (exp claim)."
+            },
+            "issuedAt": {
+              "type": ["string", "null"],
+              "description": "ISO timestamp of issuance (iat claim)."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_lorem_ipsum_generate",
+    "title": "Lorem Ipsum Generator",
+    "description": "Generate deterministic placeholder text by paragraphs, words, or list items.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "description": "Quantity (default 1)."
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["paragraphs", "words", "bytes", "list-items"],
+          "description": "Unit of generation (default 'paragraphs')."
+        },
+        "startWithClassic": {
+          "type": "boolean",
+          "description": "Start with classic 'Lorem ipsum...' opening (default true)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "amount", "unit"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Generated placeholder text."
+            },
+            "amount": {
+              "type": "integer"
+            },
+            "unit": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_markdown_render",
+    "title": "Markdown Render",
+    "description": "Render Markdown into safe HTML and compute document metrics.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["html", "headings", "words", "lines"],
+          "properties": {
+            "html": {
+              "type": "string",
+              "description": "Rendered HTML markup."
+            },
+            "headings": {
+              "type": "integer"
+            },
+            "words": {
+              "type": "integer"
+            },
+            "lines": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_mime_type_lookup",
+    "title": "MIME Types Lookup",
+    "description": "Look up media MIME types, file extensions, compressibility, and RFC categories.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query"],
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "File extension (e.g. '.png' or 'png') or MIME type string."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["query", "kind", "matches"],
+          "properties": {
+            "query": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "matches": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "mime",
+                  "type",
+                  "subtype",
+                  "category",
+                  "extensions",
+                  "description",
+                  "compressible",
+                  "source"
+                ],
+                "properties": {
+                  "mime": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "subtype": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "extensions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "charset": {
+                    "type": "string"
+                  },
+                  "compressible": {
+                    "type": "boolean"
+                  },
+                  "source": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_minify_code",
+    "title": "Minify Code",
+    "description": "Compact and minify source code (JSON, HTML, XML, CSS, JS, SQL).",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Source code to minify/compact."
+        },
+        "language": {
+          "type": "string",
+          "enum": ["auto", "json", "javascript", "html", "xml", "css", "sql"],
+          "description": "Code language (default 'auto')."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "detectedLanguage"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Formatted/minified code output."
+            },
+            "detectedLanguage": {
+              "type": "string",
+              "description": "Language applied or detected."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_mock_data_generate",
+    "title": "Mock Data Generator",
+    "description": "Generate structured fixture records locally for mock API data and testing.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Number of rows (default 5)."
+        },
+        "includeId": {
+          "type": "boolean",
+          "description": "Include unique ID field (default true)."
+        },
+        "includeName": {
+          "type": "boolean",
+          "description": "Include full name field (default true)."
+        },
+        "includeEmail": {
+          "type": "boolean",
+          "description": "Include email address field (default true)."
+        },
+        "includeRole": {
+          "type": "boolean",
+          "description": "Include role field (default true)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["records", "count"],
+          "properties": {
+            "records": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            },
+            "count": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_morse_code_decode",
+    "title": "Morse Code Decode",
+    "description": "Decode ITU Morse code into standard text.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_morse_code_encode",
+    "title": "Morse Code Encode",
+    "description": "Encode text into ITU Morse code dots and dashes.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_nanoid_generate",
+    "title": "NanoID Generator",
+    "description": "Generate compact, secure URL-friendly unique IDs.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "length": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256,
+          "description": "ID length (default 21)."
+        },
+        "alphabet": {
+          "type": "string",
+          "description": "Custom alphabet characters (default URL-safe)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "length"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Generated NanoID string."
+            },
+            "length": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_number_base_convert",
+    "title": "Number Base Converter",
+    "description": "Convert numbers across arbitrary radix bases from base 2 through base 36.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input", "fromBase", "toBase"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Number representation in source base."
+        },
+        "fromBase": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 36,
+          "description": "Source base (2 to 36)."
+        },
+        "toBase": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 36,
+          "description": "Target base (2 to 36)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "fromBase", "toBase"],
+          "properties": {
+            "value": {
+              "type": "string",
+              "description": "Converted number in target base."
+            },
+            "fromBase": {
+              "type": "integer"
+            },
+            "toBase": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_objectid_generate",
+    "title": "ObjectID Generator",
+    "description": "Generate 12-byte MongoDB-compatible ObjectID hexadecimal identifiers.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timestampSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "description": "Unix epoch second timestamp (default current second)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "timestamp", "counter"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "24-character hexadecimal MongoDB ObjectID."
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "ISO timestamp."
+            },
+            "counter": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_password_generate",
+    "title": "Password Generator",
+    "description": "Generate policy-controlled secure passwords locally with cryptographic entropy.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "length": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 128,
+          "description": "Password length (default 16)."
+        },
+        "lowercase": {
+          "type": "boolean",
+          "description": "Include lowercase letters (default true)."
+        },
+        "uppercase": {
+          "type": "boolean",
+          "description": "Include uppercase letters (default true)."
+        },
+        "numbers": {
+          "type": "boolean",
+          "description": "Include numbers (default true)."
+        },
+        "symbols": {
+          "type": "boolean",
+          "description": "Include special symbols (default true)."
+        },
+        "excludeAmbiguous": {
+          "type": "boolean",
+          "description": "Exclude ambiguous characters (0, O, 1, l, I) (default true)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["password", "length"],
+          "properties": {
+            "password": {
+              "type": "string",
+              "description": "Generated secure password."
+            },
+            "length": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_qr_code_validate",
+    "title": "QR Code Payload Validator",
+    "description": "Validate QR code payload length and text viability.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload"],
+      "properties": {
+        "payload": {
+          "type": "string",
+          "description": "Payload text or URL to validate for QR encoding."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["input", "length", "isValid"],
+          "properties": {
+            "input": {
+              "type": "string"
+            },
+            "length": {
+              "type": "integer"
+            },
+            "isValid": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_random_number_generate",
+    "title": "Random Number Generator",
+    "description": "Generate cryptographically secure random numbers within a bounded range.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "number",
+          "description": "Range minimum (default 0)."
+        },
+        "to": {
+          "type": "number",
+          "description": "Range maximum (default 100)."
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Count of values (default 1)."
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "description": "Decimal places (0 for integers, default 0)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["values", "decimals"],
+          "properties": {
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "decimals": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_random_port_generate",
+    "title": "Random Port Generator",
+    "description": "Pick unique random TCP or UDP port numbers from secure entropy.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Number of ports (default 1)."
+        },
+        "range": {
+          "type": "string",
+          "enum": ["dynamic", "ephemeral", "custom"],
+          "description": "Port range: 'dynamic' (1024-65535), 'ephemeral' (49152-65535), 'custom'."
+        },
+        "protocol": {
+          "type": "string",
+          "enum": ["tcp", "udp"],
+          "description": "Protocol (default 'tcp')."
+        },
+        "min": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Custom range min."
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Custom range max."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ports", "protocol", "min", "max"],
+          "properties": {
+            "ports": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "protocol": {
+              "type": "string",
+              "enum": ["tcp", "udp"]
+            },
+            "min": {
+              "type": "integer"
+            },
+            "max": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_regex_test",
+    "title": "Regex Tester",
+    "description": "Test regular expressions against text and extract capture groups and match indices.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pattern", "text"],
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Regular expression pattern."
+        },
+        "text": {
+          "type": "string",
+          "description": "Input text to search."
+        },
+        "flags": {
+          "type": "string",
+          "description": "RegExp flags (e.g. 'g', 'i', 'm', default 'g')."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["matches", "truncated"],
+          "properties": {
+            "matches": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["value", "index", "end", "captures", "namedCaptures"],
+                "properties": {
+                  "value": {
+                    "type": "string"
+                  },
+                  "index": {
+                    "type": "integer"
+                  },
+                  "end": {
+                    "type": "integer"
+                  },
+                  "captures": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["index", "value"],
+                      "properties": {
+                        "index": {
+                          "type": "integer"
+                        },
+                        "value": {
+                          "type": ["string", "null"]
+                        }
+                      }
+                    }
+                  },
+                  "namedCaptures": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": ["string", "null"]
+                    }
+                  }
+                }
+              }
+            },
+            "truncated": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_rot13_caesar",
+    "title": "ROT13 / Caesar Cipher",
+    "description": "Apply ROT13 or arbitrary Caesar letter shifts to text.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text to shift."
+        },
+        "shift": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 25,
+          "description": "Caesar alphabet shift amount (default 13 for standard ROT13)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "shift"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Ciphered / shifted text output."
+            },
+            "shift": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_rsa_key_pair_generate",
+    "title": "RSA Key Pair Generator",
+    "description": "Generate an RSA key pair in standard PEM format locally with Web Crypto.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "modulusLength": {
+          "type": "integer",
+          "enum": [2048, 4096],
+          "description": "RSA key modulus length in bits (2048 or 4096, default 2048)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["publicKey", "privateKey", "modulusLength"],
+          "properties": {
+            "publicKey": {
+              "type": "string",
+              "description": "PEM-encoded public key."
+            },
+            "privateKey": {
+              "type": "string",
+              "description": "PEM-encoded PKCS#8 private key."
+            },
+            "modulusLength": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_sha_hash",
+    "title": "Hash (SHA-256)",
+    "description": "Compute cryptographic SHA-256 digests locally from UTF-8 text.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "UTF-8 text to hash."
+        },
+        "encoding": {
+          "type": "string",
+          "enum": ["hex", "base64", "base64url"],
+          "description": "Output digest encoding (default 'hex')."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["digest", "algorithm", "encoding"],
+          "properties": {
+            "digest": {
+              "type": "string",
+              "description": "Computed digest hash."
+            },
+            "algorithm": {
+              "type": "string",
+              "description": "Hash algorithm used."
+            },
+            "encoding": {
+              "type": "string",
+              "enum": ["hex", "base64", "base64url"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_sort_lines",
+    "title": "Sort Lines",
+    "description": "Sort lines deterministically with direction, numeric, and case options.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Lines of text to sort."
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["ascending", "descending"],
+          "description": "Sort direction (default 'ascending')."
+        },
+        "caseSensitive": {
+          "type": "boolean",
+          "description": "Case-sensitive ordering (default false)."
+        },
+        "numeric": {
+          "type": "boolean",
+          "description": "Natural numeric sorting (default false)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_split_to_newlines",
+    "title": "Split to Newlines",
+    "description": "Split delimited text (comma, semicolon, whitespace, pipe, custom) into newline-separated lines.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Delimited text to split."
+        },
+        "delimiter": {
+          "type": "string",
+          "enum": ["comma", "semicolon", "whitespace", "pipe", "custom"],
+          "description": "Delimiter type (default 'comma')."
+        },
+        "customDelimiter": {
+          "type": "string",
+          "description": "Custom delimiter string when delimiter is 'custom'."
+        },
+        "trimItems": {
+          "type": "boolean",
+          "description": "Trim whitespace from items (default true)."
+        },
+        "dropEmpty": {
+          "type": "boolean",
+          "description": "Drop empty items (default true)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_sql_format",
+    "title": "SQL Formatter",
+    "description": "Format SQL queries for clean readability.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "SQL query to format."
+        },
+        "indent": {
+          "type": "integer",
+          "enum": [2, 4],
+          "description": "Indent spaces (default 2)."
+        },
+        "keywordCase": {
+          "type": "string",
+          "enum": ["upper", "lower"],
+          "description": "Keyword casing (default 'upper')."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_temperature_convert",
+    "title": "Temperature Converter",
+    "description": "Convert temperature values across Celsius, Fahrenheit, and Kelvin scales.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "fromUnit"],
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "Temperature value to convert."
+        },
+        "fromUnit": {
+          "type": "string",
+          "enum": ["C", "F", "K"],
+          "description": "Source temperature unit."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["celsius", "fahrenheit", "kelvin"],
+          "properties": {
+            "celsius": {
+              "type": "number"
+            },
+            "fahrenheit": {
+              "type": "number"
+            },
+            "kelvin": {
+              "type": "number"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_text_diff",
+    "title": "Text Diff",
+    "description": "Compare two text documents with line-level longest common subsequence diffing.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["original", "modified"],
+      "properties": {
+        "original": {
+          "type": "string",
+          "description": "Original text before changes."
+        },
+        "modified": {
+          "type": "string",
+          "description": "Modified text after changes."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["equal", "added", "removed", "unchanged", "lines"],
+          "properties": {
+            "equal": {
+              "type": "boolean"
+            },
+            "added": {
+              "type": "integer"
+            },
+            "removed": {
+              "type": "integer"
+            },
+            "unchanged": {
+              "type": "integer"
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["kind", "value", "oldLine", "newLine"],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": ["equal", "added", "removed"]
+                  },
+                  "value": {
+                    "type": "string"
+                  },
+                  "oldLine": {
+                    "type": ["integer", "null"]
+                  },
+                  "newLine": {
+                    "type": ["integer", "null"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_text_reverse",
+    "title": "Text Reverser",
+    "description": "Reverse characters, words, or lines with safe Unicode grapheme preservation.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text to reverse."
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["characters", "word-order", "word-characters", "line-order"],
+          "description": "Reversal mode (default 'characters')."
+        },
+        "case": {
+          "type": "string",
+          "enum": ["keep", "upper", "lower"],
+          "description": "Case treatment (default 'keep')."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "mode"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Reversed text output."
+            },
+            "mode": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_text_stats",
+    "title": "Text Stats",
+    "description": "Calculate detailed text metrics (graphemes, words, lines, code points, UTF-8 bytes).",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "graphemes",
+            "codePoints",
+            "words",
+            "lines",
+            "charactersWithWhitespace",
+            "charactersWithoutWhitespace",
+            "utf8Bytes"
+          ],
+          "properties": {
+            "graphemes": {
+              "type": "integer",
+              "description": "Perceived visual characters (grapheme clusters)."
+            },
+            "codePoints": {
+              "type": "integer",
+              "description": "Unicode scalar values."
+            },
+            "words": {
+              "type": "integer",
+              "description": "Word count."
+            },
+            "lines": {
+              "type": "integer",
+              "description": "Logical line count."
+            },
+            "charactersWithWhitespace": {
+              "type": "integer"
+            },
+            "charactersWithoutWhitespace": {
+              "type": "integer"
+            },
+            "utf8Bytes": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_timezone_convert",
+    "title": "Timezone Converter",
+    "description": "Convert datetime strings between fixed standard timezones locally.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["datetime", "sourceZone", "targetZone"],
+      "properties": {
+        "datetime": {
+          "type": "string",
+          "description": "Local ISO datetime (e.g. '2026-08-20T12:00' or '2026-08-20T12:00:00')."
+        },
+        "sourceZone": {
+          "type": "string",
+          "description": "Source timezone ('UTC', 'America/New_York', 'Europe/London', 'Europe/Paris', 'Asia/Tokyo', 'Australia/Sydney')."
+        },
+        "targetZone": {
+          "type": "string",
+          "description": "Target timezone ('UTC', 'America/New_York', 'Europe/London', 'Europe/Paris', 'Asia/Tokyo', 'Australia/Sydney')."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sourceIso", "targetIso", "sourceZone", "targetZone"],
+          "properties": {
+            "sourceIso": {
+              "type": "string"
+            },
+            "targetIso": {
+              "type": "string"
+            },
+            "sourceZone": {
+              "type": "string"
+            },
+            "targetZone": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_token_generate",
+    "title": "Token Generator",
+    "description": "Generate cryptographically secure random secret tokens.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "length": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096,
+          "description": "Token length (default 32)."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["hex", "base64url"],
+          "description": "Token format (default 'hex')."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["token", "length", "format"],
+          "properties": {
+            "token": {
+              "type": "string",
+              "description": "Generated random token."
+            },
+            "length": {
+              "type": "integer"
+            },
+            "format": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_ulid_generate",
+    "title": "ULID Generator",
+    "description": "Generate 128-bit sortable Universally Unique Lexicographically Sortable Identifiers.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timestamp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 281474976710655,
+          "description": "Unix epoch millisecond timestamp (default Date.now())."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ulid", "timestamp"],
+          "properties": {
+            "ulid": {
+              "type": "string",
+              "description": "26-character Crockford Base32 ULID."
+            },
+            "timestamp": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_unicode_decode",
+    "title": "Unicode Decode",
+    "description": "Decode Unicode code points into UTF-8 text.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_unicode_encode",
+    "title": "Unicode Encode",
+    "description": "Convert characters into Unicode code point notation (e.g. U+0048).",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_unix_timestamp_parse",
+    "title": "Unix Timestamp Parser",
+    "description": "Parse a Unix epoch timestamp (seconds or milliseconds) to ISO datetime.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["seconds", "milliseconds", "iso"],
+          "properties": {
+            "seconds": {
+              "type": "string",
+              "description": "Unix timestamp in seconds."
+            },
+            "milliseconds": {
+              "type": "string",
+              "description": "Unix timestamp in milliseconds."
+            },
+            "iso": {
+              "type": "string",
+              "description": "ISO 8601 UTC date string."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_url_decode",
+    "title": "URL Decode",
+    "description": "Decode percent-encoded URL components or full URLs.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text or URL to process."
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["component", "url"],
+          "description": "Scope: 'component' for query params/components, 'url' for full URLs."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "scope"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed URL or encoded string."
+            },
+            "scope": {
+              "type": "string",
+              "enum": ["component", "url"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_url_encode",
+    "title": "URL Encode",
+    "description": "Percent-encode text as a URL component or full URL.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text or URL to process."
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["component", "url"],
+          "description": "Scope: 'component' for query params/components, 'url' for full URLs."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "scope"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed URL or encoded string."
+            },
+            "scope": {
+              "type": "string",
+              "enum": ["component", "url"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_url_parse",
+    "title": "URL Parser",
+    "description": "Parse an absolute URL into its component protocol, host, port, path, and query params.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "href",
+            "origin",
+            "protocol",
+            "host",
+            "hostname",
+            "port",
+            "pathname",
+            "search",
+            "hash",
+            "params"
+          ],
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "origin": {
+              "type": "string"
+            },
+            "protocol": {
+              "type": "string"
+            },
+            "host": {
+              "type": "string"
+            },
+            "hostname": {
+              "type": "string"
+            },
+            "port": {
+              "type": "string"
+            },
+            "pathname": {
+              "type": "string"
+            },
+            "search": {
+              "type": "string"
+            },
+            "hash": {
+              "type": "string"
+            },
+            "params": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "value"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_user_agent_parse",
+    "title": "User Agent Parser",
+    "description": "Parse browser, engine, OS, and device information from a User-Agent header string.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Text content to process."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["browser", "engine", "os", "device"],
+          "properties": {
+            "browser": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "version"],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": ["string", "null"]
+                }
+              }
+            },
+            "engine": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "version"],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": ["string", "null"]
+                }
+              }
+            },
+            "os": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "version"],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": ["string", "null"]
+                }
+              }
+            },
+            "device": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "vendor", "model"],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "vendor": {
+                  "type": ["string", "null"]
+                },
+                "model": {
+                  "type": ["string", "null"]
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_uuid_generate",
+    "title": "UUID Generator",
+    "description": "Generate cryptographically random RFC 4122 Version 4 UUIDs.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "uppercase": {
+          "type": "boolean",
+          "description": "Whether to return uppercase UUID."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["uuid", "version"],
+          "properties": {
+            "uuid": {
+              "type": "string",
+              "description": "Generated canonical UUID v4."
+            },
+            "version": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_xml_format",
+    "title": "XML Formatter",
+    "description": "Validate and format XML markup without external entities.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "XML string to format."
+        },
+        "indent": {
+          "type": "integer",
+          "enum": [2, 4],
+          "description": "Indent spaces (default 2)."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "elementCount", "maxDepth"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Formatted XML output."
+            },
+            "elementCount": {
+              "type": "integer"
+            },
+            "maxDepth": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  },
+  {
+    "name": "kitland_yaml_to_json",
+    "title": "YAML to JSON",
+    "description": "Convert YAML text to formatted JSON.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "YAML text to convert to JSON."
+        },
+        "indent": {
+          "type": "integer",
+          "enum": [2, 4],
+          "description": "JSON indentation spaces."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output"],
+          "properties": {
+            "output": {
+              "type": "string",
+              "description": "Transformed text output."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ok", "error"],
+          "properties": {
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "readOnly": true,
+      "idempotent": true
+    }
+  }
+]

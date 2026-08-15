@@ -1,0 +1,24 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { LandingPage } from "@/components/landing/LandingPage";
+
+const description =
+  "Local-first developer tools for formatting, encoding, and inspecting data on Web, Extension, VS Code, and MCP. No account or payload upload required.";
+---
+
+<BaseLayout
+  title="Kitland — Developer tools that keep data local"
+  description={description}
+  canonicalPath="/"
+  socialImageAlt="Kitland local-first Base64 workspace preview"
+  structuredData={{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Kitland",
+    url: "https://kitland.dev/",
+    description,
+  }}
+>
+  <LandingPage />
+  <script src="../scripts/scroll-reveal.ts"></script>
+</BaseLayout>

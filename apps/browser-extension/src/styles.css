@@ -1,0 +1,8 @@
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/manrope/wght.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
+@import "tailwindcss";
+@import "@kitland/ui/workspace.css";
+
+@source "../../../packages/ui/src";
+@source "./**/*.{html,ts,tsx}";

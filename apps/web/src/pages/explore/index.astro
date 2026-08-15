@@ -1,0 +1,290 @@
+---
+import { Logo } from "@/components/Logo";
+import { CATALOG_FAMILIES } from "@/data/catalog";
+import { listWebTools } from "@/lib/release-scope";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const tools = listWebTools();
+const availableToolCount = tools.filter((tool) => tool.status === "available").length;
+const plannedToolCount = tools.length - availableToolCount;
+const description =
+  "Explore Kitland's 64 local-first developer tools. Open every available tool or browse the committed roadmap.";
+const normalizedSearchValue = (value: string) => value.toLocaleLowerCase();
+const familyGroups = CATALOG_FAMILIES.map((family) => ({
+  ...family,
+  tools: tools.filter((tool) => tool.family === family.id),
+})).filter((family) => family.tools.length > 0);
+---
+
+<BaseLayout
+  title="Explore developer tools — Kitland"
+  description={description}
+  canonicalPath="/explore"
+  structuredData={{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Kitland developer tool catalog",
+    url: "https://kitland.dev/explore",
+    description,
+  }}
+>
+  <div class="min-h-screen overflow-x-hidden bg-marketing-canvas text-marketing-foreground">
+    <a
+      href="#explore-main"
+      class="sr-only fixed left-4 top-4 z-50 min-h-11 rounded-md bg-marketing-primary px-4 py-3 text-sm font-semibold text-white focus:not-sr-only"
+    >
+      Skip to tool catalog
+    </a>
+
+    <header class="border-b border-marketing-border bg-marketing-canvas">
+      <nav
+        class="mx-auto flex min-h-16 w-full max-w-[1248px] items-center justify-between gap-3 px-4 sm:px-8"
+        aria-label="Explore"
+      >
+        <a href="/" aria-label="Kitland home" class="flex min-h-11 items-center rounded-sm">
+          <Logo variant="reverse" className="h-9" />
+        </a>
+        <div class="flex items-center gap-3">
+          <a
+            href="/"
+            class="relative flex min-h-11 items-center rounded-sm px-2 text-sm font-medium text-marketing-text-secondary transition-colors hover:text-marketing-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-marketing-primary-light after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-marketing-primary after:transition-transform motion-safe:hover:after:scale-x-100"
+          >Home</a>
+          <a
+            href="#tool-catalog"
+            class="inline-flex h-10 min-h-11 items-center justify-center gap-2 rounded-md border border-marketing-border-strong bg-marketing-surface px-3 text-sm font-semibold text-marketing-foreground transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out hover:border-marketing-border-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marketing-primary-light motion-safe:hover:-translate-y-px motion-safe:active:scale-[0.985] sm:px-4"
+          >
+            Browse tools
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="explore-main" tabindex="-1">
+      <section class="relative isolate overflow-hidden border-b border-marketing-border px-4 py-16 sm:px-8 lg:py-24">
+        <div class="pointer-events-none absolute inset-0 -z-10 bg-marketing-grid bg-[length:40px_40px] opacity-40"></div>
+        <div class="pointer-events-none absolute inset-0 -z-10 bg-marketing-radial"></div>
+        <div class="mx-auto grid w-full max-w-[1248px] gap-12 lg:grid-cols-[548px_minmax(0,1fr)] lg:items-end">
+          <div class="min-w-0">
+            <p class="font-mono text-xs font-semibold tracking-[0.18em] text-marketing-primary-light">
+              EXPLORE THE LOCAL-FIRST TOOLSET
+            </p>
+            <h1 class="mt-5 max-w-4xl break-words font-display text-5xl font-extrabold leading-[0.99] tracking-[-0.05em] text-white sm:text-6xl lg:text-7xl">
+              A complete local workbench,
+              <span class="text-marketing-primary-light">
+                with every status made explicit.
+              </span>
+            </h1>
+            <p class="mt-6 max-w-2xl text-base leading-7 text-marketing-text-secondary sm:text-lg">
+              Find a focused utility, see its delivery status, and open every tool available in
+              this deployment. The catalog is the calm front door to all 64 Kitland workflows.
+            </p>
+          </div>
+
+          <aside class="grid min-w-0 grid-cols-3 gap-px overflow-hidden rounded-xl border border-marketing-border bg-marketing-border shadow-marketing-preview" aria-label="Catalog summary">
+            <div class="min-w-0 bg-marketing-raised p-4 sm:p-5">
+              <p class="font-display text-4xl font-extrabold text-white">{tools.length}</p>
+              <p class="mt-1 font-mono text-[10px] tracking-wide text-marketing-text-muted">TOOLS</p>
+            </div>
+            <div class="min-w-0 bg-marketing-raised p-4 sm:p-5">
+              <p class="font-display text-4xl font-extrabold text-marketing-success">{availableToolCount}</p>
+              <p class="mt-1 font-mono text-[10px] tracking-wide text-marketing-text-muted">AVAILABLE</p>
+            </div>
+            <div class="min-w-0 bg-marketing-raised p-4 sm:p-5">
+              <p class="font-display text-4xl font-extrabold text-marketing-text-cool">{plannedToolCount}</p>
+              <p class="mt-1 font-mono text-[10px] tracking-wide text-marketing-text-muted">PLANNED</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="tool-catalog" class="px-4 py-12 sm:px-8 lg:py-16" aria-labelledby="catalog-heading">
+        <div class="mx-auto w-full max-w-[1248px]">
+          <div class="max-w-3xl">
+            <p class="font-mono text-xs font-semibold tracking-[0.18em] text-marketing-accent">ALL TOOLS</p>
+            <h2 id="catalog-heading" class="mt-4 font-display text-4xl font-extrabold tracking-[-0.04em] text-white sm:text-5xl">
+              Pick the smallest tool that gets the job done.
+            </h2>
+            <p class="mt-4 text-base leading-7 text-marketing-text-secondary">
+              Search all 64 tools, then filter by family or availability. Available means the tool
+              opens a working local editor now. Planned tools remain visible so the product scope
+              stays explicit.
+            </p>
+          </div>
+
+          <form class="mt-10 grid gap-4 rounded-xl border border-marketing-border bg-marketing-raised p-4 sm:p-5" data-explore-filters>
+            <fieldset class="grid min-w-0 gap-4 border-0 p-0 sm:grid-cols-2">
+              <legend class="sr-only">Find tools</legend>
+              <div class="min-w-0">
+                <label for="catalog-search" class="font-mono text-[11px] font-semibold tracking-wide text-marketing-text-cool">
+                  SEARCH ALL TOOLS
+                </label>
+                <input
+                  id="catalog-search"
+                  data-explore-search
+                  type="search"
+                  autocomplete="off"
+                  placeholder="Try JSON, encode, regex, timestamp…"
+                  class="mt-2 block min-h-11 w-full min-w-0 rounded-md border border-marketing-border-card bg-marketing-recessed px-3 text-base text-marketing-foreground"
+                />
+              </div>
+              <div class="min-w-0">
+                <label for="catalog-family" class="font-mono text-[11px] font-semibold tracking-wide text-marketing-text-cool">
+                  TOOL FAMILY
+                </label>
+                <select
+                  id="catalog-family"
+                  data-explore-family
+                  class="mt-2 block min-h-11 w-full min-w-0 rounded-md border border-marketing-border-card bg-marketing-recessed px-3 text-sm text-marketing-foreground"
+                >
+                  <option value="all">All six families</option>
+                  {
+                    familyGroups.map((family) => (
+                      <option value={family.id}>{family.name}</option>
+                    ))
+                  }
+                </select>
+              </div>
+            </fieldset>
+
+            <fieldset class="min-w-0 border-0 p-0">
+              <legend class="font-mono text-[11px] font-semibold tracking-wide text-marketing-text-cool">AVAILABILITY</legend>
+              <div class={`mt-2 grid gap-2 ${plannedToolCount > 0 ? "grid-cols-3" : "grid-cols-2"}`} data-explore-availability>
+                <label class="min-w-0">
+                  <span class="flex min-h-11 items-center justify-center gap-2 rounded-md border border-marketing-border-card bg-marketing-recessed px-2 text-center text-xs font-semibold text-marketing-text-secondary">
+                    <input type="radio" name="availability" value="all" checked />
+                    <span>All</span>
+                  </span>
+                </label>
+                <label class="min-w-0">
+                  <span class="flex min-h-11 items-center justify-center gap-2 rounded-md border border-marketing-border-card bg-marketing-recessed px-2 text-center text-xs font-semibold text-marketing-text-secondary">
+                    <input type="radio" name="availability" value="available" />
+                    <span>Available now</span>
+                  </span>
+                </label>
+                {
+                  plannedToolCount > 0 ? (
+                    <label class="min-w-0">
+                      <span class="flex min-h-11 items-center justify-center gap-2 rounded-md border border-marketing-border-card bg-marketing-recessed px-2 text-center text-xs font-semibold text-marketing-text-secondary">
+                        <input type="radio" name="availability" value="planned" />
+                        <span>Planned</span>
+                      </span>
+                    </label>
+                  ) : null
+                }
+              </div>
+            </fieldset>
+
+            <button
+              type="button"
+              data-explore-clear
+              class="inline-flex h-10 min-h-11 w-full items-center justify-center gap-2 rounded-md border border-marketing-border-strong bg-marketing-surface px-4 text-sm font-semibold text-marketing-foreground transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out hover:border-marketing-border-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marketing-primary-light motion-safe:hover:-translate-y-px motion-safe:active:scale-[0.985]"
+              hidden
+            >
+              Clear filters
+            </button>
+          </form>
+
+          <p class="mt-5 text-sm text-marketing-text-secondary" role="status" aria-live="polite" aria-atomic="true" data-explore-status>
+            Showing all {tools.length} tools.
+          </p>
+
+          <section class="mt-8 rounded-xl border border-marketing-border bg-marketing-panel-deep p-6 text-center" data-explore-empty hidden aria-labelledby="empty-tools-heading">
+            <p class="font-mono text-xs font-semibold tracking-[0.18em] text-marketing-primary-light">NO MATCHES</p>
+            <h3 id="empty-tools-heading" class="mt-3 font-display text-2xl font-extrabold text-white">No tools match those filters.</h3>
+            <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-marketing-text-secondary">Try a broader search, choose another family, or reset the catalog.</p>
+            <button
+              type="button"
+              data-explore-empty-clear
+              class="mt-6 inline-flex h-10 min-h-11 items-center justify-center gap-2 rounded-md bg-marketing-primary px-4 text-sm font-semibold text-white shadow-marketing-primary transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out hover:bg-marketing-primary-hover hover:shadow-marketing-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marketing-primary-light motion-safe:hover:-translate-y-px motion-safe:active:scale-[0.985]"
+            >
+              Clear filters
+            </button>
+          </section>
+
+          <div class="mt-8 grid gap-8" data-explore-results>
+            {
+              familyGroups.map((family) => (
+                <section data-explore-family-group={family.id} aria-labelledby={`${family.id}-heading`}>
+                  <div class="flex flex-col gap-3 border-b border-marketing-border pb-4 sm:flex-row sm:justify-between">
+                    <div class="min-w-0">
+                      <p class="font-mono text-xs font-semibold tracking-[0.16em] text-marketing-primary-light">
+                        {family.index} · {family.tools.length} TOOLS
+                      </p>
+                      <h3 id={`${family.id}-heading`} class="mt-2 text-2xl font-bold text-white">{family.name}</h3>
+                    </div>
+                    <p class="max-w-xl text-sm leading-6 text-marketing-text-secondary">{family.description}</p>
+                  </div>
+
+                  <ul class="mt-5 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label={`${family.name} tools`}>
+                    {
+                      family.tools.map((tool) => {
+                        const availability = tool.status === "available" ? "available" : "planned";
+                        const searchValue = normalizedSearchValue(
+                          [tool.name, tool.shortName, tool.description, tool.family, ...tool.keywords].join(" "),
+                        );
+
+                        return (
+                          <li
+                            data-explore-card
+                            data-explore-family={tool.family}
+                            data-explore-availability={availability}
+                            data-explore-action={availability === "available" ? "open" : "planned"}
+                            data-explore-search={searchValue}
+                            class="min-w-0"
+                          >
+                            {
+                              availability === "available" ? (
+                                <a
+                                  href={`/explore/${tool.slug}`}
+                                  class="group flex min-h-44 h-full min-w-0 flex-col rounded-xl border border-marketing-border-card bg-marketing-surface p-5 transition-[box-shadow,border-color] duration-200 ease-out hover:border-marketing-border-hover hover:shadow-marketing-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marketing-primary-light"
+                                  aria-label={`Open ${tool.name}`}
+                                >
+                                  <span class="flex items-center justify-between gap-3">
+                                    <span class="rounded border border-marketing-success-border bg-marketing-success-bg px-2 py-1 font-mono text-[10px] font-semibold tracking-wide text-marketing-success">AVAILABLE NOW</span>
+                                    <span class="font-mono text-xs text-marketing-primary-light" aria-hidden="true">↗</span>
+                                  </span>
+                                  <span class="mt-6 block break-words text-lg font-bold text-white">{tool.name}</span>
+                                  <span class="mt-2 block break-words text-sm leading-6 text-marketing-text-secondary">{tool.description}</span>
+                                  <span class="mt-auto pt-5 text-sm font-semibold text-marketing-text-strong">Open tool <span aria-hidden="true">→</span></span>
+                                </a>
+                              ) : (
+                                <article
+                                  class="flex min-h-44 h-full min-w-0 flex-col rounded-xl border border-marketing-border bg-marketing-recessed p-5"
+                                  aria-label={`${tool.name}, planned`}
+                                >
+                                  <span class="flex items-center justify-between gap-3">
+                                    <span class="rounded border border-marketing-border-card bg-marketing-panel-deep px-2 py-1 font-mono text-[10px] font-semibold tracking-wide text-marketing-text-cool">PLANNED</span>
+                                    <span class="font-mono text-[10px] font-semibold tracking-wide text-marketing-text-faint">NOT YET RUNNABLE</span>
+                                  </span>
+                                  <h4 class="mt-6 break-words text-lg font-bold text-marketing-text-strong">{tool.name}</h4>
+                                  <p class="mt-2 break-words text-sm leading-6 text-marketing-text-secondary">{tool.description}</p>
+                                  <p class="mt-auto pt-5 text-sm font-medium text-marketing-text-faint">Planned for the workbench</p>
+                                </article>
+                              )
+                            }
+                          </li>
+                        );
+                      })
+                    }
+                  </ul>
+                </section>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-marketing-border px-4 py-8 sm:px-8">
+      <div class="mx-auto flex w-full max-w-[1248px] flex-col gap-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-marketing-text-muted">Kitland · tools that keep data on your device</p>
+        <a
+          href="/"
+          class="min-h-11 rounded-sm py-3 font-semibold text-marketing-text-secondary transition-colors hover:text-marketing-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-marketing-primary-light"
+        >Back to overview</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../../scripts/explore-catalog.ts"></script>
+</BaseLayout>

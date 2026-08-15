@@ -1,0 +1,7 @@
+/*
+ * Optional scan list for hosts that compile from this package directory.
+ * Host CSS entries must also `@source` `packages/ui/src` with a path
+ * relative to the host stylesheet — Vite resolves imported `@source`
+ * against the app root, so this file alone is not enough.
+ */
+@source "./src";

@@ -1,6 +1,10 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
+  workflow_call:
   push:
     branches: [main, master]
   pull_request:
@@ -12,83 +16,315 @@ concurrency:
 
 jobs:
   build:
-    name: Typecheck & build
+    name: Quality, test & build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a7487c7e64a18d06315d7d33afbd097169040a7b # v4.0.0
         with:
           version: 9.12.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
-          node-version: 22
+          node-version: 22.12.0
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
       - name: Typecheck
         run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
 
       - name: Build
         run: pnpm build
 
+      - name: Verify bundle budgets
+        run: pnpm --filter @kitland/web bundle:check
+
+      - name: Verify extension packages
+        run: pnpm package:check
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @kitland/web exec playwright install --with-deps chromium
+
+      - name: Web browser smoke test
+        run: pnpm --filter @kitland/web test:e2e
+
+      - name: Browser extension smoke test
+        run: pnpm --filter @kitland/browser-extension test:smoke
+
+      - name: Verify static SEO output
+        run: pnpm --filter @kitland/web seo:check
+
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: playwright-artifacts
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+            apps/browser-extension/playwright-report
+            apps/browser-extension/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Upload web dist
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: kitland-web-dist
           path: apps/web/dist
           if-no-files-found: error
           retention-days: 7
 
-  deploy:
-    name: Deploy to Cloudflare Pages
+      - name: Upload extension foundation builds
+        if: success()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: kitland-extension-foundations
+          path: |
+            apps/browser-extension/dist
+            apps/vscode-extension/dist
+          if-no-files-found: error
+          retention-days: 7
+
+  vscode-integration:
+    name: VS Code Extension Host
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a7487c7e64a18d06315d7d33afbd097169040a7b # v4.0.0
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pinned Extension Host tests
+        run: xvfb-run -a pnpm test:integration:vscode
+
+  web-rollout:
+    name: Verify web rollout certification
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a7487c7e64a18d06315d7d33afbd097169040a7b # v4.0.0
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify web rollout catalog gate
+        run: pnpm release:verify:rollout
+
+      # The rollout must certify exactly the normal catalog artifact built by
+      # the main quality job. It must never create a filtered tool catalog.
+      - name: Download normal web artifact
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          name: kitland-web-dist
+          path: apps/web/dist
+
+      - name: Verify web bundle budgets
+        run: pnpm --filter @kitland/web bundle:check
+
+      - name: Verify web static SEO output
+        run: pnpm --filter @kitland/web seo:check
+
+      - name: Verify full-catalog web artifact
+        run: pnpm --filter @kitland/web rollout:artifact:check
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @kitland/web exec playwright install --with-deps chromium
+
+      - name: Web rollout browser smoke test
+        run: pnpm --filter @kitland/web test:e2e:rollout
+
+      - name: Upload web rollout Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: web-rollout-playwright-artifacts
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+  deploy-web-rollout:
+    name: Deploy certified web rollout to Cloudflare Pages
+    needs: [build, web-rollout]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Production branch only; skipped until Cloudflare secrets are configured
+    # A tool rollout is an explicit web-only production surface. It certifies
+    # selected tools, but deploys the normal full-catalog web artifact.
     if: >-
       github.event_name == 'push'
       && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-      && vars.CLOUDFLARE_PAGES_ENABLED != 'false'
-      && secrets.CLOUDFLARE_API_TOKEN != ''
-      && secrets.CLOUDFLARE_ACCOUNT_ID != ''
+      && vars.CLOUDFLARE_PAGES_ROLLOUT_ENABLED == 'true'
+      && vars.CLOUDFLARE_PAGES_ENABLED != 'true'
+    concurrency:
+      group: cloudflare-pages-production
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: https://kitland.dev
     permissions:
       contents: read
       deployments: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a7487c7e64a18d06315d7d33afbd097169040a7b # v4.0.0
         with:
           version: 9.12.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
-          node-version: 22
+          node-version: 22.12.0
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Verify web rollout catalog gate
+        run: pnpm release:verify:rollout
 
-      - name: Deploy
-        uses: cloudflare/wrangler-action@v3
+      - name: Download verified normal web artifact
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          name: kitland-web-dist
+          path: apps/web/dist
+
+      - name: Verify downloaded full-catalog web artifact
+        run: pnpm --filter @kitland/web rollout:artifact:check
+
+      - name: Validate deployment credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "Cloudflare deployment is enabled, but required credentials are missing." >&2
+            exit 1
+          fi
+
+      - name: Deploy certified web rollout artifact
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3.14.1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/web/dist --project-name=kitland --branch=${{ github.ref_name }} --commit-dirty=true
+          command: pages deploy apps/web/dist --project-name=kitland --branch=${{ github.ref_name }}
+
+  deploy:
+    name: Deploy complete 64-tool suite to Cloudflare Pages
+    needs: [build, vscode-integration]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Explicit opt-in avoids referencing secrets in a job-level `if`, which
+    # GitHub Actions does not support. Enable only after both secrets exist.
+    if: >-
+      github.event_name == 'push'
+      && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      && vars.CLOUDFLARE_PAGES_ENABLED == 'true'
+      && vars.CLOUDFLARE_PAGES_ROLLOUT_ENABLED != 'true'
+    concurrency:
+      group: cloudflare-pages-production
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: https://kitland.dev
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a7487c7e64a18d06315d7d33afbd097169040a7b # v4.0.0
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify complete-suite production release gate
+        run: pnpm release:verify
+
+      - name: Download verified web dist
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          name: kitland-web-dist
+          path: apps/web/dist
+
+      - name: Validate deployment credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "Cloudflare deployment is enabled, but required credentials are missing." >&2
+            exit 1
+          fi
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3.14.1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/web/dist --project-name=kitland --branch=${{ github.ref_name }}

@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@kitland/core": ["../../packages/core/src/index.ts"],
+      "@kitland/core/*": ["../../packages/core/src/*"],
+      "@kitland/tools": ["../../packages/tools/src/index.ts"],
+      "@kitland/ui": ["../../packages/ui/src/index.ts"],
+      "@kitland/ui/catalog": ["../../packages/ui/src/tools/shared-catalog-tools.tsx"],
+      "@kitland/ui/tools/*": ["../../packages/ui/src/tools/*"]
+    },
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "src",
+    "tests",
+    "e2e",
+    "scripts",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ]
+}

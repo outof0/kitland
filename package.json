@@ -1,29 +1,62 @@
 {
   "name": "kitland",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
   "description": "Kitland — everyday developer tools, in one place. Tools out. Work on.",
-  "author": "OutOf0 <hello.outof0@gmail.com>",
-  "license": "MIT",
   "homepage": "https://kitland.dev",
   "bugs": {
+    "url": "https://github.com/OutOf0/kitland/issues",
     "email": "hello.outof0@gmail.com"
   },
-  "packageManager": "pnpm@9.12.0",
-  "engines": {
-    "node": ">=22"
+  "license": "MIT",
+  "author": "OutOf0 <hello.outof0@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OutOf0/kitland.git"
   },
   "scripts": {
     "dev": "pnpm --filter @kitland/web dev",
-    "build": "pnpm --filter @kitland/web build",
+    "dev:browser-extension": "pnpm --filter @kitland/browser-extension dev",
+    "build": "pnpm -r --if-present build",
+    "build:web": "pnpm --filter @kitland/web build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "pnpm -r --if-present test",
+    "test:e2e": "pnpm --filter @kitland/web test:e2e && pnpm --filter @kitland/browser-extension test:smoke",
+    "test:integration:vscode": "pnpm --filter kitland-developer-tools test:integration",
+    "test:integration:mcp": "pnpm --filter @kitland/mcp test:protocol",
+    "package:check": "pnpm --filter @kitland/browser-extension package:check && pnpm --filter kitland-developer-tools package:smoke && pnpm --filter @kitland/mcp package:check",
+    "release:check:mcp": "pnpm --filter @kitland/mcp package:check",
+    "artifacts:check": "pnpm --filter @kitland/browser-extension package && pnpm --filter kitland-developer-tools package:vsix",
+    "artifacts:chrome": "pnpm --filter @kitland/browser-extension package:chrome",
+    "artifacts:firefox": "pnpm --filter @kitland/browser-extension package:firefox",
+    "artifacts:all": "pnpm --filter @kitland/browser-extension package:all && pnpm --filter kitland-developer-tools package:vsix && pnpm --filter @kitland/mcp package",
+    "release:artifacts": "pnpm build && pnpm artifacts:all && pnpm --filter @kitland/mcp package:check",
+    "quality:check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm audit --audit-level=high && pnpm build && pnpm --filter @kitland/web bundle:check && pnpm --filter @kitland/web seo:check && pnpm package:check && pnpm test:e2e",
+    "release:verify": "pnpm --filter @kitland/tools release:verify",
+    "release:verify:rollout": "KITLAND_RELEASE_PLATFORM=web pnpm --filter @kitland/tools release:verify:rollout",
+    "release:check": "pnpm quality:check && pnpm release:verify && pnpm artifacts:check",
+    "release:check:rollout": "pnpm quality:check && pnpm release:verify:rollout && pnpm --filter @kitland/web rollout:artifact:check && pnpm --filter @kitland/web test:e2e:rollout",
     "preview": "pnpm --filter @kitland/web preview",
-    "pages:deploy": "pnpm build && wrangler pages deploy apps/web/dist --project-name=kitland",
-    "pages:dev": "pnpm build && wrangler pages dev apps/web/dist"
+    "pages:deploy": "pnpm release:check && wrangler pages deploy apps/web/dist --project-name=kitland",
+    "pages:deploy:rollout": "pnpm release:check:rollout && wrangler pages deploy apps/web/dist --project-name=kitland",
+    "pages:dev": "pnpm build:web && wrangler pages dev apps/web/dist"
   },
   "devDependencies": {
+    "oxfmt": "^0.62.0",
+    "oxlint": "^1.77.0",
     "wrangler": "^4.28.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "pnpm": {
+    "overrides": {
+      "mocha>diff": "8.0.3",
+      "mocha>serialize-javascript": "7.0.5"
+    }
   }
 }
-

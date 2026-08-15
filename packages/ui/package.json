@@ -1,0 +1,48 @@
+{
+  "name": "@kitland/ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Host-agnostic Kitland tool shells — same UI, host only supplies runtime wrap",
+  "files": [
+    "src"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./styles.css": "./src/styles.css",
+    "./tokens.css": "./tokens.css",
+    "./sources.css": "./sources.css",
+    "./theme.css": "./theme.css",
+    "./workspace.css": "./workspace.css",
+    "./catalog": "./src/tools/shared-catalog-tools.tsx",
+    "./base64-protocol": "./src/lib/base64-worker-protocol.ts",
+    "./tools/*": "./src/tools/*"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit --pretty false",
+    "test": "vitest run",
+    "lint": "oxlint src --vitest-plugin --deny-warnings"
+  },
+  "dependencies": {
+    "@kitland/core": "workspace:*",
+    "@kitland/tools": "workspace:*",
+    "bcryptjs": "^3.0.3",
+    "lucide-react": "^0.539.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "happy-dom": "^20.11.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@kitland/core": ["../../packages/core/src/index.ts"],
+      "@kitland/ui/catalog": ["../../packages/ui/src/tools/shared-catalog-tools.tsx"],
+      "@kitland/ui/tools/*": ["../../packages/ui/src/tools/*"]
+    },
+    "types": ["node", "mocha", "vscode", "vitest/globals", "react", "react-dom"]
+  },
+  "include": ["src", "test", "scripts", "vitest.config.ts"],
+  "exclude": ["src/webview/main.ts"]
+}

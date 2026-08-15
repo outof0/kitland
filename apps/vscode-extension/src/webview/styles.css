@@ -1,0 +1,21 @@
+/*
+ * Kitland VS Code webview shell — compiled with Tailwind against the shared
+ * Kitland theme so the workbench matches web and the browser extension.
+ *
+ * The webview runs under a strict CSP (style-src is the bundled stylesheet
+ * only), so all styling is class-based: no inline style attributes.
+ */
+@import "tailwindcss";
+@import "../../../../packages/ui/workspace.css";
+@import "./codemirror.css";
+
+@source "../../../../packages/ui/src";
+@source "./**/*.{ts,tsx}";
+@source "../webviewHtml.ts";
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}

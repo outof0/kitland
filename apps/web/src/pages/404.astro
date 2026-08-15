@@ -1,0 +1,22 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import "@/styles/seo.css";
+---
+
+<BaseLayout
+  title="Page not found — Kitland"
+  description="The Kitland page you requested does not exist."
+  robots="noindex,follow"
+>
+  <main class="not-found-page">
+    <div class="not-found-page__inner">
+      <p class="tool-catalog-page__eyebrow">404</p>
+      <h1>That tool is not here.</h1>
+      <p>
+        The URL may be outdated, or the tool has not been published yet. Open
+        the available Base64 tool or return home.
+      </p>
+      <a href="/explore/base64">Open Base64 tool →</a>
+    </div>
+  </main>
+</BaseLayout>

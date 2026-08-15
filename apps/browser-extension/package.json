@@ -1,0 +1,47 @@
+{
+  "name": "@kitland/browser-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Permission-free browser shell for the Kitland developer tool suite",
+  "license": "MIT",
+  "author": "OutOf0 <hello.outof0@gmail.com>",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5174",
+    "preview": "vite preview --host 127.0.0.1 --port 43817 --strictPort",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit --pretty false",
+    "lint": "oxlint src tests e2e scripts vite.config.ts vitest.config.ts playwright.config.ts --vitest-plugin --deny-warnings",
+    "test": "vitest run",
+    "test:smoke": "playwright test",
+    "package:check": "node ./scripts/verify-package.mjs",
+    "package": "pnpm build && node ./scripts/create-zip.mjs && node ./scripts/verify-package.mjs --archive",
+    "package:chrome": "pnpm build && node ./scripts/create-zip.mjs && node ./scripts/verify-package.mjs --archive",
+    "package:firefox": "pnpm build && node ./scripts/create-browser-artifacts.mjs && node ./scripts/verify-package.mjs --archive",
+    "package:all": "pnpm build && node ./scripts/create-browser-artifacts.mjs && node ./scripts/verify-package.mjs --archive",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm package:check && pnpm test:smoke"
+  },
+  "dependencies": {
+    "@kitland/core": "workspace:*",
+    "@kitland/tools": "workspace:*",
+    "@kitland/ui": "workspace:^",
+    "bcryptjs": "^3.0.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/node": "^24.2.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3",
+    "vite": "^8.2.1",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
