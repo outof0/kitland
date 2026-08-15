@@ -1,7 +1,7 @@
 # ADR 0001: Astro static delivery with React islands and Shadcn
 
 - **Status:** accepted
-- **Date:** 2026-08-09
+- **Date:** 2026-08-15
 - **Owner:** Kitland maintainers
 
 ## Context
@@ -27,7 +27,7 @@ Astro (static routes, HTML, SEO metadata, 404s, sitemap)
 └── React 19 islands (interactive tool workspace and editors only)
     └── Tailwind v4 + Shadcn/Radix (the single UI component system)
         ├── @kitland/core (pure bounded transforms)
-        └── @kitland/tool-catalog (tool and SEO metadata)
+        └── @kitland/tools (tool and SEO metadata)
 ```
 
 - Astro is the route and document owner. It statically generates `/`, the

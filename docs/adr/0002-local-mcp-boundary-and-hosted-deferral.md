@@ -1,7 +1,7 @@
 # ADR 0002: Keep MCP local-only and defer a hosted service
 
 - **Status:** accepted
-- **Date:** 2026-08-09
+- **Date:** 2026-08-15
 - **Owner:** Kitland maintainers
 
 ## Context
@@ -11,7 +11,7 @@ already support that promise:
 
 - `@kitland/core` contains deterministic, bounded transforms and has no DOM,
   network, filesystem, or host-platform API dependency.
-- `@kitland/tool-catalog` describes a tool's identity and browser presentation
+- `@kitland/tools` describes a tool's identity and browser presentation
   without importing a runtime host.
 - `apps/web` owns browser state. A shared Base64 link is an explicit,
   fragment-only action; drafts are not persisted by default.

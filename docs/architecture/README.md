@@ -5,7 +5,7 @@ experience:
 
 ```text
 packages/core            Pure, bounded tool operations
-packages/tool-catalog    Tool identity, availability, and UI-pattern metadata
+packages/tools    Tool identity, availability, and UI-pattern metadata
 apps/web                 Browser shell, routes, and tool compositions
 ```
 

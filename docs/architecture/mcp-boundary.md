@@ -12,12 +12,12 @@ that version rather than relying on this document alone.
 
 ## Current boundary and non-goals
 
-| Layer                   | Current responsibility                                                      | MCP rule                                                                                                             |
-| ----------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `@kitland/core`         | Pure, bounded domain transforms returning `ToolResult<T>`                   | Remains the single transform implementation. No MCP, Node, DOM, network, or filesystem APIs are added here.          |
-| `@kitland/tool-catalog` | Tool identity, browser copy, family, status, and UI pattern                 | Does **not** make a tool callable. A future operation needs a separate approved exposure declaration.                |
-| `apps/web`              | Local editor UX, clipboard/upload, opt-in fragment sharing, browser storage | Does not import, launch, configure, or talk to `@kitland/mcp`. Browser payloads are never a source of MCP arguments. |
-| Future `@kitland/mcp`   | Local protocol adapter                                                      | Validates explicit client arguments, invokes core, and returns bounded MCP results.                                  |
+| Layer                 | Current responsibility                                                      | MCP rule                                                                                                             |
+| --------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `@kitland/core`       | Pure, bounded domain transforms returning `ToolResult<T>`                   | Remains the single transform implementation. No MCP, Node, DOM, network, or filesystem APIs are added here.          |
+| `@kitland/tools`      | Tool identity, browser copy, family, status, and UI pattern                 | Does **not** make a tool callable. A future operation needs a separate approved exposure declaration.                |
+| `apps/web`            | Local editor UX, clipboard/upload, opt-in fragment sharing, browser storage | Does not import, launch, configure, or talk to `@kitland/mcp`. Browser payloads are never a source of MCP arguments. |
+| Future `@kitland/mcp` | Local protocol adapter                                                      | Validates explicit client arguments, invokes core, and returns bounded MCP results.                                  |
 
 The first adapter deliberately excludes hosted HTTP, OAuth, resources, prompts,
 sampling, filesystem access, network access, shell commands, background jobs,
@@ -34,8 +34,8 @@ packages/mcp/
   src/server.ts         stdio lifecycle plus tools/list and tools/call wiring
   test/                 raw stdio, contract, budget, and capability tests
 
-@kitland/mcp ──imports──► @kitland/core and @kitland/tool-catalog
-@kitland/core / @kitland/tool-catalog ──never import──► @kitland/mcp
+@kitland/mcp ──imports──► @kitland/core and @kitland/tools
+@kitland/core / @kitland/tools ──never import──► @kitland/mcp
 ```
 
 ```text
@@ -45,7 +45,7 @@ AI client (user-configured local process)
 @kitland/mcp
   │ schema + byte/deadline gate; no host capability access
   ▼
-approved operation registry ─────────────► @kitland/tool-catalog metadata
+approved operation registry ─────────────► @kitland/tools metadata
   │                                          (identity/copy only)
   ▼
 @kitland/core
@@ -249,9 +249,12 @@ as untrusted.
   contract. A package major may contain more than one operation version during
   a documented migration period, but an old `mcpName` must never silently begin
   doing something else.
-- Pin the accepted MCP SDK and protocol revision in package metadata and test
-  against it. A protocol/SDK upgrade gets its own compatibility review and
-  changelog entry.
+- Pin the accepted MCP SDK and protocol revision set in package metadata and test
+  against it. For v1:
+  - SDK: `@modelcontextprotocol/sdk@1.30.0`
+  - Preferred protocol: `2025-11-25`
+  - Accepted stable set: `2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`, `2024-10-07`
+    A protocol/SDK upgrade gets its own compatibility review and changelog entry.
 - The tool owner approves semantics and fixtures; a security owner approves
   limits and capability changes; a release owner owns package publication and
   supported-client documentation.
@@ -262,9 +265,9 @@ as untrusted.
    values or intentionally documented error mappings.
 2. Schema tests cover absent, wrong-type, unknown, boundary, Unicode, and
    oversized arguments; result schemas validate success and every error shape.
-3. Raw stdio transcript tests cover initialize, the pinned protocol revision's
-   required request metadata, `tools/list`, `tools/call`, malformed requests,
-   unknown tools, and protocol-version negotiation.
+3. Raw stdio transcript tests cover initialize, the snapshotted preferred and
+   accepted stable protocol versions, `tools/list`, `tools/call`, malformed requests,
+   unknown tools, and protocol-version negotiation (including rejection of unsupported versions).
 4. Output-budget tests prove no partial payload, no duplicate large data beyond
    the total budget, and no payload in errors or diagnostics.
 5. Process tests prove stdout is protocol-only and that ordinary tool calls do
@@ -284,6 +287,6 @@ user payload in a canonical/query URL.
 
 ## References
 
-- [MCP tools specification](https://modelcontextprotocol.io/specification/2026-07-28/server/tools)
-- [MCP schema reference](https://modelcontextprotocol.io/specification/2026-07-28/schema)
+- [MCP tools specification (2025-11-25)](https://modelcontextprotocol.io/specification/2025-11-25/server/tools)
+- [MCP schema reference (2025-11-25)](https://modelcontextprotocol.io/specification/2025-11-25/schema)
 - [MCP security best practices](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)

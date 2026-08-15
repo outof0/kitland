@@ -54,7 +54,7 @@
 
 ```text
 packages/core            Pure encode/decode (no React, no DOM host APIs)
-packages/tool-catalog    Metadata: id, slug, family, UI pattern, status
+packages/tools    Metadata: id, slug, family, UI pattern, status
 apps/web                 Thin workspace shell + pattern UI for the tool
 ```
 

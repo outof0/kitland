@@ -5,7 +5,7 @@ on one host never implies availability or permission on another host.
 
 ## Source of truth
 
-`packages/tool-catalog/src/types.ts` defines three platform identifiers:
+`packages/tools/src/types.ts` defines three platform identifiers:
 
 - `web`
 - `browser-extension`
@@ -19,7 +19,9 @@ catalog lookup maps cannot drift after initialization.
 Tool delivery maturity is tracked separately as `reference`, `planned`,
 `implemented`, or `release-ready`. `available` means a host can expose the tool
 in a development/preview build; it does not mean the overall product may be
-released. Base64 is currently the reference vertical slice.
+released. `release-ready` makes a tool eligible for explicit per-surface rollout
+certification when that surface is listed in `releasePlatforms`; it never
+authorizes implicit marketplace publication or the complete-suite launch.
 
 The existing top-level `status` is the web navigation status and must match the
 web platform contract. Host adapters use `listToolsByPlatform()` and
@@ -65,6 +67,8 @@ source for names, families, UI patterns, host status, and capabilities. The
 release gate still requires every tool to be implemented and release-ready, so
 the inventory cannot unlock deployment by itself.
 
-Normal CI remains green during development. The production deploy job runs the
-separate `release:verify` command, which intentionally fails while Base64 is a
-reference tool and the other 63 committed slices are still planned.
+Normal CI remains green during development. The complete-suite production
+deploy job runs the separate `release:verify` command, which intentionally
+fails until all 64 tools are ready. A different `release:verify:rollout` gate
+evaluates the declared targets for one platform (web by default) and is paired
+with a full-catalog artifact verifier before a certified web rollout can deploy.

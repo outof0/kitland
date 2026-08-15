@@ -1,6 +1,6 @@
-# 64-tool rollout playbook
+# 64-tool catalog and rollout playbook
 
-Status: foundation ready; canonical 64-tool inventory committed; 27 tool slices implemented; 36 planned
+Status: canonical 64-tool inventory committed; all 64 tools release-ready
 Release policy: [ADR 0003](../adr/0003-release-the-complete-tool-suite.md)
 
 ## Product scope is committed
@@ -20,9 +20,10 @@ of truth for:
 
 The identity manifest is the reviewed product scope; the matching catalog
 definitions own all descriptive and platform metadata so the repository does
-not maintain two copies that can drift. A catalog test reads `design.pen` and
-fails if artboard order, count, or stable frame ids diverge from the catalog.
-The strict release gate compares every catalog id/slug to the manifest.
+not maintain two copies that can drift. Catalog tests validate the committed
+inventory and static design-frame metadata; a design review resolves those ids
+through Pencil MCP. No test or script parses `design/design.pen`. The strict
+release gate compares every catalog id/slug to the manifest.
 
 ## Agent ownership model
 
@@ -76,6 +77,36 @@ make an incomplete catalog appear shippable.
 - Documentation explains what the tool does, what it does not do, privacy, and
   security caveats.
 - Bundle/package budgets and platform smoke checks pass.
+
+## Per-surface rollout certification
+
+The full-suite gate is intentionally not the only way to ship a finished tool.
+`getCatalogSurfaceRolloutReadiness(platform)` evaluates the tools explicitly
+declared for one surface in `releasePlatforms`. A target must be canonical,
+`release-ready`, and available on the selected surface. The gate is non-empty
+by design so a rollout cannot pass as an accidental no-op. It does not change
+`getCatalogReleaseReadiness()` or the 64-tool product-release policy.
+
+The target set is catalog-driven: promoting a tool requires its focused host
+checks, then a reviewed `releasePlatforms` declaration for that surface. This
+makes web, browser-extension, and VS Code certification independent rather
+than assuming one host's readiness implies another's.
+
+`pnpm release:check:rollout` first runs normal quality checks, then certifies
+the web rollout targets and verifies the normal full-catalog web artifact. Its
+artifact verifier rejects a build that drops a catalog-available tool's static
+route, sitemap URL, public link, or lazy renderer import; a separate browser
+smoke test exercises the complete catalog. The landing page and Explore catalog
+always show the 64-tool roadmap, every `available` entry remains runnable, and
+planned entries remain visibly planned. GitHub Actions deploys this normal
+artifact only with `CLOUDFLARE_PAGES_ROLLOUT_ENABLED=true`.
+
+The default rollout command certifies `web`. To evaluate another surface, run
+`KITLAND_RELEASE_PLATFORM=browser-extension pnpm --filter @kitland/tools release:verify:rollout`
+or replace the platform with `vscode-extension`. Those catalog checks do not
+publish a browser extension ZIP, VS Code VSIX, or npm package; each package and
+marketplace release remains a distinct approval. No per-surface rollout alters
+the requirements below for the coordinated 64-tool launch.
 
 ## Suite release gate
 

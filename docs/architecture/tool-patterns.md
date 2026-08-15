@@ -24,8 +24,9 @@ Every pattern keeps these invariants:
 - keyboard use is complete, focus is visible, and the workflow has no horizontal
   document overflow at 390 px;
 - input and output payloads are not persisted by default;
-- platform adapters enforce the same limits and deterministic test vectors as
-  the framework-independent core.
+- platform adapters preserve core semantics and deterministic test vectors;
+  host transport or editor limits may be tighter when they are explicit, tested,
+  and visible to users.
 
 ## Pattern matrix
 
@@ -65,6 +66,11 @@ Every pattern keeps these invariants:
 
 - Inputs have durable names such as Original/Changed or A/B. Their meaning
   cannot depend only on left/right placement because mobile stacks them.
+- JSON Diff uses one route with labelled **Editor** and **Compare** modes.
+  Editor owns A/B inputs; Compare owns one derived structural result. Mode
+  switching preserves both documents. An edit after Compare returns to Editor
+  (or must visibly mark Compare stale); a stale result is never presented as
+  current.
 - Swap changes the named inputs and result together; it is undoable with a
   second swap.
 - Insertions, deletions, and changes use text/icon semantics in addition to
@@ -73,6 +79,24 @@ Every pattern keeps these invariants:
   repeated in the result summary.
 - Large inputs use bounded algorithms or workers and show progress/cancel where
   latency can exceed an interaction frame.
+
+## Transform execution policy (bounded local tools)
+
+Default for bounded deterministic transforms is **live** local derivation
+(optionally debounced or off-main-thread). Explicit Run needs a written
+per-tool cost or safety reason.
+
+| Tool / workspace                                                              | Policy                | Transport         | Reason                                                             |
+| ----------------------------------------------------------------------------- | --------------------- | ----------------- | ------------------------------------------------------------------ |
+| Binary Text, Hex Text, HTML Entities, Unicode, ROT13, URL Encode, JSON Escape | live                  | worker            | Bounded codec; worker avoids main-thread stalls on large paste     |
+| Text Reverser, Case Converter, Sort Lines, Dedupe Lines                       | live                  | worker / deferred | Bounded text ops; no deliberate result preservation                |
+| Beautify/Minify, JSON→YAML/CSV/TOML, YAML→JSON, XML Formatter, SQL Formatter  | live                  | deferred / worker | Structured parse is cheap within input caps                        |
+| JSON Formatter                                                                | live                  | worker            | Inspect + format; Share is fragment-only after explicit click      |
+| Base64                                                                        | live                  | worker            | Golden-path transform; Share is fragment-only after explicit click |
+| JSON Diff                                                                     | explicit Compare mode | deferred on enter | Diff pattern: Editor edits freely; Compare owns one derived result |
+
+Invalid or processing states clear the authoritative output pane. Direction
+labels (Encode/Decode/Beautify) are never disguised Copy actions.
 
 ## Inspect
 
