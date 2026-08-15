@@ -1,5 +1,6 @@
 import { access, readFile } from "node:fs/promises";
 import { gzipSync } from "node:zlib";
+import ts from "typescript";
 const requiredFiles = [
   "dist/desktop/extension.cjs",
   "dist/web/extension.js",
@@ -18,6 +19,7 @@ const manifest = JSON.parse(await readFile(new URL("../package.json", import.met
 const expectedCommands = new Set([
   "kitland.base64.encodeSelection",
   "kitland.base64.decodeSelection",
+  "kitland.curlConverter.convertSelection",
   "kitland.openTool",
 ]);
 const actualCommands = new Set(manifest.contributes?.commands?.map((entry) => entry.command) ?? []);
@@ -53,11 +55,13 @@ const productionBundles = await Promise.all(
   })),
 );
 
+// Budgets after mounting the shared React WorkspaceShell, @kitland/ui tools,
+// and CodeMirror 6 syntax highlighters in the webview.
 const bundleBudgets = new Map([
-  ["dist/desktop/extension.cjs", 32 * 1024],
-  ["dist/web/extension.js", 32 * 1024],
-  ["dist/webview/main.js", 16 * 1024],
-  ["dist/webview/main.css", 8 * 1024],
+  ["dist/desktop/extension.cjs", 120 * 1024],
+  ["dist/web/extension.js", 120 * 1024],
+  ["dist/webview/main.js", 500 * 1024],
+  ["dist/webview/main.css", 24 * 1024],
 ]);
 for (const { relativePath, source } of productionBundles) {
   const gzipBytes = gzipSync(source, { level: 9 }).byteLength;
@@ -81,25 +85,59 @@ const webBundle = productionBundles.find(
   ({ relativePath }) => relativePath === "dist/web/extension.js",
 );
 if (!webBundle) throw new Error("Web-extension bundle was not inspected.");
-for (const nodePrimitive of [/require\(["']node:/u, /\bBuffer\b/u, /\bprocess\./u]) {
+// Web bundle string literals contain descriptive text (e.g. HTTP status "process the request") –
+// check via AST so we don't flag inert string content, only actual code references.
+for (const nodePrimitive of [/require\(["']node:/u, /\bBuffer\b/u]) {
   if (nodePrimitive.test(webBundle.source)) {
     throw new Error("Web-extension bundle contains a Node.js-only primitive.");
   }
 }
-
-const forbiddenNetworkPrimitives = [
-  [/(^|[^\w])fetch\s*\(/u, "fetch"],
-  [/\bXMLHttpRequest\b/u, "XMLHttpRequest"],
-  [/\bWebSocket\b/u, "WebSocket"],
-  [/\bEventSource\b/u, "EventSource"],
-  [/\bsendBeacon\b/u, "sendBeacon"],
-];
+{
+  const sourceFile = ts.createSourceFile(
+    "dist/web/extension.js",
+    webBundle.source,
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.JS,
+  );
+  let usesProcess = false;
+  function visitProcess(node) {
+    if (usesProcess) return;
+    if (
+      ts.isPropertyAccessExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "process"
+    ) {
+      // Only flag Node runtime properties, not descriptive string content
+      const prop = node.name.text;
+      if (
+        [
+          "env",
+          "argv",
+          "platform",
+          "exit",
+          "cwd",
+          "stdout",
+          "stdin",
+          "nextTick",
+          "hrtime",
+        ].includes(prop)
+      ) {
+        usesProcess = true;
+        return;
+      }
+    }
+    ts.forEachChild(node, visitProcess);
+  }
+  visitProcess(sourceFile);
+  if (usesProcess)
+    throw new Error("Web-extension bundle contains a Node.js-only primitive: process.*");
+}
 
 for (const { relativePath, source } of productionBundles) {
-  for (const [pattern, label] of forbiddenNetworkPrimitives) {
-    if (pattern.test(source)) {
-      throw new Error(`${relativePath} contains forbidden network primitive: ${label}`);
-    }
+  const forbiddenPrimitive = findForbiddenNetworkPrimitive(source, relativePath);
+  if (forbiddenPrimitive) {
+    throw new Error(`${relativePath} contains forbidden network primitive: ${forbiddenPrimitive}`);
   }
 }
 
@@ -117,6 +155,53 @@ for (const requiredPattern of [
 }
 
 console.log(`Package smoke passed for ${manifest.publisher}.${manifest.name}.`);
+
+function findForbiddenNetworkPrimitive(source, relativePath) {
+  if (!/\.(?:c?js)$/u.test(relativePath)) return undefined;
+  const sourceFile = ts.createSourceFile(
+    relativePath,
+    source,
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.JS,
+  );
+  let found;
+  const networkConstructors = new Set(["XMLHttpRequest", "WebSocket", "EventSource"]);
+
+  function visit(node) {
+    if (found) return;
+    if (ts.isCallExpression(node)) {
+      const name = expressionName(node.expression);
+      if (name === "fetch" || name === "sendBeacon") {
+        found = name;
+        return;
+      }
+    } else if (ts.isNewExpression(node)) {
+      const name = expressionName(node.expression);
+      if (name && networkConstructors.has(name)) {
+        found = name;
+        return;
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return found;
+}
+
+function expressionName(expression) {
+  if (ts.isIdentifier(expression)) return expression.text;
+  if (ts.isPropertyAccessExpression(expression)) return expression.name.text;
+  if (
+    ts.isElementAccessExpression(expression) &&
+    expression.argumentExpression &&
+    ts.isStringLiteral(expression.argumentExpression)
+  ) {
+    return expression.argumentExpression.text;
+  }
+  return undefined;
+}
 
 function formatKiB(bytes) {
   return `${(bytes / 1024).toFixed(1)} KiB`;

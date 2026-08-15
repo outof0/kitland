@@ -1,5 +1,5 @@
 import { err, ok, type ToolResult } from "@kitland/core";
-import type { ToolAdapter } from "./toolAdapter";
+import type { TextTransformAdapter } from "./toolAdapter";
 
 export type OffsetRange = { start: number; end: number };
 
@@ -15,12 +15,12 @@ export function hasOverlappingRanges(ranges: readonly OffsetRange[]): boolean {
   return false;
 }
 
-export function transformSelectedValues(
-  adapter: ToolAdapter,
+export async function transformSelectedValues(
+  adapter: TextTransformAdapter,
   operationId: string,
   optionId: string,
   inputs: readonly string[],
-): ToolResult<readonly string[]> {
+): Promise<ToolResult<readonly string[]>> {
   if (inputs.length === 0 || inputs.some((input) => input.length === 0)) {
     return err("EMPTY_SELECTION", "Select non-empty text before running this command.");
   }
@@ -43,7 +43,7 @@ export function transformSelectedValues(
 
   const values: string[] = [];
   for (const input of inputs) {
-    const result = adapter.transform({ operationId, optionId, input });
+    const result = await adapter.transform({ operationId, optionId, input });
     if (!result.ok) return result;
     if (result.value.length > adapter.maxOutputChars) {
       return err("OUTPUT_TOO_LARGE", "Output exceeds this tool's editor safety limit.");

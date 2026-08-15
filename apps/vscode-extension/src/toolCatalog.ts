@@ -1,12 +1,20 @@
-import { listToolsByPlatform } from "@kitland/tool-catalog";
+import { listToolsByPlatform } from "@kitland/tools";
 import { base64Adapter } from "./adapters/base64";
-import type { SelectionCommand, ToolAdapter } from "./toolAdapter";
+import { curlConverterAdapter } from "./adapters/curl-converter";
+import { hostTransformAdapters } from "./adapters/host-transforms";
+import { jsonFormatterAdapter } from "./adapters/json-formatter";
+import type { SelectionCommand, TextTransformAdapter, ToolAdapter } from "./toolAdapter";
 
-const ADAPTERS: readonly ToolAdapter[] = [base64Adapter];
+const ADAPTERS: readonly ToolAdapter[] = [
+  jsonFormatterAdapter,
+  base64Adapter,
+  curlConverterAdapter,
+  ...hostTransformAdapters,
+];
 assertAdapterRegistryComplete();
 
 export type RegisteredSelectionCommand = SelectionCommand & {
-  adapter: ToolAdapter;
+  adapter: TextTransformAdapter;
 };
 
 export function listToolAdapters(): readonly ToolAdapter[] {
@@ -19,7 +27,9 @@ export function getToolAdapter(toolId: string): ToolAdapter | undefined {
 
 export function listSelectionCommands(): readonly RegisteredSelectionCommand[] {
   return ADAPTERS.flatMap((adapter) =>
-    adapter.selectionCommands.map((command) => ({ ...command, adapter })),
+    "transform" in adapter
+      ? adapter.selectionCommands.map((command) => ({ ...command, adapter }))
+      : [],
   );
 }
 

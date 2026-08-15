@@ -1,11 +1,11 @@
 import { err, runBase64, type Base64Mode } from "@kitland/core";
-import { base64Tool } from "@kitland/tool-catalog";
-import type { ToolAdapter } from "../toolAdapter";
+import { base64Tool } from "@kitland/tools";
+import type { TextTransformAdapter } from "../toolAdapter";
 
 const MAX_ENCODE_INPUT_CHARS = 250_000;
 const MAX_DECODE_INPUT_CHARS = 1_000_000;
 
-export const base64Adapter: ToolAdapter = {
+export const base64Adapter: TextTransformAdapter = {
   catalogTool: base64Tool,
   descriptor: {
     id: base64Tool.id,

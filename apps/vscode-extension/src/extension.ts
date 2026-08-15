@@ -5,14 +5,28 @@ import { hasOverlappingRanges, transformSelectedValues } from "./selectionTransf
 import type { RegisteredSelectionCommand } from "./toolCatalog";
 import type { ToolAdapter } from "./toolAdapter";
 
+import { KitlandViewProvider } from "./kitlandViewProvider";
+
 const OPEN_TOOL = "kitland.openTool";
 
 export function activate(context: vscode.ExtensionContext): void {
   const selectionCommands = listSelectionCommands().map((command) =>
     vscode.commands.registerCommand(command.commandId, () => replaceSelections(command)),
   );
+  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarItem.text = "$(tools) Kitland";
+  statusBarItem.tooltip = "Open Kitland Developer Tools";
+  statusBarItem.command = OPEN_TOOL;
+  statusBarItem.show();
+
+  const viewProvider = new KitlandViewProvider(context.extensionUri);
+
   context.subscriptions.push(
     ...selectionCommands,
+    statusBarItem,
+    vscode.window.registerWebviewViewProvider(KitlandViewProvider.viewType, viewProvider, {
+      webviewOptions: { retainContextWhenHidden: true },
+    }),
     vscode.commands.registerCommand(OPEN_TOOL, (toolId?: unknown) =>
       openTool(context.extensionUri, toolId),
     ),
@@ -40,7 +54,7 @@ async function replaceSelections(command: RegisteredSelectionCommand): Promise<v
     return;
   }
 
-  const result = transformSelectedValues(
+  const result = await transformSelectedValues(
     command.adapter,
     command.operationId,
     command.optionId,
@@ -73,18 +87,26 @@ async function openTool(extensionUri: vscode.Uri, requestedToolId?: unknown): Pr
   let initialInput: string | undefined;
   if (editor && !editor.selection.isEmpty) {
     const selectedText = editor.document.getText(editor.selection);
-    const defaultOperation = adapter.descriptor.renderer.defaultOperationId;
-    const limit = Math.min(adapter.inputLimit(defaultOperation) ?? 0, adapter.maxSelectionChars);
+    const renderer = adapter.descriptor.renderer;
+    const limit =
+      "inputLimit" in adapter
+        ? Math.min(
+            adapter.inputLimit(
+              renderer.kind === "text-transform" ? renderer.defaultOperationId : "",
+            ) ?? 0,
+            adapter.maxSelectionChars,
+          )
+        : Math.min(adapter.maxInputChars, adapter.maxSelectionChars);
     if (selectedText.length <= limit) {
       initialInput = selectedText;
     } else {
       await vscode.window.showWarningMessage(
-        `Selection exceeds the ${limit.toLocaleString()} character workbench limit and was not imported.`,
+        `Selection exceeds the ${limit.toLocaleString()} UTF-16 code unit workbench limit and was not imported.`,
       );
     }
   }
 
-  ToolPanel.show(extensionUri, adapter, initialInput);
+  ToolPanel.show(extensionUri, adapter, initialInput, true);
 }
 
 async function chooseAdapter(requestedToolId?: unknown): Promise<ToolAdapter | undefined> {

@@ -6,135 +6,83 @@ import { getToolAdapter, listToolAdapters } from "./toolCatalog";
 import type { ToolAdapter } from "./toolAdapter";
 import { renderWebviewHtml } from "./webviewHtml";
 
-export class ToolPanel implements vscode.Disposable {
-  static current: ToolPanel | undefined;
+export class KitlandViewProvider implements vscode.WebviewViewProvider {
+  public static readonly viewType = "kitland.mainView";
 
-  static show(
-    extensionUri: vscode.Uri,
-    adapter: ToolAdapter,
-    initialInput?: string,
-    collapseSidebar = false,
-  ): void {
-    if (collapseSidebar) {
-      void vscode.commands.executeCommand("workbench.action.closeSidebar");
-    }
-
-    if (ToolPanel.current) {
-      ToolPanel.current.panel.reveal(vscode.ViewColumn.Active, false);
-      ToolPanel.current.selectTool(adapter, initialInput, true, collapseSidebar);
-      return;
-    }
-
-    const panel = vscode.window.createWebviewPanel(
-      "kitland.toolWorkbench",
-      "Kitland Developer Tools",
-      vscode.ViewColumn.Active,
-      {
-        enableScripts: true,
-        retainContextWhenHidden: true,
-        localResourceRoots: [vscode.Uri.joinPath(extensionUri, "dist", "webview")],
-      },
-    );
-    ToolPanel.current = new ToolPanel(
-      panel,
-      extensionUri,
-      adapter,
-      initialInput ?? "",
-      collapseSidebar,
-    );
-  }
-
-  static disposeCurrent(): void {
-    ToolPanel.current?.dispose();
-  }
-
-  private readonly disposables: vscode.Disposable[] = [];
+  private view?: vscode.WebviewView;
   private adapter: ToolAdapter;
-  private initialInput: string;
-  private collapseSidebar: boolean;
+  private initialInput = "";
   private ready = false;
+  private resolved = false;
   private lastOutput: { toolId: string; value: string } | undefined;
   private latestExecutionRequestId = -1;
 
-  private constructor(
-    private readonly panel: vscode.WebviewPanel,
-    extensionUri: vscode.Uri,
-    adapter: ToolAdapter,
-    initialInput: string,
-    collapseSidebar = false,
-  ) {
-    this.adapter = adapter;
-    this.initialInput = initialInput;
-    this.collapseSidebar = collapseSidebar;
-    const scriptUri = panel.webview.asWebviewUri(
-      vscode.Uri.joinPath(extensionUri, "dist", "webview", "main.js"),
+  constructor(private readonly extensionUri: vscode.Uri) {
+    this.adapter = listToolAdapters()[0]!;
+  }
+
+  public resolveWebviewView(
+    webviewView: vscode.WebviewView,
+    _context: vscode.WebviewViewResolveContext,
+    _token: vscode.CancellationToken,
+  ): void {
+    this.view = webviewView;
+
+    webviewView.webview.options = {
+      enableScripts: true,
+      localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, "dist", "webview")],
+    };
+
+    // Set up the document and listeners exactly once. With
+    // `retainContextWhenHidden` the view is reused across show/hide, so
+    // re-resolving must not rewrite HTML (which remounts the React tree and
+    // drops in-progress input) or stack another theme listener.
+    if (this.resolved) return;
+    this.resolved = true;
+
+    const scriptUri = webviewView.webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, "dist", "webview", "main.js"),
     );
-    const styleUri = panel.webview.asWebviewUri(
-      vscode.Uri.joinPath(extensionUri, "dist", "webview", "main.css"),
+    const styleUri = webviewView.webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, "dist", "webview", "main.css"),
     );
-    panel.webview.html = renderWebviewHtml({
-      cspSource: panel.webview.cspSource,
+
+    webviewView.webview.html = renderWebviewHtml({
+      cspSource: webviewView.webview.cspSource,
       scriptUri: scriptUri.toString(),
       styleUri: styleUri.toString(),
     });
-    this.updateTitle();
 
-    panel.onDidDispose(() => this.dispose(), undefined, this.disposables);
-    panel.webview.onDidReceiveMessage(
-      (message: unknown) => {
-        void this.handleMessage(message);
-      },
-      undefined,
-      this.disposables,
-    );
-    this.disposables.push(
-      vscode.window.onDidChangeActiveColorTheme((theme) => {
-        this.post({
-          type: "themeChanged",
-          kind: theme.kind === vscode.ColorThemeKind.Light ? "light" : "dark",
-        });
-      }),
-    );
+    webviewView.webview.onDidReceiveMessage((message: unknown) => {
+      void this.handleMessage(message);
+    });
+
+    vscode.window.onDidChangeActiveColorTheme((theme) => {
+      this.post({
+        type: "themeChanged",
+        kind: theme.kind === vscode.ColorThemeKind.Light ? "light" : "dark",
+      });
+    });
   }
 
-  dispose(): void {
-    if (ToolPanel.current !== this) return;
-    ToolPanel.current = undefined;
-    this.initialInput = "";
-    this.lastOutput = undefined;
-    for (const disposable of this.disposables.splice(0)) disposable.dispose();
-    this.panel.dispose();
-  }
-
-  private selectTool(
-    adapter: ToolAdapter,
-    initialInput?: string,
-    notifyWebview = true,
-    collapseSidebar?: boolean,
-  ): void {
+  public selectTool(adapter: ToolAdapter, initialInput?: string): void {
     const changingTool = adapter.descriptor.id !== this.adapter.descriptor.id;
     this.adapter = adapter;
     if (changingTool) this.initialInput = "";
     if (initialInput !== undefined) this.initialInput = initialInput;
-    if (collapseSidebar !== undefined) this.collapseSidebar = collapseSidebar;
     this.lastOutput = undefined;
     this.latestExecutionRequestId = -1;
-    this.updateTitle();
-    if (
-      this.ready &&
-      notifyWebview &&
-      (changingTool || initialInput !== undefined || collapseSidebar !== undefined)
-    ) {
+    if (this.ready) {
       this.postToolsList();
     }
   }
 
-  private updateTitle(): void {
-    this.panel.title = `Kitland: ${this.adapter.descriptor.title}`;
+  public getActiveAdapter(): ToolAdapter {
+    return this.adapter;
   }
 
   private post(message: HostMessage): void {
-    void this.panel.webview.postMessage(message);
+    void this.view?.webview.postMessage(message);
   }
 
   private catalogEntries(): CatalogToolEntry[] {
@@ -154,7 +102,6 @@ export class ToolPanel implements vscode.Disposable {
       tools: this.catalogEntries(),
       activeToolId: this.adapter.descriptor.id,
       initialInput: this.initialInput,
-      collapseSidebar: this.collapseSidebar,
     });
   }
 
@@ -171,10 +118,16 @@ export class ToolPanel implements vscode.Disposable {
     if (message.type === "selectTool") {
       const adapter = getToolAdapter(message.toolId);
       if (!adapter) return;
-      this.selectTool(adapter, undefined, false);
+      // The activity-bar view is the workbench: switch the tool in place.
+      // Opening a second ToolPanel editor would duplicate the React tree and
+      // leak the previous tool's initialInput.
+      this.selectTool(adapter, undefined);
       return;
     }
 
+    // Regex execution is host-agnostic and runs isolated from the
+    // extension-host event loop (worker_threads with deadline) so a
+    // catastrophic pattern cannot freeze Kitland commands.
     if (message.type === "regexTest") {
       const result = await runRegexIsolated(message.pattern, message.input, message.flags);
       this.post({ type: "regexResult", requestId: message.requestId, result });

@@ -1,47 +1,104 @@
 import { PROTOCOL_MAX_TEXT_CHARS } from "../../src/constants";
 import { listSelectionCommands, listToolAdapters } from "../../src/toolCatalog";
-import { getToolById, listToolsByPlatform } from "@kitland/tool-catalog";
+import { getToolById, listToolsByPlatform } from "@kitland/tools";
 
 describe("tool catalog", () => {
   it("keeps tool and command identifiers unique", () => {
     const adapters = listToolAdapters();
     const toolIds = adapters.map((adapter) => adapter.descriptor.id);
     const commandIds = listSelectionCommands().map((command) => command.commandId);
-
     expect(new Set(toolIds).size).toBe(toolIds.length);
     expect(new Set(commandIds).size).toBe(commandIds.length);
   });
 
   it("derives public identity from the shared product catalog", () => {
-    for (const adapter of listToolAdapters()) {
-      expect(adapter.catalogTool).toBe(getToolById(adapter.descriptor.id));
-      expect(adapter.descriptor.title).toBe(adapter.catalogTool.shortName);
-      expect(adapter.descriptor.description).toBe(adapter.catalogTool.description);
-    }
-    expect(listToolAdapters().map((adapter) => adapter.catalogTool.id)).toEqual(
-      listToolsByPlatform("vscode-extension").map((tool) => tool.id),
+    const adapters = listToolAdapters();
+    expect(adapters.map((adapter) => adapter.catalogTool)).toEqual(
+      adapters.map((adapter) => getToolById(adapter.descriptor.id)),
+    );
+    expect(adapters.map((adapter) => adapter.descriptor.title)).toEqual(
+      adapters.map((adapter) => adapter.catalogTool.shortName),
+    );
+    expect(adapters.map((adapter) => adapter.descriptor.description)).toEqual(
+      adapters.map((adapter) => adapter.catalogTool.description),
+    );
+    expect(adapters.map((adapter) => adapter.catalogTool.id).sort()).toEqual(
+      listToolsByPlatform("vscode-extension")
+        .map((tool) => tool.id)
+        .sort(),
     );
   });
 
-  it("requires every text-transform operation to have a bounded input contract", () => {
-    for (const adapter of listToolAdapters()) {
-      expect(adapter.maxOutputChars).toBeGreaterThan(0);
-      expect(adapter.maxOutputChars).toBeLessThanOrEqual(PROTOCOL_MAX_TEXT_CHARS);
-      expect(adapter.maxSelectionChars).toBeGreaterThan(0);
+  it("requires every renderer to have bounded input and output contracts", () => {
+    const adapters = listToolAdapters();
+    expect(adapters.every((adapter) => adapter.maxOutputChars > 0)).toBe(true);
+    expect(adapters.every((adapter) => adapter.maxOutputChars <= PROTOCOL_MAX_TEXT_CHARS)).toBe(
+      true,
+    );
+    expect(adapters.every((adapter) => adapter.maxSelectionChars > 0)).toBe(true);
+    expect(
+      adapters.every((adapter) =>
+        adapter.descriptor.renderer.options.some(
+          (item) => item.id === adapter.descriptor.renderer.defaultOptionId,
+        ),
+      ),
+    ).toBe(true);
 
-      const renderer = adapter.descriptor.renderer;
-      expect(renderer.operations.some((item) => item.id === renderer.defaultOperationId)).toBe(
-        true,
-      );
-      expect(renderer.options.some((item) => item.id === renderer.defaultOptionId)).toBe(true);
-      for (const operation of renderer.operations) {
-        expect(adapter.inputLimit(operation.id)).toBeGreaterThan(0);
-        expect(adapter.inputLimit(operation.id)).toBeLessThanOrEqual(PROTOCOL_MAX_TEXT_CHARS);
-      }
-    }
+    const transforms = adapters.filter((adapter) => "transform" in adapter);
+    expect(
+      transforms.every((adapter) => adapter.descriptor.renderer.kind === "text-transform"),
+    ).toBe(true);
+    expect(
+      transforms.every((adapter) =>
+        adapter.descriptor.renderer.operations.every((operation) => {
+          const limit = adapter.inputLimit(operation.id);
+          return limit !== undefined && limit > 0 && limit <= PROTOCOL_MAX_TEXT_CHARS;
+        }),
+      ),
+    ).toBe(true);
+
+    const inspectors = adapters.filter((adapter) => "inspect" in adapter);
+    expect(inspectors.map((adapter) => adapter.descriptor.renderer.kind)).toEqual(["text-inspect"]);
+    expect(inspectors.map((adapter) => adapter.maxInputChars)).toEqual([100_000]);
+    expect(inspectors.map((adapter) => adapter.selectionCommands)).toEqual([[]]);
+    expect(
+      inspectors.every((adapter) =>
+        adapter.descriptor.renderer.operations.some(
+          (item) => item.id === adapter.descriptor.renderer.defaultOperationId,
+        ),
+      ),
+    ).toBe(true);
   });
 
-  it("ships Base64 only as the first registered reference adapter", () => {
-    expect(listToolAdapters().map((adapter) => adapter.descriptor.id)).toEqual(["base64"]);
+  it("ships JSON Formatter as inspect and pure transforms via host adapters", () => {
+    const ids = listToolAdapters().map((adapter) => adapter.descriptor.id);
+    expect(ids).toEqual(
+      expect.arrayContaining(["json-formatter", "base64", "curl-converter", "beautify-minify"]),
+    );
+    expect(ids.length).toBe(listToolsByPlatform("vscode-extension").length);
+    expect(ids.length).toBe(64);
+
+    const json = listToolAdapters().find((adapter) => adapter.descriptor.id === "json-formatter");
+    expect(json?.descriptor.renderer).toMatchObject({
+      kind: "text-inspect",
+      operations: [
+        { id: "beautify", label: "Beautify", actionLabel: "Beautify JSON" },
+        { id: "minify", label: "Minify", actionLabel: "Minify JSON" },
+      ],
+      defaultOperationId: "beautify",
+      options: [
+        { id: "indent-2", label: "2 spaces" },
+        { id: "indent-4", label: "4 spaces" },
+      ],
+    });
+    // Selection replace stays limited to hand-reviewed specialty commands.
+    expect(listSelectionCommands().map(({ adapter }) => adapter.descriptor.id)).not.toContain(
+      "json-formatter",
+    );
+    expect(
+      listSelectionCommands()
+        .map(({ adapter }) => adapter.descriptor.id)
+        .sort(),
+    ).toEqual(["base64", "base64", "curl-converter"].sort());
   });
 });

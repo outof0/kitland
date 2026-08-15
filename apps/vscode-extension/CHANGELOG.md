@@ -4,7 +4,15 @@
 
 - Add the catalog/adapter/renderer foundation for the Kitland VS Code surface.
 - Add Base64 as the first reference adapter, including atomic selection commands.
+- Add the bounded cURL-to-Fetch adapter, workbench option, and atomic selection command.
+- Add JSON Formatter with a structured inspect renderer, Beautify/Minify output modes, 2/4-space
+  Beautify formatting, bounded selection prefill, complete statistics, and no document mutation command.
 - Add a local-only accessible webview with strict CSP and validated messaging.
+- Mount the shared `@kitland/ui` WorkspaceShell in the webview so the workbench
+  chrome matches the web and browser-extension surfaces.
 - Add desktop, web-extension, unit, Extension Host, and package-smoke foundations.
+- Certify the complete suite: every catalog tool is `release-ready` on
+  `vscode-extension` and the per-surface rollout gate passes.
 
-This version is an internal foundation and is not the completed Kitland tool suite.
+0.1.0 is the first complete-suite release candidate: the coordinated release
+gate certifies all 64 tools release-ready across web, browser extension, and VS Code.

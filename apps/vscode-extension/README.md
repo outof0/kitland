@@ -1,25 +1,29 @@
 # Kitland Developer Tools for VS Code
 
 The VS Code surface for Kitland's local, privacy-first developer-tool suite. This package is a
-catalog-driven foundation for the full tool set; Base64 is the first reference adapter and vertical
-slice, not the product boundary or a claim that the complete suite is ready.
+catalog-driven host: only tools declared `available` on `vscode-extension` appear here. Web
+availability never implies a VS Code adapter.
 
-## Current reference slice
+## Current host surface
 
-- `Kitland: Open Tool...` discovers tools from the extension catalog and opens the shared workbench.
-- `Kitland: Base64: Encode and Replace Selection` transforms one or more non-overlapping selections
-  in a single undoable edit.
-- `Kitland: Base64: Decode and Replace Selection` validates every selection before applying any edit.
-- The Base64 workbench supports Standard and URL-safe variants through `@kitland/core`.
+- `Kitland: Open Tool...` discovers every catalog-available VS Code tool and opens the shared workbench.
+- Specialty selection commands remain hand-reviewed:
+  - `Kitland: Base64: Encode and Replace Selection` / `Decode and Replace Selection`
+  - `Kitland: cURL Converter: Convert Selection to Fetch`
+- JSON Formatter uses the structured `text-inspect` workbench (Beautify/Minify, 2/4-space indent,
+  statistics, copy-only output; no document edits).
+- Pure transforms declared multi-host in `@kitland/tools` mount through
+  `src/adapters/host-transforms.ts` (Open Tool only; no mass selection-command contributions).
 - The same runtime is bundled for desktop, remote, and VS Code for the Web.
 
 ## Architecture for the full catalog
 
-`@kitland/tool-catalog` owns immutable product identity and platform capability metadata;
+`@kitland/tools` owns immutable product identity and platform capability metadata;
 `src/toolCatalog.ts` is the VS Code adapter discovery boundary. Each adapter supplies safety limits,
 renderer configuration, and optional editor commands. `src/toolPanel.ts` owns one secure webview
 lifecycle and switches between catalog entries. The renderer contract is discriminated by `kind`;
-the first implementation is `text-transform`. New renderer families should add a separate contract
+`text-transform` preserves bounded transformation and atomic selection behavior, while `text-inspect`
+renders structured read-only inspection results. New renderer families should add a separate contract
 and renderer implementation rather than adding tool-specific conditions to the panel.
 
 The Base64 adapter in `src/adapters/base64.ts` demonstrates the intended rule: platform code owns
@@ -60,13 +64,12 @@ VSIX contents.
 
 ## Gaps before the complete suite can ship
 
-1. Register the remaining shared-tool adapters while preserving the exhaustive
-   shared-catalog-to-adapter check; product release remains blocked until the complete inventory
-   passes its gates.
-2. Add renderer contracts beyond text transformation (structured forms, diff, generators, file-safe
-   workflows) with accessibility and protocol tests per renderer.
-3. Generate or verify static `package.json` command/menu contributions against the catalog so dozens
-   of commands cannot drift from runtime registration.
+1. Promote remaining web-only tools (generators, inspectors, diff, crypto, network) only when host
+   adapters, budgets, and privacy disclosures exist; keep those catalog hosts `planned` until then.
+2. Add renderer contracts beyond text transformation/inspection (forms, diff, generators) with
+   accessibility and protocol tests per renderer.
+3. Optionally expand hand-reviewed selection commands; host-transform adapters intentionally ship
+   without automatic selection-command generation.
 4. Introduce worker/streaming protocols and cancellation before any tool exceeds the current
    1,000,000-character message ceiling.
 5. Expand the Linux Extension Host and web-bundle CI baseline into the final compatibility matrix;
