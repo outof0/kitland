@@ -1,4 +1,4 @@
-import { listAvailableTools } from "@kitland/tool-catalog";
+import { listAvailableTools } from "@kitland/tools";
 import { expect, test } from "@playwright/test";
 
 /**

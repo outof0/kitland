@@ -1,47 +1,14 @@
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/manrope/wght.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "./tokens.css";
+@import "@kitland/ui/workspace.css";
+@source "../../../../packages/ui/src";
 
-/* Shadcn is the component system. Kitland's existing palette remains the
- * single source of color truth, including its persisted data-theme switch. */
-@custom-variant dark (&:is([data-theme="dark"] *));
-
+/* Marketing palette. The landing/catalog intentionally keep a fixed dark
+ * canvas, but JSX must still consume named Tailwind tokens rather than raw
+ * hex values. */
 @theme inline {
-  --color-bg: var(--bg);
-  --color-bg-elevated: var(--bg-elevated);
-  --color-surface-low: var(--surface-low);
-  --color-surface: var(--surface);
-  --color-surface-high: var(--surface-high);
-  --color-outline: var(--outline);
-  --color-outline-strong: var(--outline-strong);
-  --color-on-surface: var(--on-surface);
-  --color-on-muted: var(--on-muted);
-  --color-on-faint: var(--on-faint);
-  --color-primary: var(--primary);
-  --color-primary-strong: var(--primary-strong);
-  --color-primary-soft: var(--primary-soft);
-  --color-accent: var(--ui-accent);
-  --color-accent-lime: var(--accent-lime);
-  --color-success: var(--success);
-  --color-success-soft: var(--success-soft);
-  --color-error: var(--error);
-  --color-info: var(--info);
-  --color-rail: var(--rail);
-  --color-ink-dark: var(--ink-dark);
-  --color-code-key: var(--code-key);
-  --color-code-string: var(--code-string);
-  --color-code-number: var(--code-number);
-  --color-code-punct: var(--code-punct);
-  --color-text-secondary: var(--text-secondary);
-  --font-ui: var(--font-ui);
-  --font-display: var(--font-display);
-  --font-mono: var(--font-mono);
-  --shadow-primary: var(--shadow-primary);
-
-  /* Marketing palette. The landing/catalog intentionally keep a fixed dark
-   * canvas, but JSX must still consume named Tailwind tokens rather than raw
-   * hex values. */
   --color-marketing-canvas: #0b0c10;
   --color-marketing-shell: #0d0f13;
   --color-marketing-panel: #0f172a;
@@ -72,9 +39,10 @@
   --color-marketing-border-hover: #515867;
   --color-marketing-primary: #2563eb;
   --color-marketing-primary-hover: #1d4ed8;
+  --color-marketing-on-primary: #ffffff;
   --color-marketing-primary-light: #60a5fa;
-  --color-marketing-text-faint: #697284;
-  --color-marketing-text-muted: #7c8596;
+  --color-marketing-text-faint: #8490a3;
+  --color-marketing-text-muted: #94a3b8;
   --color-marketing-success: #86efac;
   --color-marketing-text-quiet: #8e97a7;
   --color-marketing-text-primary: #93c5fd;
@@ -101,11 +69,6 @@
     rgb(37 99 235 / 35%),
     transparent 48%
   );
-  --animate-marketing-enter: marketing-fade-up 720ms var(--motion-ease) both;
-  --animate-marketing-enter-fast: marketing-fade-up 220ms var(--motion-ease) both;
-  --animate-marketing-pulse: marketing-pulse-dot 2.4s ease-out infinite;
-  --animate-marketing-float: marketing-float 7s var(--motion-ease) infinite;
-
   /* Shadcn semantic aliases. Do not reuse --accent here: Kitland uses that
    * name for its lime brand accent, whereas Shadcn uses it as a surface. */
   --font-sans: var(--font-ui);
@@ -143,33 +106,10 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@utility sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-@utility not-sr-only {
-  position: static;
-  width: auto;
-  height: auto;
-  padding: 0;
-  margin: 0;
-  overflow: visible;
-  clip: auto;
-  white-space: normal;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 html {
@@ -190,67 +130,8 @@ html {
   }
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: Inter, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-.font-display {
-  font-family: var(--font-display);
-}
-
-.font-mono {
-  font-family: var(--font-mono);
-}
-
-.font-ui {
-  font-family: var(--font-ui);
-}
-
-#root {
-  min-height: 100vh;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button {
-  font: inherit;
-  cursor: pointer;
-}
-
-img {
-  display: block;
-  max-width: 100%;
-}
-
 summary::-webkit-details-marker {
   display: none;
-}
-
-/* Runtime-only helper elements use named classes rather than style
- * attributes so the static CSP can keep `style-src-attr 'none'`. */
-.kitland-clipboard-fallback {
-  position: fixed;
-  top: 0;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-}
-
-.kitland-file-picker {
-  display: none;
-}
-
-:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
 }
 
 @keyframes marketing-fade-up {
@@ -264,25 +145,211 @@ summary::-webkit-details-marker {
   }
 }
 
-@keyframes marketing-pulse-dot {
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 0 0 rgb(190 242 100 / 42%);
+@keyframes marketing-highlight-in {
+  from {
+    clip-path: inset(0 100% 0 0);
   }
-  50% {
-    opacity: 0.85;
-    box-shadow: 0 0 0 6px rgb(190 242 100 / 0%);
+  to {
+    clip-path: inset(0 0 0 0);
   }
 }
 
-@keyframes marketing-float {
+@keyframes marketing-workbench-in {
+  from {
+    opacity: 0.7;
+    transform: translate3d(0, 14px, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes marketing-input-ready {
+  0%,
+  100% {
+    border-color: var(--color-marketing-border-recessed);
+  }
+  45% {
+    border-color: var(--color-marketing-primary-light);
+    box-shadow: inset 0 0 0 1px rgb(96 165 250 / 18%);
+  }
+}
+
+@keyframes marketing-transform-run {
   0%,
   100% {
     transform: translate3d(0, 0, 0);
   }
+  45% {
+    transform: translate3d(7px, 0, 0);
+  }
+}
+
+@keyframes marketing-output-ready {
+  0%,
+  100% {
+    border-color: var(--color-marketing-border-recessed);
+  }
+  45% {
+    border-color: var(--color-marketing-success-border);
+    background-color: rgb(16 38 25 / 58%);
+  }
+}
+
+@keyframes marketing-success-ready {
+  0% {
+    color: var(--color-marketing-text-strong);
+  }
   50% {
-    transform: translate3d(0, -5px, 0);
+    color: var(--color-marketing-accent);
+  }
+  100% {
+    color: var(--color-marketing-text-strong);
+  }
+}
+
+@keyframes marketing-reveal-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes marketing-reveal-scale {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes marketing-counter-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-hero-copy {
+    animation: marketing-fade-up 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-hero-highlight {
+    animation: marketing-highlight-in 360ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-workbench {
+    animation: marketing-workbench-in 360ms 180ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-stage-input {
+    animation: marketing-input-ready 560ms 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-stage-transform {
+    animation: marketing-transform-run 420ms 860ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-stage-output {
+    animation: marketing-output-ready 620ms 1120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-stage-success {
+    animation: marketing-success-ready 520ms 1540ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  /* ---- Scroll-reveal: hidden by default, animate on [data-revealed] ---- */
+  .marketing-reveal {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+
+  .marketing-reveal[data-revealed] {
+    animation: marketing-reveal-up 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-reveal-card {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.97);
+  }
+
+  .marketing-reveal-card[data-revealed] {
+    animation: marketing-reveal-scale 440ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .marketing-reveal-counter {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+
+  .marketing-reveal-counter[data-revealed] {
+    animation: marketing-counter-up 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Stagger delays for children — apply marketing-reveal-stagger-N as additional classes */
+  .marketing-reveal-stagger-1[data-revealed] {
+    animation-delay: 60ms;
+  }
+  .marketing-reveal-stagger-2[data-revealed] {
+    animation-delay: 120ms;
+  }
+  .marketing-reveal-stagger-3[data-revealed] {
+    animation-delay: 180ms;
+  }
+  .marketing-reveal-stagger-4[data-revealed] {
+    animation-delay: 240ms;
+  }
+  .marketing-reveal-stagger-5[data-revealed] {
+    animation-delay: 300ms;
+  }
+  .marketing-reveal-stagger-6[data-revealed] {
+    animation-delay: 360ms;
+  }
+  .marketing-reveal-stagger-7[data-revealed] {
+    animation-delay: 420ms;
+  }
+  .marketing-reveal-stagger-8[data-revealed] {
+    animation-delay: 480ms;
+  }
+
+  @keyframes marketing-pulse-glow {
+    0%,
+    100% {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.65;
+      transform: scale(1.04);
+    }
+  }
+
+  .marketing-glow-pulse {
+    animation: marketing-pulse-glow 6s ease-in-out infinite;
+  }
+
+  .marketing-glow-pulse-delayed {
+    animation: marketing-pulse-glow 6s ease-in-out infinite;
+    animation-delay: 3s;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .marketing-action-arrow {
+    transform: translate3d(3px, 0, 0);
   }
 }
 
@@ -320,8 +387,8 @@ summary::-webkit-details-marker {
 }
 
 :root[data-theme="dark"] {
-  --primary-foreground: var(--ink-dark);
-  --sidebar-primary-foreground: var(--ink-dark);
+  --primary-foreground: var(--on-primary);
+  --sidebar-primary-foreground: var(--on-primary);
 }
 
 @layer base {

@@ -8,7 +8,7 @@ import { cva } from "class-variance-authority";
  * visual variants stay consistent across Astro and React entry points.
  */
 export const marketingButton = cva(
-  "inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out hover:-translate-y-px active:scale-[0.985]",
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-md font-semibold transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marketing-primary-light motion-safe:hover:-translate-y-px motion-safe:active:scale-[0.985]",
   {
     variants: {
       tone: {
@@ -30,10 +30,11 @@ export const marketingButton = cva(
   },
 );
 
-export const marketingLink = "transition-colors hover:text-marketing-foreground";
+export const marketingLink =
+  "rounded-sm transition-colors hover:text-marketing-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-marketing-primary-light";
 
 export const marketingNavLink =
-  "relative text-sm font-medium text-marketing-text-secondary transition-colors hover:text-marketing-foreground after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-marketing-primary after:transition-transform hover:after:scale-x-100";
+  "relative rounded-sm text-sm font-medium text-marketing-text-secondary transition-colors hover:text-marketing-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-marketing-primary-light after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-marketing-primary after:transition-transform motion-safe:hover:after:scale-x-100";
 
 export const marketingCard =
-  "rounded-xl border border-marketing-border-card bg-marketing-surface transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-marketing-border-hover hover:shadow-marketing-card";
+  "rounded-xl border border-marketing-border-card bg-marketing-surface transition-[transform,box-shadow,border-color] duration-200 ease-out hover:border-marketing-border-hover hover:shadow-marketing-card motion-safe:hover:-translate-y-1";

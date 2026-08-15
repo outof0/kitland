@@ -1,90 +1,113 @@
-import { err, testRegex, type RegexTestResult, type ToolResult } from "@kitland/core";
+import {
+  err,
+  ok,
+  testRegex,
+  type RegexTestResult,
+  type ToolResult,
+} from "@kitland/core";
+import {
+  isRegexTesterWorkerResponse,
+  type RegexTesterWorkerRequest,
+} from "@/lib/regex-tester-worker-protocol";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+const TEST_DEBOUNCE_MS = 120;
+const UNAVAILABLE_ERROR = {
+  code: "WORKER_UNAVAILABLE",
+  message: "The local regex tester is unavailable. Refresh the page and try again.",
+} as const;
+
 type Query = { pattern: string; input: string; flags: string };
-type WorkerResponse = { id: number; result: ToolResult<RegexTestResult> };
+type State = { result: ToolResult<RegexTestResult>; isProcessing: boolean };
 
-export type RegexTesterState = {
-  result: ToolResult<RegexTestResult>;
-  isProcessing: boolean;
-};
-
-const DEBOUNCE_MS = 160;
-const EXECUTION_TIMEOUT_MS = 750;
+const EMPTY_MATCHES: RegexTestResult = { matches: [], truncated: false };
 
 /**
- * Runs user patterns in a short-lived worker. The watchdog terminates patterns
- * that exhibit catastrophic backtracking, so an editor remains responsive.
+ * Web host hook for the shared Regex Tester. User-provided patterns run in a
+ * cancellable Web Worker so a catastrophic pattern cannot freeze the page;
+ * the synchronous core `testRegex` is only the explicit fallback when workers
+ * are unavailable.
  */
-export function useRegexTester(pattern: string, input: string, flags: string): RegexTesterState {
-  const query = useMemo<Query>(() => ({ pattern, input, flags }), [flags, input, pattern]);
-  const latest = useRef(query);
-  latest.current = query;
-  const [completed, setCompleted] = useState(() => ({
-    query,
-    result: testRegex(pattern, input, { flags }),
-  }));
+export function useRegexTester(pattern: string, input: string, flags: string): State {
+  const query = useMemo<Query>(() => ({ pattern, input, flags }), [pattern, input, flags]);
+  const requestId = useRef(0);
+  const [state, setState] = useState<State>(() => immediateState(query));
 
   useEffect(() => {
-    if (sameQuery(completed.query, query)) return;
+    const immediate = immediateState(query);
+    if (!immediate.isProcessing) {
+      setState(immediate);
+      return;
+    }
 
-    let worker: Worker | null = null;
-    let watchdog: number | undefined;
-    const debounce = window.setTimeout(() => {
+    setState({ result: { ok: true, value: EMPTY_MATCHES }, isProcessing: true });
+
+    let worker: Worker | undefined;
+    let active = true;
+    const timer = window.setTimeout(() => {
+      if (!active) return;
+      if (typeof Worker === "undefined") {
+        setState({ result: testRegex(query.pattern, query.input, { flags: query.flags }), isProcessing: false });
+        return;
+      }
       try {
-        worker = new Worker(new URL("../tools/regex-tester.worker.ts", import.meta.url), {
+        worker = new Worker(new URL("../workers/regex-tester.worker.ts", import.meta.url), {
           type: "module",
         });
       } catch {
-        setCompleted({
-          query,
-          result: err("WORKER_UNAVAILABLE", "The regex worker could not start."),
-        });
+        setState({ result: err(UNAVAILABLE_ERROR.code, UNAVAILABLE_ERROR.message), isProcessing: false });
         return;
       }
 
-      const complete = (result: ToolResult<RegexTestResult>) => {
-        if (watchdog !== undefined) window.clearTimeout(watchdog);
-        if (sameQuery(latest.current, query)) setCompleted({ query, result });
+      const id = requestId.current === Number.MAX_SAFE_INTEGER ? 1 : requestId.current + 1;
+      requestId.current = id;
+      const fail = () => {
+        if (!active) return;
+        active = false;
+        worker?.terminate();
+        setState({ result: err(UNAVAILABLE_ERROR.code, UNAVAILABLE_ERROR.message), isProcessing: false });
       };
       worker.addEventListener("message", (event: MessageEvent<unknown>) => {
-        if (!isWorkerResponse(event.data) || event.data.id !== 1) return;
-        complete(event.data.result);
-      });
-      worker.addEventListener("error", () => {
-        complete(err("WORKER_FAILED", "The regex worker stopped unexpectedly."));
-      });
-      watchdog = window.setTimeout(() => {
+        if (!active) return;
+        if (!isRegexTesterWorkerResponse(event.data)) {
+          fail();
+          return;
+        }
+        if (event.data.id !== id) return;
+        active = false;
         worker?.terminate();
-        complete(
-          err(
-            "REGEX_TIMEOUT",
-            `The pattern exceeded the ${EXECUTION_TIMEOUT_MS} ms safety limit and was stopped.`,
-          ),
-        );
-      }, EXECUTION_TIMEOUT_MS);
-      worker.postMessage({ id: 1, ...query });
-    }, DEBOUNCE_MS);
+        setState({ result: event.data.result, isProcessing: false });
+      });
+      worker.addEventListener("error", fail);
+      worker.addEventListener("messageerror", fail);
+
+      const request: RegexTesterWorkerRequest = {
+        type: "test",
+        id,
+        pattern: query.pattern,
+        input: query.input,
+        flags: query.flags,
+      };
+      try {
+        worker.postMessage(request);
+      } catch {
+        fail();
+      }
+    }, TEST_DEBOUNCE_MS);
 
     return () => {
-      window.clearTimeout(debounce);
-      if (watchdog !== undefined) window.clearTimeout(watchdog);
+      active = false;
+      window.clearTimeout(timer);
       worker?.terminate();
     };
-  }, [completed.query, query]);
+  }, [query]);
 
-  return {
-    result: completed.result,
-    isProcessing: !sameQuery(completed.query, query),
-  };
+  return state;
 }
 
-function sameQuery(left: Query, right: Query): boolean {
-  return left.pattern === right.pattern && left.input === right.input && left.flags === right.flags;
-}
-
-function isWorkerResponse(value: unknown): value is WorkerResponse {
-  if (!value || typeof value !== "object") return false;
-  const response = value as Record<string, unknown>;
-  return typeof response.id === "number" && "result" in response;
+function immediateState(query: Query): State {
+  if (query.pattern.length === 0 || query.input.length === 0) {
+    return { result: ok(EMPTY_MATCHES), isProcessing: false };
+  }
+  return { result: { ok: true, value: EMPTY_MATCHES }, isProcessing: true };
 }

@@ -1,4 +1,6 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { expectPaneText, fillPane, pane, paneText } from "./support/editor";
 
 test.describe("structured data tool contracts", () => {
   test("formats and converts the shared two-pane tools", async ({ page }) => {
@@ -60,57 +62,231 @@ test.describe("structured data tool contracts", () => {
 
     for (const tool of cases) {
       await page.goto(`/explore/${tool.slug}`);
-      const input = page.getByRole("textbox", { name: tool.input });
-      const output = page.getByRole("textbox", { name: tool.output });
-      await input.fill(tool.source);
-      await expect(output).toHaveValue(tool.expected);
-      await expect(page.getByRole("button", { name: "Download result" })).toBeEnabled();
+      const input = pane(page, tool.input);
+      const output = pane(page, tool.output);
+      await expectPaneText(input, "");
+      await expectPaneText(output, "");
+      await expect(page.getByRole("button", { name: `Copy ${tool.output}` })).toBeDisabled();
+      await page.getByRole("button", { name: "Sample" }).click();
+      await expect.poll(async () => paneText(input)).not.toBe("");
+      await fillPane(input, tool.source);
+      await expectPaneText(output, tool.expected);
+      await expect(page.getByRole("button", { name: `Copy ${tool.output}` })).toBeEnabled();
+      await expect(page.getByRole("button", { name: "Download result" })).toHaveCount(0);
     }
+  });
+
+  test("uses the standard local transform shell without mobile overflow", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/explore/json-to-csv");
+
+    await expectPaneText(pane(page, "JSON records"), "");
+    await expect(page.getByRole("button", { name: "Sample" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Clear" })).toBeDisabled();
+    await expect(page.getByLabel("JSON → CSV status")).toContainText("Waiting");
+
+    const dimensions = await page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+    expect(dimensions.scrollWidth).toBe(dimensions.clientWidth);
+
+    const results = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(results.violations).toEqual([]);
   });
 
   test("shows actionable validation errors without preserving stale output", async ({ page }) => {
     await page.goto("/explore/beautify-minify");
-    const input = page.getByRole("textbox", { name: "JSON input" });
-    const output = page.getByRole("textbox", { name: "Formatted JSON" });
-    await input.fill('{"valid":true}');
-    await expect(output).toHaveValue('{\n  "valid": true\n}');
+    const input = pane(page, "JSON input");
+    const output = pane(page, "Formatted JSON");
+    await fillPane(input, '{"valid":true}');
+    await expectPaneText(output, '{\n  "valid": true\n}');
 
-    await input.fill("{");
+    await fillPane(input, "{");
     await expect(page.getByRole("alert")).toContainText("JSON is invalid");
-    await expect(output).toHaveValue("");
-    await expect(page.getByRole("button", { name: "Download result" })).toBeDisabled();
+    await expectPaneText(output, "");
+    await expect(page.getByRole("button", { name: "Copy Formatted JSON" })).toBeDisabled();
+  });
+
+  test("contains worker faults and never renders a stale structured result", async ({ page }) => {
+    await page.addInitScript(() => {
+      const variant = new URL(window.location.href).searchParams.get("worker-case");
+      if (variant === "unavailable") {
+        Object.defineProperty(window, "Worker", {
+          configurable: true,
+          value: undefined,
+        });
+        return;
+      }
+      if (variant !== "malformed" && variant !== "stale") return;
+
+      class ControlledWorker {
+        private listeners = new Map<string, Array<(event: { data?: unknown }) => void>>();
+
+        addEventListener(type: string, listener: (event: { data?: unknown }) => void) {
+          this.listeners.set(type, [...(this.listeners.get(type) ?? []), listener]);
+        }
+
+        postMessage(request: { id?: unknown; source?: unknown }) {
+          const id = typeof request.id === "number" ? request.id : 1;
+          if (variant === "malformed") {
+            queueMicrotask(() => this.emit({ type: "result", id, result: { ok: true } }));
+            return;
+          }
+
+          const source = typeof request.source === "string" ? request.source : "";
+          const result = source.includes('"first"')
+            ? '{\n  "first": true\n}'
+            : '{\n  "second": true\n}';
+          window.setTimeout(
+            () =>
+              this.emit({
+                type: "result",
+                id,
+                result: { ok: true, value: result },
+              }),
+            source.includes('"first"') ? 400 : 150,
+          );
+        }
+
+        terminate() {
+          // Deliberately leave an already scheduled message alive. The hook's
+          // request lifetime guard, not the mock, must discard it.
+        }
+
+        private emit(data: unknown) {
+          for (const listener of this.listeners.get("message") ?? []) listener({ data });
+        }
+      }
+
+      Object.defineProperty(window, "Worker", {
+        configurable: true,
+        value: ControlledWorker,
+      });
+    });
+
+    const open = async (workerCase: "malformed" | "unavailable" | "stale") => {
+      await page.goto(`/explore/beautify-minify?worker-case=${workerCase}`);
+      return {
+        input: pane(page, "JSON input"),
+        output: pane(page, "Formatted JSON"),
+      };
+    };
+
+    const malformed = await open("malformed");
+    await fillPane(malformed.input, '{"valid":true}');
+    await expect(page.getByRole("alert")).toContainText("invalid response");
+    await expectPaneText(malformed.output, "");
+    await expect(page.getByRole("button", { name: "Copy Formatted JSON" })).toBeDisabled();
+
+    const unavailable = await open("unavailable");
+    await fillPane(unavailable.input, '{"valid":true}');
+    await expect(page.getByRole("alert")).toContainText("worker is unavailable");
+    await expectPaneText(unavailable.output, "");
+
+    const stale = await open("stale");
+    await fillPane(stale.input, '{"first":true}');
+    await page.waitForTimeout(180);
+    await fillPane(stale.input, '{"second":true}');
+    await expectPaneText(stale.output, "");
+    await expectPaneText(stale.output, '{\n  "second": true\n}');
+    await page.waitForTimeout(500);
+    await expectPaneText(stale.output, '{\n  "second": true\n}');
+  });
+
+  test("renders CodeMirror panes with editable results and working indent options", async ({
+    page,
+  }) => {
+    await page.goto("/explore/json-to-js-const");
+    const input = pane(page, "JSON");
+    const output = pane(page, "JavaScript");
+    await expect(page.locator(".cm-editor")).toHaveCount(2);
+    await expect(page.locator(".cm-gutters")).toHaveCount(2);
+    await expect(page.locator(".cm-content").nth(0)).toHaveAttribute("aria-label", "JSON");
+
+    await fillPane(input, '{"nested":{"a":1}}');
+    await expectPaneText(output, 'const value = {\n  "nested": {\n    "a": 1\n  }\n};');
+
+    await page.getByLabel("Indent size").selectOption("4");
+    await expectPaneText(output, 'const value = {\n    "nested": {\n        "a": 1\n    }\n};');
+
+    await fillPane(output, "const value = {\n  // tweaked\n};");
+    await expectPaneText(output, "const value = {\n  // tweaked\n};");
+    await expect(page.getByRole("button", { name: "Copy JavaScript" })).toBeEnabled();
+
+    // A different source re-derives the result (manual output edits stick
+    // until the next source change).
+    await fillPane(input, '{"nested":{"b":2}}');
+    await expectPaneText(output, 'const value = {\n    "nested": {\n        "b": 2\n    }\n};');
+  });
+
+  test("json-to-typescript honors the indent option", async ({ page }) => {
+    await page.goto("/explore/json-to-typescript");
+    await page.getByLabel("Indent size").selectOption("4");
+    await fillPane(pane(page, "JSON"), '{"user":{"id":1}}');
+    await expectPaneText(
+      pane(page, "TypeScript interfaces"),
+      "export type Root = {\n    user: {\n        id: number;\n    };\n};",
+    );
   });
 
   test("inspects JSON and compares two structural documents", async ({ page }) => {
-    await page.goto("/explore/json-toolbox");
-    await page.getByRole("textbox", { name: "JSON input" }).fill('{"name":"Kitland","items":[1]}');
-    await expect(page.getByRole("textbox", { name: "Formatted JSON" })).toHaveValue(
+    await page.goto("/explore/json-formatter");
+    await fillPane(pane(page, "JSON input"), '{"name":"Kitland","items":[1]}');
+    await page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "Output" }) })
+      .getByRole("button", { name: "Code", exact: true })
+      .click();
+    await expectPaneText(
+      pane(page, "Formatted JSON"),
       '{\n  "name": "Kitland",\n  "items": [\n    1\n  ]\n}',
     );
-    await expect(page.getByLabel("JSON inspection summary")).toContainText(
-      "object · 4 values · depth 2",
-    );
+    const inspection = page.getByLabel("JSON inspection summary");
+    await expect(inspection).toContainText("object");
+    await expect(inspection).toContainText("props");
+    await expect(inspection).toContainText("2");
 
     await page.goto("/explore/json-diff");
-    await page
-      .getByRole("textbox", { name: "Before JSON" })
-      .fill('{"service":"kitland","version":1}');
-    await page
-      .getByRole("textbox", { name: "After JSON" })
-      .fill('{"service":"kitland","version":2,"released":true}');
+    await expect(page.getByRole("button", { name: "Editor", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await fillPane(pane(page, "Before JSON"), '{"service":"kitland","version":1}');
+    await fillPane(pane(page, "After JSON"), '{"service":"kitland","version":2,"released":true}');
+    // Editor owns A/B; Compare is an explicit mode on the same route.
+    await expect(page.getByRole("list", { name: "JSON differences" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Compare documents" }).click();
+    await expect(page.getByRole("button", { name: "Compare", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     await expect(page.getByRole("list", { name: "JSON differences" })).toContainText(
       "/released — added: true",
     );
     await expect(page.getByRole("list", { name: "JSON differences" })).toContainText(
       "/version — changed: 1 → 2",
     );
+    await page.getByRole("button", { name: "Edit inputs" }).click();
+    await expect(page.getByRole("button", { name: "Editor", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expectPaneText(pane(page, "Before JSON"), '{"service":"kitland","version":1}');
+    await expectPaneText(
+      pane(page, "After JSON"),
+      '{"service":"kitland","version":2,"released":true}',
+    );
   });
 
   test("renders Markdown safely in the preview pane", async ({ page }) => {
     await page.goto("/explore/markdown-preview");
-    await page
-      .getByRole("textbox", { name: "Markdown source" })
-      .fill("# Safe preview\n\n**Local**\n\n<script>window.__unsafe = true</script>");
+    await fillPane(
+      pane(page, "Markdown source"),
+      "# Safe preview\n\n**Local**\n\n<script>window.__unsafe = true</script>",
+    );
 
     await expect(page.getByRole("heading", { name: "Safe preview" })).toBeVisible();
     await expect(page.getByText("Local", { exact: true })).toHaveCount(1);

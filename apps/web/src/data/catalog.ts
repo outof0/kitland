@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 import { Braces, Clock3, Dices, Regex, ShieldCheck, Shuffle } from "lucide-react";
-import { CATALOG_RELEASE_POLICY } from "@kitland/tool-catalog";
 
 export type CatalogFamily = {
   id: string;
@@ -78,32 +77,26 @@ export const CATALOG_FAMILIES = [
   },
 ] as const satisfies readonly CatalogFamily[];
 
-export const STATS = [
-  { value: String(CATALOG_RELEASE_POLICY.targetToolCount), label: "release target" },
-  { value: "6", label: "tool families" },
-  { value: "3", label: "product surfaces" },
-  { value: "0", label: "payload uploads" },
-] as const;
-
 export const PRINCIPLES = [
   {
     index: "01",
-    title: "Local by default",
+    title: "Enter the payload",
     description:
-      "Tool inputs are processed on the current device. Payloads never need to cross the network.",
-    chip: "NO UPLOAD",
+      "Paste text or import a file into an available workspace without creating an account.",
+    chip: "YOUR INPUT",
   },
   {
     index: "02",
-    title: "One step, one result",
-    description: "Open a tool, paste, copy. No wizards, onboarding, or artificial waiting.",
-    chip: "1-STEP",
+    title: "Process on this device",
+    description:
+      "Runnable tools perform their transformation in the current browser, not through a Kitland API.",
+    chip: "NO UPLOAD",
   },
   {
     index: "03",
-    title: "One tested core",
+    title: "Copy the result",
     description:
-      "Web, browser extension, and VS Code reuse the same typed rules, limits, errors, and test vectors.",
-    chip: "3 SURFACES",
+      "Take the output and move on without onboarding, artificial waiting, or payload telemetry.",
+    chip: "ONE RESULT",
   },
 ] as const;

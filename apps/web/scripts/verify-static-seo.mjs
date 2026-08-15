@@ -404,6 +404,58 @@ function verifyBase64(page, relativePath) {
   }
 }
 
+function verifyLanding(page) {
+  const pageLabel = `Landing (${page.relativePath})`;
+  const headings = [...page.html.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/gi)];
+  if (headings.length !== 1) {
+    fail(`${pageLabel} must contain exactly one h1, found ${headings.length}`);
+  } else if (!visibleText(headings[0][1])) {
+    fail(`${pageLabel} h1 must contain visible text`);
+  }
+
+  if (!hasJsonLdType(page.html, "WebSite", pageLabel)) {
+    fail(`${pageLabel} is missing WebSite JSON-LD`);
+  }
+
+  const ogImage = getMetaContent(page.html, "property", "og:image");
+  const ogImageAlt = getMetaContent(page.html, "property", "og:image:alt");
+  const ogImageWidth = getMetaContent(page.html, "property", "og:image:width");
+  const ogImageHeight = getMetaContent(page.html, "property", "og:image:height");
+  const twitterImageAlt = getMetaContent(page.html, "name", "twitter:image:alt");
+
+  if (!ogImageAlt) fail(`${pageLabel} is missing og:image:alt`);
+  if (!twitterImageAlt) fail(`${pageLabel} is missing twitter:image:alt`);
+  if (ogImageWidth !== "1200" || ogImageHeight !== "630") {
+    fail(`${pageLabel} social image metadata must declare 1200x630`);
+  }
+
+  if (!ogImage) {
+    fail(`${pageLabel} is missing og:image`);
+    return;
+  }
+
+  let imageUrl;
+  try {
+    imageUrl = new URL(ogImage);
+  } catch {
+    fail(`${pageLabel} og:image is not an absolute URL`);
+    return;
+  }
+
+  const imagePath = resolve(DIST_DIRECTORY, imageUrl.pathname.replace(/^\//, ""));
+  if (!existsSync(imagePath)) {
+    fail(`${pageLabel} og:image does not resolve to a built static asset`);
+    return;
+  }
+
+  const image = readFileSync(imagePath);
+  const width = image.readUInt32BE(16);
+  const height = image.readUInt32BE(20);
+  if (width !== 1200 || height !== 630) {
+    fail(`${pageLabel} built social image must be 1200x630, found ${width}x${height}`);
+  }
+}
+
 if (!existsSync(DIST_DIRECTORY)) {
   fail(`Missing build output: ${DIST_DIRECTORY}. Run the Astro build first.`);
 } else {
@@ -467,6 +519,13 @@ if (!existsSync(DIST_DIRECTORY)) {
   verifyNoLegacyToolRoutes(pages);
   verifyExploreCatalog(pages);
   verifyPublicDeliveryFiles();
+
+  const landingPage = renderedPages.get(SITE_ORIGIN);
+  if (!landingPage) {
+    fail("Landing route is missing from the sitemap or its static output");
+  } else {
+    verifyLanding(landingPage);
+  }
 
   const base64Page = renderedPages.get(`${SITE_ORIGIN}/explore/base64`);
   if (!base64Page) {

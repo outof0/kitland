@@ -41,6 +41,13 @@ const DEFAULT_TEXT_FILE_EXTENSIONS = new Set([
 ]);
 const CLIPBOARD_WRITE_TIMEOUT_MS = 1_500;
 
+/**
+ * Upper bound on bytes read when a caller supplies neither `maxBytes` nor
+ * `maxChars`. A tool that forgets to cap its upload still rejects a multi-hundred
+ * MB file before it is decoded, instead of freezing or OOM-ing the tab.
+ */
+const DEFAULT_PICK_MAX_BYTES = 8 * 1024 * 1024;
+
 type LegacyCopyDocument = {
   execCommand?: (commandId: string) => boolean;
 };
@@ -136,6 +143,11 @@ export function downloadText(filename: string, text: string): void {
  */
 export function pickTextFile(options: PickTextFileOptions = {}): Promise<PickTextFileResult> {
   const { accept = DEFAULT_TEXT_FILE_ACCEPT, maxBytes, maxChars } = options;
+  // Derive a byte ceiling so files are rejected before being read into memory:
+  // from an explicit cap, from the character contract (4 bytes is the UTF-16
+  // surrogate / UTF-8 maxima), or a small hard ceiling.
+  const effectiveMaxBytes =
+    maxBytes ?? (maxChars !== undefined ? maxChars * 4 : DEFAULT_PICK_MAX_BYTES);
 
   return new Promise((resolve) => {
     const input = document.createElement("input");
@@ -176,7 +188,7 @@ export function pickTextFile(options: PickTextFileOptions = {}): Promise<PickTex
         return;
       }
 
-      void readPickedTextFile(file, { maxBytes, maxChars }).then(finish);
+      void readPickedTextFile(file, { accept, maxBytes: effectiveMaxBytes, maxChars }).then(finish);
     };
 
     input.addEventListener("change", onChange, { once: true });
@@ -194,14 +206,16 @@ export function pickTextFile(options: PickTextFileOptions = {}): Promise<PickTex
 async function readPickedTextFile(
   file: File,
   {
+    accept,
     maxBytes,
     maxChars,
   }: {
-    maxBytes: number | undefined;
+    accept: string;
+    maxBytes: number;
     maxChars: number | undefined;
   },
 ): Promise<PickTextFileResult> {
-  if (!isTextFile(file)) {
+  if (!isTextFile(file, accept)) {
     return {
       ok: false,
       code: "UNSUPPORTED_FILE_TYPE",
@@ -259,11 +273,23 @@ export function decodeUtf8Text(buffer: ArrayBuffer): string {
   return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(buffer);
 }
 
-function isTextFile(file: File): boolean {
+function isTextFile(file: File, accept: string): boolean {
   if (file.type.startsWith("text/")) return true;
-
+  const acceptTokens = accept
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
+  if (file.type && acceptTokens.includes(file.type.toLowerCase())) return true;
   const extension = file.name.split(".").pop()?.toLowerCase();
-  return extension !== undefined && DEFAULT_TEXT_FILE_EXTENSIONS.has(extension);
+  if (!extension) return false;
+  if (DEFAULT_TEXT_FILE_EXTENSIONS.has(extension)) return true;
+  const acceptExtensions = new Set(
+    acceptTokens
+      .filter((t) => t.startsWith("."))
+      .map((t) => t.slice(1).toLowerCase())
+      .filter(Boolean),
+  );
+  return acceptExtensions.has(extension);
 }
 
 function formatBytes(bytes: number): string {

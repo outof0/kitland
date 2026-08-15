@@ -66,7 +66,7 @@ test("preserves future envelopes until the user explicitly changes a preference"
     value: ["base64"],
   });
 
-  await page.getByRole("button", { name: "Use light theme" }).click();
+  await page.getByRole("button", { name: "Light" }).click();
   await page.getByRole("button", { name: "Add to favorites" }).click();
 
   await expect

@@ -1,0 +1,850 @@
+/* CodeMirror 6 styling for Kitland tool panes.
+
+   This file is imported from BaseLayout as well as CodeEditor. A JS-only
+   import is injected when the editor chunk first loads, then Astro's
+   ClientRouter drops that tag on the next explore-page swap and the pane
+   collapses to a single line. Layout-level CSS stays in the document head.
+
+   The site ships a strict CSP (Astro.csp: `style-src 'self' + sha256`,
+   no unsafe-inline, `style-src-attr 'none'`), which blocks every
+   runtime-injected <style> tag that style-mod would emit. All CodeMirror
+   styling therefore ships here as bundled CSS with static selectors:
+   - the CM base layout/behavior theme (cursor, selection, gutters, panes,
+     tooltips, fold, bracket matching),
+   - the Kitland visual theme,
+   - the syntax palette (static `.kit-tok-*` classes applied by a
+     HighlightStyle built with `class` specs, which generates no styles).
+
+   The pane fills the editor through a flex chain (no percentage heights,
+   which do not resolve against the min-height-driven workspace layout):
+   pane body (flex row) -> wrapper (flex-1) -> .cm-editor (flex-1, capped).
+*/
+
+.kitland-cm .cm-editor {
+  position: relative !important;
+  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100vh - 274px);
+  background: transparent !important;
+  color: var(--on-surface) !important;
+  font-family: var(--font-mono, "JetBrains Mono Variable", monospace);
+  font-size: 13px;
+}
+
+.kitland-cm .cm-editor.cm-focused {
+  outline: 1px dotted #212121;
+}
+
+.kitland-cm .cm-scroller {
+  display: flex !important;
+  align-items: flex-start !important;
+  flex: 1 1 auto;
+  min-height: 0;
+  font-family: inherit;
+  line-height: 20px;
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+  z-index: 0;
+  overflow-anchor: none;
+  background: transparent !important;
+}
+
+.kitland-cm .cm-content {
+  margin: 0;
+  flex-grow: 2;
+  flex-shrink: 0;
+  display: block;
+  white-space: pre;
+  word-wrap: normal;
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 14px 16px;
+  outline: none;
+  caret-color: var(--primary);
+}
+
+.kitland-cm .cm-content[contenteditable="true"] {
+  -webkit-user-modify: read-write-plaintext-only;
+}
+
+.kitland-cm .cm-lineWrapping {
+  white-space: break-spaces;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  flex-shrink: 1;
+}
+
+.kitland-cm .cm-line {
+  display: block;
+  padding: 0 2px 0 6px;
+}
+
+.kitland-cm .cm-layer {
+  user-select: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  contain: size style;
+}
+
+.kitland-cm .cm-layer > * {
+  position: absolute;
+}
+
+.kitland-cm .cm-cursorLayer {
+  pointer-events: none;
+}
+
+.kitland-cm .cm-editor.cm-focused .cm-cursorLayer {
+  animation: steps(1) cm-blink 1.2s infinite;
+}
+
+@keyframes cm-blink {
+  0% {
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+  }
+}
+
+.kitland-cm .cm-cursor,
+.kitland-cm .cm-dropCursor {
+  border-left: 1.2px solid black;
+  margin-left: -0.6px;
+  pointer-events: none;
+}
+
+.kitland-cm .cm-cursor {
+  display: none;
+  border-left-color: var(--primary);
+  border-left-width: 2px;
+}
+
+.kitland-cm .cm-dropCursor {
+  position: absolute;
+}
+
+.kitland-cm .cm-editor.cm-focused .cm-scroller .cm-cursorLayer .cm-cursor {
+  display: block;
+}
+
+.kitland-cm .cm-selectionBackground,
+.kitland-cm .cm-content ::selection {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+.kitland-cm .cm-selectionMatch {
+  background-color: rgba(59, 130, 246, 0.18);
+}
+
+.kitland-cm .cm-searchMatch {
+  background-color: rgba(59, 130, 246, 0.22);
+  border-radius: 2px;
+}
+
+.kitland-cm .cm-searchMatch.cm-searchMatch-selected {
+  background-color: rgba(59, 130, 246, 0.45);
+  outline: 1.5px solid var(--primary);
+  border-radius: 2px;
+}
+
+.kitland-cm .cm-searchMatch .cm-selectionMatch {
+  background-color: transparent;
+}
+
+[data-theme="light"] .kitland-cm .cm-searchMatch {
+  background-color: rgba(29, 92, 206, 0.18);
+}
+
+[data-theme="light"] .kitland-cm .cm-searchMatch.cm-searchMatch-selected {
+  background-color: rgba(29, 92, 206, 0.35);
+  outline: 1.5px solid var(--primary);
+}
+
+.kitland-cm .cm-iso {
+  unicode-bidi: isolate;
+}
+
+.kitland-cm .cm-announced {
+  position: fixed;
+  top: -10000px;
+}
+
+@media print {
+  .kitland-cm .cm-announced {
+    display: none;
+  }
+}
+
+.kitland-cm .cm-activeLine {
+  background-color: rgba(128, 128, 128, 0.05) !important;
+}
+
+.kitland-cm .cm-activeLineGutter {
+  background-color: transparent !important;
+  color: var(--on-surface) !important;
+  font-weight: bold;
+}
+
+.kitland-cm .cm-gutters {
+  flex-shrink: 0;
+  display: flex;
+  height: 100%;
+  box-sizing: border-box;
+  z-index: 200;
+  background-color: var(--surface-low) !important;
+  color: var(--on-faint) !important;
+  border-right: 1px solid var(--outline) !important;
+  padding-right: 8px;
+  user-select: none;
+}
+
+.kitland-cm .cm-gutters-before {
+  inset-inline-start: 0;
+}
+
+.kitland-cm .cm-gutters-after {
+  inset-inline-end: 0;
+}
+
+.kitland-cm .cm-gutter {
+  display: flex !important;
+  flex-direction: column;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+.kitland-cm .cm-gutterElement {
+  box-sizing: border-box;
+}
+
+.kitland-cm .cm-lineNumbers .cm-gutterElement {
+  padding: 0 8px 0 12px;
+  min-width: 36px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--on-faint);
+}
+
+.kitland-cm .cm-panels {
+  box-sizing: border-box;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 300;
+  font-family: var(--font-ui);
+  font-size: 12px;
+}
+
+.kitland-cm .cm-panels-top {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 40;
+  border: none;
+  background: transparent !important;
+  pointer-events: none;
+  max-width: calc(100% - 24px);
+}
+
+.kitland-cm .cm-panels-bottom {
+  border-top: 1px solid var(--outline);
+  background-color: var(--surface) !important;
+}
+
+@keyframes cm-widget-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Custom Search Widget */
+.kitland-cm .cm-search-widget {
+  pointer-events: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px;
+  background-color: var(--surface) !important;
+  border: 1px solid var(--outline) !important;
+  border-radius: var(--radius, 10px);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.25),
+    0 4px 10px -2px rgba(0, 0, 0, 0.1);
+  min-width: 300px;
+  max-width: 440px;
+  color: var(--on-surface) !important;
+  font-family: var(--font-ui);
+  user-select: none;
+  animation: cm-widget-appear 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+[data-theme="light"] .kitland-cm .cm-search-widget {
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.12),
+    0 4px 10px -2px rgba(0, 0, 0, 0.05);
+}
+
+.kitland-cm .cm-search-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.kitland-cm .cm-search-row-replace {
+  max-height: 40px;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    max-height 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.18s ease,
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    margin 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.kitland-cm .cm-search-row-replace.cm-search-row-hidden {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+  margin-top: -6px;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.kitland-cm .cm-search-spacer {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.kitland-cm .cm-search-box {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  background-color: var(--surface-low);
+  border: 1px solid var(--outline);
+  border-radius: 6px;
+  padding: 0 4px 0 8px;
+  gap: 4px;
+  transition:
+    border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.18s ease;
+}
+
+.kitland-cm .cm-search-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-soft);
+  background-color: var(--surface);
+}
+
+.kitland-cm .cm-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--on-surface);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 26px;
+  padding: 0;
+  margin: 0;
+  caret-color: var(--primary);
+}
+
+.kitland-cm .cm-search-input::placeholder {
+  color: var(--on-faint);
+  user-select: none;
+}
+
+.kitland-cm .cm-search-count {
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  color: var(--on-muted);
+  padding: 0 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
+  transition:
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.kitland-cm .cm-search-count.is-empty {
+  color: var(--warning-strong, #f59e0b);
+  font-family: var(--font-ui);
+  font-size: 11px;
+}
+
+.kitland-cm .cm-search-count.is-found {
+  color: var(--on-muted);
+}
+
+.kitland-cm .cm-search-options {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.kitland-cm .cm-search-chip {
+  box-sizing: border-box;
+  height: 20px;
+  min-width: 20px;
+  padding: 0 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--on-faint);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease,
+    box-shadow 0.15s ease;
+}
+
+.kitland-cm .cm-search-chip:hover {
+  background-color: var(--surface-high);
+  color: var(--on-surface);
+}
+
+.kitland-cm .cm-search-chip:active {
+  transform: scale(0.92);
+}
+
+.kitland-cm .cm-search-chip.is-active {
+  background-color: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.kitland-cm .cm-search-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.kitland-cm .cm-search-replace-actions {
+  gap: 4px;
+}
+
+.kitland-cm .cm-search-btn {
+  box-sizing: border-box;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--on-muted);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.kitland-cm .cm-search-btn:hover {
+  background-color: var(--surface-high);
+  color: var(--on-surface);
+}
+
+.kitland-cm .cm-search-btn:active {
+  transform: scale(0.9);
+}
+
+.kitland-cm .cm-search-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.kitland-cm .cm-search-btn-close:hover {
+  background-color: var(--error-soft);
+  color: var(--error);
+}
+
+.kitland-cm .cm-search-btn-toggle svg {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kitland-cm .cm-search-btn-toggle.is-expanded svg {
+  transform: rotate(90deg);
+}
+
+.kitland-cm .cm-search-btn-toggle.is-expanded {
+  background-color: var(--surface-high);
+  color: var(--primary);
+}
+
+.kitland-cm .cm-search-icon {
+  display: block;
+  pointer-events: none;
+}
+
+.kitland-cm .cm-search-action-btn {
+  box-sizing: border-box;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--outline);
+  background-color: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease,
+    box-shadow 0.15s ease;
+}
+
+.kitland-cm .cm-search-action-btn:hover {
+  background-color: var(--surface-high);
+  border-color: var(--outline-strong);
+  color: var(--on-surface);
+}
+
+.kitland-cm .cm-search-action-btn:active {
+  transform: scale(0.94);
+}
+
+.kitland-cm .cm-search-action-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* Fallback default search panel styles */
+.kitland-cm .cm-panel.cm-search {
+  pointer-events: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 8px 36px 8px 10px;
+  background-color: var(--surface) !important;
+  border: 1px solid var(--outline) !important;
+  border-radius: var(--radius, 10px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.kitland-cm .cm-search br {
+  display: block;
+  flex-basis: 100%;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.kitland-cm .cm-search label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--on-muted);
+  white-space: nowrap;
+}
+
+.kitland-cm .cm-search input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: var(--primary);
+}
+
+.kitland-cm .cm-search button[name="close"] {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--on-muted);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.kitland-cm .cm-search button[name="close"]:hover {
+  background: var(--surface-high);
+  color: var(--on-surface);
+}
+
+.kitland-cm .cm-dialog {
+  padding: 2px 19px 4px 6px;
+  position: relative;
+}
+
+.kitland-cm .cm-dialog label {
+  font-size: 12px;
+}
+
+.kitland-cm .cm-dialog-close {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  background-color: inherit;
+  border: none;
+  font: inherit;
+  font-size: 14px;
+  padding: 0;
+}
+
+.kitland-cm .cm-tab {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.kitland-cm .cm-widgetBuffer {
+  vertical-align: text-top;
+  height: 1em;
+  width: 0;
+  display: inline;
+}
+
+.kitland-cm .cm-placeholder {
+  color: var(--on-faint);
+  font-style: normal;
+  display: inline-block;
+  vertical-align: top;
+  user-select: none;
+}
+
+.kitland-cm .cm-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid var(--outline);
+  border-radius: 6px;
+  background-color: var(--surface);
+  background-image: none !important;
+  color: var(--on-surface);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.kitland-cm .cm-button:hover {
+  background-color: var(--surface-high);
+  border-color: var(--outline-strong);
+}
+
+.kitland-cm .cm-textfield {
+  box-sizing: border-box;
+  height: 26px;
+  min-width: 120px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid var(--outline);
+  border-radius: 6px;
+  background-color: var(--surface-low);
+  background-image: none !important;
+  color: var(--on-surface);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 26px;
+}
+
+.kitland-cm .cm-textfield::placeholder {
+  color: var(--on-faint);
+}
+
+.kitland-cm .cm-textfield:focus {
+  outline: 1.5px solid var(--primary);
+  outline-offset: 0;
+  border-color: var(--primary);
+  background-color: var(--surface);
+}
+
+.kitland-cm .cm-tooltip {
+  z-index: 500;
+  box-sizing: border-box;
+  border: 1px solid var(--outline);
+  background-color: var(--surface-low) !important;
+  color: var(--on-surface) !important;
+}
+
+.kitland-cm .cm-foldPlaceholder {
+  background-color: var(--surface-low);
+  border: 1px solid var(--outline);
+  color: var(--primary);
+  border-radius: 4px;
+  padding: 0 4px;
+  margin: 0 2px;
+}
+
+.kitland-cm .cm-foldGutter span {
+  padding: 0 1px;
+  cursor: pointer;
+}
+
+.kitland-cm .cm-editor.cm-focused .cm-matchingBracket {
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+.kitland-cm .cm-editor.cm-focused .cm-nonmatchingBracket {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* Syntax palette — static classes applied by HighlightStyle with `class`
+   specs (no style-mod involved), so colors survive the CSP. */
+.kitland-cm .kit-tok-propertyName,
+.kitland-cm .kit-tok-tagName {
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+.kitland-cm .kit-tok-string,
+.kitland-cm .kit-tok-attributeValue {
+  color: #34d399;
+}
+
+.kitland-cm .kit-tok-number,
+.kitland-cm .kit-tok-attributeName {
+  color: #fbbf24;
+}
+
+.kitland-cm .kit-tok-bool {
+  color: #f472b6;
+  font-weight: 600;
+}
+
+.kitland-cm .kit-tok-null {
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+.kitland-cm .kit-tok-keyword {
+  color: #818cf8;
+  font-weight: 600;
+}
+
+.kitland-cm .kit-tok-comment {
+  color: #64748b;
+  font-style: italic;
+}
+
+.kitland-cm .kit-tok-punctuation {
+  color: #94a3b8;
+}
+
+.kitland-cm .kit-tok-bracket {
+  color: #cbd5e1;
+}
+
+.kitland-cm .kit-tok-operator {
+  color: #38bdf8;
+}
+
+[data-theme="light"] .kitland-cm .kit-tok-propertyName,
+[data-theme="light"] .kitland-cm .kit-tok-tagName {
+  color: #2563eb;
+}
+
+[data-theme="light"] .kitland-cm .kit-tok-string,
+[data-theme="light"] .kitland-cm .kit-tok-attributeValue {
+  color: #059669;
+}
+
+[data-theme="light"] .kitland-cm .kit-tok-number,
+[data-theme="light"] .kitland-cm .kit-tok-attributeName {
+  color: #d97706;
+}
+
+[data-theme="light"] .kitland-cm .kit-tok-bool {
+  color: #db2777;
+  font-weight: 600;
+}
+
+[data-theme="light"] .kitland-cm .kit-tok-null {
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+[data-theme="light"] .kitland-cm .kit-tok-keyword {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+[data-theme="light"] .kitland-cm .kit-tok-comment {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+[data-theme="light"] .kitland-cm .kit-tok-punctuation {
+  color: #475569;
+}
+
+[data-theme="light"] .kitland-cm .kit-tok-bracket {
+  color: #334155;
+}
+
+[data-theme="light"] .kitland-cm .kit-tok-operator {
+  color: #0284c7;
+}

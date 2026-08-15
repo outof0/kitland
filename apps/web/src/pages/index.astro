@@ -3,13 +3,14 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { LandingPage } from "@/components/landing/LandingPage";
 
 const description =
-  "Private, local-first developer tools for encoding, formatting, generating, and inspecting text. No account and no server upload required.";
+  "Local-first developer tools for formatting, encoding, and inspecting data on Web, Extension, VS Code, and MCP. No account or payload upload required.";
 ---
 
 <BaseLayout
-  title="Kitland — Local-first developer tools"
+  title="Kitland — Developer tools that keep data local"
   description={description}
   canonicalPath="/"
+  socialImageAlt="Kitland local-first Base64 workspace preview"
   structuredData={{
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -19,4 +20,5 @@ const description =
   }}
 >
   <LandingPage />
+  <script src="../scripts/scroll-reveal.ts"></script>
 </BaseLayout>

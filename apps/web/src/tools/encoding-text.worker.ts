@@ -1,66 +1,49 @@
+import { err } from "@kitland/core";
 import {
-  runEncodingTextTransform,
-  type EncodingTextFormat,
-  type EncodingTextMode,
-  type EncodingTextTool,
-} from "./encoding-text-transform";
-import { type ToolResult } from "@kitland/core";
-
-type TransformRequest = {
-  type: "transform";
-  id: number;
-  tool: EncodingTextTool;
-  mode: EncodingTextMode;
-  input: string;
-  format?: EncodingTextFormat;
-};
-
-type TransformResponse = {
-  type: "result";
-  id: number;
-  result: ToolResult<string>;
-};
+  ENCODING_TEXT_WORKER_MAX_CHARS,
+  isEncodingTextWorkerRequest,
+  type EncodingTextWorkerResponse,
+} from "@/lib/encoding-text-worker-protocol";
+import { runEncodingTextTransform } from "@kitland/ui/tools/encoding-text-transform";
 
 type WorkerScope = {
   addEventListener(type: "message", listener: (event: MessageEvent<unknown>) => void): void;
-  postMessage(message: TransformResponse): void;
+  postMessage(message: EncodingTextWorkerResponse): void;
 };
 
 const workerScope = self as unknown as WorkerScope;
 
 workerScope.addEventListener("message", (event: MessageEvent<unknown>) => {
-  if (!isTransformRequest(event.data)) return;
+  if (!isEncodingTextWorkerRequest(event.data)) return;
 
-  workerScope.postMessage({
-    type: "result",
-    id: event.data.id,
-    result: runEncodingTextTransform(
+  let result: ReturnType<typeof runEncodingTextTransform>;
+  try {
+    result = runEncodingTextTransform(
       event.data.tool,
       event.data.mode,
       event.data.input,
       event.data.format,
-    ),
+    );
+  } catch {
+    result = err("TRANSFORM_FAILED", "The local text transformation could not be completed.");
+  }
+
+  workerScope.postMessage({
+    type: "result",
+    id: event.data.id,
+    result: boundedResult(result),
   });
 });
 
-function isTransformRequest(value: unknown): value is TransformRequest {
-  if (!value || typeof value !== "object") return false;
-  const request = value as Record<string, unknown>;
-  return (
-    request.type === "transform" &&
-    typeof request.id === "number" &&
-    (request.tool === "html-entities" ||
-      request.tool === "hex-text" ||
-      request.tool === "unicode-converter" ||
-      request.tool === "binary-text" ||
-      request.tool === "rot13-caesar") &&
-    (request.mode === "encode" || request.mode === "decode") &&
-    typeof request.input === "string" &&
-    (request.format === undefined ||
-      request.format === "named" ||
-      request.format === "decimal" ||
-      request.format === "hexadecimal" ||
-      request.format === "spaced" ||
-      request.format === "compact")
+/** Keep user-derived error strings and output inside the validated wire contract. */
+function boundedResult(result: ReturnType<typeof runEncodingTextTransform>) {
+  if (result.ok) {
+    return result.value.length <= ENCODING_TEXT_WORKER_MAX_CHARS
+      ? result
+      : err("OUTPUT_TOO_LARGE", "The converted result exceeds this tool's output safety limit.");
+  }
+  return err(
+    result.error.code.slice(0, 64) || "TRANSFORM_FAILED",
+    result.error.message.slice(0, 320) || "The local text transformation could not be completed.",
   );
 }

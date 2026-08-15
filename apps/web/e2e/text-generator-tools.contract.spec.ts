@@ -1,36 +1,38 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { expectPaneText, fillPane, pane } from "./support/editor";
 
 test.describe("text transformation contracts", () => {
   test("case conversion, sorting, deduplication, and reversal update their output", async ({
     page,
   }) => {
     await page.goto("/explore/case-converter");
-    await page.getByRole("textbox", { name: "Text" }).fill("Hello World API");
-    await expect(page.getByRole("textbox", { name: "Converted" })).toHaveValue("hello_world_api");
+    await fillPane(pane(page, "Text"), "Hello World API");
+    await expectPaneText(pane(page, "Converted"), "hello_world_api");
     await page.getByRole("button", { name: "camelCase" }).click();
-    await expect(page.getByRole("textbox", { name: "Converted" })).toHaveValue("helloWorldApi");
+    await expectPaneText(pane(page, "Converted"), "helloWorldApi");
 
     await page.goto("/explore/sort-lines");
-    await page.getByRole("textbox", { name: "Lines" }).fill("item10\nitem2\nitem1");
+    await fillPane(pane(page, "Lines"), "item10\nitem2\nitem1");
     await page.getByRole("button", { name: "Numeric" }).click();
-    await expect(page.getByRole("textbox", { name: "Sorted" })).toHaveValue("item1\nitem2\nitem10");
+    await expectPaneText(pane(page, "Sorted"), "item1\nitem2\nitem10");
     await page.getByRole("button", { name: "Z → A" }).click();
-    await expect(page.getByRole("textbox", { name: "Sorted" })).toHaveValue("item10\nitem2\nitem1");
+    await expectPaneText(pane(page, "Sorted"), "item10\nitem2\nitem1");
 
     await page.goto("/explore/dedupe-lines");
-    await page.getByRole("textbox", { name: "Lines" }).fill("Tea\ntea\nTea\n🍵");
+    await fillPane(pane(page, "Lines"), "Tea\ntea\nTea\n🍵");
     await page.getByRole("button", { name: "Case sensitive" }).click();
-    await expect(page.getByRole("textbox", { name: "Unique" })).toHaveValue("Tea\n🍵");
+    await expectPaneText(pane(page, "Unique"), "Tea\n🍵");
 
     await page.goto("/explore/text-reverser");
-    await page.getByRole("textbox", { name: "Text" }).fill("first\nsecond\n🍵");
+    await fillPane(pane(page, "Text"), "first\nsecond\n🍵");
     await page.getByRole("button", { name: "Line order" }).click();
-    await expect(page.getByRole("textbox", { name: "Reversed" })).toHaveValue("🍵\nsecond\nfirst");
+    await expectPaneText(pane(page, "Reversed"), "🍵\nsecond\nfirst");
   });
 
   test("statistics and diff react to edited input", async ({ page }) => {
     await page.goto("/explore/text-stats");
-    await page.getByRole("textbox", { name: "Text to measure" }).fill("tea 🍵");
+    await fillPane(pane(page, "Text to measure"), "tea 🍵");
     const statistics = page.getByLabel("Text statistics");
     await expect(statistics.getByText("Graphemes", { exact: true }).locator("..")).toContainText(
       "5",
@@ -38,8 +40,8 @@ test.describe("text transformation contracts", () => {
     await expect(statistics.getByText("Words", { exact: true }).locator("..")).toContainText("1");
 
     await page.goto("/explore/text-diff");
-    await page.getByRole("textbox", { name: "Original" }).fill("one\ntwo");
-    await page.getByRole("textbox", { name: "Changed" }).fill("one\nthree\nfour");
+    await fillPane(pane(page, "Original"), "one\ntwo");
+    await fillPane(pane(page, "Changed"), "one\nthree\nfour");
     await expect(page.getByLabel("Diff result")).toContainText("three");
     await expect(page.getByLabel("Diff result")).toContainText("+2");
     await expect(page.getByLabel("Diff result")).toContainText("−1");
@@ -59,6 +61,45 @@ test.describe("text transformation contracts", () => {
 });
 
 test.describe("generator contracts", () => {
+  test("generator tools start empty and stay accessible on a narrow viewport", async ({ page }) => {
+    const tools = [
+      {
+        slug: "lorem-ipsum",
+        output: "Generated Lorem Ipsum",
+        copy: "Copy Generated Lorem Ipsum",
+        download: "Download Generated Lorem Ipsum",
+      },
+      {
+        slug: "random-number",
+        output: "Random Number",
+        copy: "Copy Random Number",
+        download: "Download Random Number",
+      },
+    ] as const;
+
+    await page.setViewportSize({ width: 320, height: 720 });
+
+    for (const tool of tools) {
+      await page.goto(`/explore/${tool.slug}`);
+      await expect(page.getByRole("region", { name: tool.output, exact: true })).toContainText(
+        "Generate a value to see it here.",
+      );
+      await expect(page.getByRole("button", { name: tool.copy, exact: true })).toBeDisabled();
+      await expect(page.getByRole("button", { name: tool.download, exact: true })).toBeDisabled();
+
+      const dimensions = await page.evaluate(() => ({
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+      }));
+      expect(dimensions.scrollWidth).toBe(dimensions.clientWidth);
+
+      const results = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .analyze();
+      expect(results.violations).toEqual([]);
+    }
+  });
+
   test("lorem, random ports, and random numbers generate bounded local results", async ({
     page,
   }) => {
@@ -71,19 +112,21 @@ test.describe("generator contracts", () => {
     );
 
     await page.goto("/explore/random-port");
-    await page.getByRole("combobox", { name: "Range" }).selectOption("ephemeral");
-    await page.getByRole("spinbutton", { name: "Count" }).fill("3");
+    await page.getByRole("combobox", { name: "Port range" }).selectOption("ephemeral");
+    await page.getByRole("combobox", { name: "Port count" }).selectOption("3");
     await page.getByRole("button", { name: "Pick Port" }).click();
-    const portOutput = page.getByRole("region", { name: "Random Port", exact: true });
-    await expect(portOutput).not.toContainText("Generate a value");
-    const ports = (await portOutput.locator("code").innerText()).split("\n").map(Number);
-    expect(ports).toHaveLength(3);
-    expect(new Set(ports).size).toBe(3);
-    expect(ports.every((port) => Number.isInteger(port) && port >= 49152 && port <= 65535)).toBe(
-      true,
-    );
-    await page.getByRole("combobox", { name: "Range" }).selectOption("dynamic");
-    await expect(portOutput).toContainText("49152–65535 · TCP");
+    const portResult = page.locator("section").filter({ hasText: "Next available port" });
+    await expect(portResult).toContainText("dynamic range");
+    await expect(portResult).toContainText("More Generated");
+    const portTexts = await portResult.locator("span.font-mono").allInnerTexts();
+    const ports = portTexts
+      .map((text) => Number(text.replace(/,/g, "")))
+      .filter((n) => Number.isInteger(n) && n > 0);
+    expect(ports.length).toBeGreaterThanOrEqual(3);
+    expect(new Set(ports).size).toBe(ports.length);
+    expect(ports.every((port) => port >= 49152 && port <= 65535)).toBe(true);
+    await page.getByRole("combobox", { name: "Port range" }).selectOption("dynamic");
+    await expect(portResult).toContainText("dynamic range");
 
     await page.goto("/explore/random-number");
     await page.getByRole("spinbutton", { name: "From" }).fill("-1");
@@ -91,19 +134,16 @@ test.describe("generator contracts", () => {
     await page.getByRole("spinbutton", { name: "Decimals" }).fill("2");
     await page.getByRole("spinbutton", { name: "Count" }).fill("3");
     await page.getByRole("button", { name: "Roll Number" }).click();
-    const values = (
-      await page
-        .getByRole("region", { name: "Random Number", exact: true })
-        .locator("code")
-        .innerText()
-    )
-      .split("\n")
-      .map(Number);
+    const numberOutput = page.getByRole("region", {
+      name: "Random Number",
+      exact: true,
+    });
+    const generatedText = await numberOutput.locator("code").innerText();
+    const generatedValues = generatedText.split("\n");
+    const values = generatedValues.map(Number);
     expect(values).toHaveLength(3);
     expect(values.every((value) => value >= -1 && value <= 1)).toBe(true);
-    expect(values.every((value) => Number.isInteger(value * 100))).toBe(true);
-    const numberOutput = page.getByRole("region", { name: "Random Number", exact: true });
-    const generatedText = await numberOutput.locator("code").innerText();
+    expect(generatedValues.every((value) => /^-?\d+\.\d{2}$/.test(value))).toBe(true);
     await page.getByRole("spinbutton", { name: "Decimals" }).fill("0");
     await expect(numberOutput.locator("code")).toHaveText(generatedText);
     await expect(numberOutput).toContainText("2 decimals · uniform");

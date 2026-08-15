@@ -1,13 +1,48 @@
-import {
-  isAvailableToolSlug,
-  listAvailableTools,
-  type AvailableToolSlug,
-} from "@kitland/tool-catalog";
+import { isWebAvailableToolSlug, listWebAvailableTools } from "@/lib/release-scope";
+import { capabilitiesForWebTool } from "@/lib/tool-capabilities";
+import type { AvailableToolSlug } from "@kitland/tools";
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 
 type ToolRendererModule = { readonly default: ComponentType };
 type ToolRendererLoader = () => Promise<ToolRendererModule>;
 export type ToolRenderer = LazyExoticComponent<ComponentType>;
+
+function fromNamed<T extends Record<string, unknown>, K extends keyof T & string>(
+  slug: string,
+  loadModule: () => Promise<T>,
+  exportName: K,
+): ToolRendererLoader {
+  return async () => {
+    const module = await loadModule();
+    const Tool = module[exportName] as ComponentType<{ capabilities?: unknown }>;
+    if (typeof Tool !== "function") {
+      throw new Error(`Shared tool export "${exportName}" is not a component.`);
+    }
+    return {
+      default: (props: Record<string, unknown>) => (
+        <Tool capabilities={capabilitiesForWebTool(slug)} {...props} />
+      ),
+    };
+  };
+}
+
+function fromEncoding(slug: string): ToolRendererLoader {
+  return async () => {
+    const [{ EncodingToolBySlug }, { useEncodingTextTransform }] = await Promise.all([
+      import("@kitland/ui/tools/encoding-tools"),
+      import("@/hooks/useEncodingTextTransform"),
+    ]);
+    return {
+      default: () => (
+        <EncodingToolBySlug
+          slug={slug as never}
+          useTransform={useEncodingTextTransform}
+          capabilities={capabilitiesForWebTool(slug)}
+        />
+      ),
+    };
+  };
+}
 
 /**
  * Every available catalog slug must have a dynamic entry. The exhaustive
@@ -16,90 +51,178 @@ export type ToolRenderer = LazyExoticComponent<ComponentType>;
  */
 const TOOL_RENDERER_LOADERS = Object.freeze({
   base64: async () => ({ default: (await import("./Base64Tool")).Base64Tool }),
-  "json-diff": async () => ({ default: (await import("./JsonDiffTool")).JsonDiffTool }),
-  "beautify-minify": async () => ({
-    default: (await import("./BeautifyMinifyTool")).BeautifyMinifyTool,
-  }),
+  "json-diff": fromNamed("json-diff", () => import("@kitland/ui/tools/JsonDiffTool"), "JsonDiffTool"),
+  "beautify-minify": async () => {
+    const [{ BeautifyMinifyTool }, { useStructuredTextTransform }] = await Promise.all([
+      import("@kitland/ui/tools/BeautifyMinifyTool"),
+      import("@/hooks/useStructuredTextTransform"),
+    ]);
+    return {
+      default: () => (
+        <BeautifyMinifyTool
+          capabilities={capabilitiesForWebTool("beautify-minify")}
+          useTransform={(source, mode, indent, language) =>
+            useStructuredTextTransform({ tool: "beautify-minify", mode, indent, language }, source)
+          }
+        />
+      ),
+    };
+  },
   "json-to-yaml": async () => ({ default: (await import("./JsonToYamlTool")).JsonToYamlTool }),
-  "yaml-to-json": async () => ({ default: (await import("./YamlToJsonTool")).YamlToJsonTool }),
-  "json-toolbox": async () => ({ default: (await import("./JsonToolboxTool")).JsonToolboxTool }),
-  "json-to-csv": async () => ({ default: (await import("./JsonToCsvTool")).JsonToCsvTool }),
-  "json-to-toml": async () => ({ default: (await import("./JsonToTomlTool")).JsonToTomlTool }),
-  "xml-formatter": async () => ({ default: (await import("./XmlFormatterTool")).XmlFormatterTool }),
-  "sql-formatter": async () => ({ default: (await import("./SqlFormatterTool")).SqlFormatterTool }),
-  "markdown-preview": async () => ({
-    default: (await import("./MarkdownPreviewTool")).MarkdownPreviewTool,
+  "yaml-to-json": fromNamed("yaml-to-json", () => import("@kitland/ui/tools/YamlToJsonTool"), "YamlToJsonTool"),
+  "json-formatter": async () => ({
+    default: (await import("./JsonFormatterTool")).JsonFormatterTool,
   }),
-  "url-encode": async () => ({ default: (await import("./UrlEncodeTool")).UrlEncodeTool }),
-  "uuid-id": async () => ({ default: (await import("./UuidIdTool")).UuidIdTool }),
-  "html-entities": async () => ({
-    default: (await import("./HtmlEntitiesTool")).HtmlEntitiesTool,
-  }),
-  "hex-text": async () => ({ default: (await import("./HexTextTool")).HexTextTool }),
-  "unicode-converter": async () => ({
-    default: (await import("./UnicodeConverterTool")).UnicodeConverterTool,
-  }),
-  "binary-text": async () => ({ default: (await import("./BinaryTextTool")).BinaryTextTool }),
-  "rot13-caesar": async () => ({ default: (await import("./Rot13CaesarTool")).Rot13CaesarTool }),
-  "sha-hash": async () => ({ default: (await import("./ShaHashTool")).ShaHashTool }),
-  "hmac-generator": async () => ({
-    default: (await import("./HmacGeneratorTool")).HmacGeneratorTool,
-  }),
-  "aes-cipher": async () => ({ default: (await import("./AesCipherTool")).AesCipherTool }),
-  "bcrypt-hash": async () => ({ default: (await import("./BcryptHashTool")).BcryptHashTool }),
-  "jwt-decoder": async () => ({ default: (await import("./JwtDecoderTool")).JwtDecoderTool }),
-  "token-generator": async () => ({
-    default: (await import("./TokenGeneratorTool")).TokenGeneratorTool,
-  }),
-  "rsa-key-pair": async () => ({ default: (await import("./RsaKeyPairTool")).RsaKeyPairTool }),
-  "url-parser": async () => ({ default: (await import("./UrlParserTool")).UrlParserTool }),
-  "http-status-codes": async () => ({
-    default: (await import("./HttpStatusCodesTool")).HttpStatusCodesTool,
-  }),
-  "mime-types": async () => ({ default: (await import("./MimeTypesTool")).MimeTypesTool }),
-  "user-agent-parser": async () => ({
-    default: (await import("./UserAgentParserTool")).UserAgentParserTool,
-  }),
-  "basic-auth-header": async () => ({
-    default: (await import("./BasicAuthHeaderTool")).BasicAuthHeaderTool,
-  }),
-  "curl-converter": async () => ({
-    default: (await import("./CurlConverterTool")).CurlConverterTool,
-  }),
-  "cron-parser": async () => ({ default: (await import("./CronParserTool")).CronParserTool }),
-  "ip-subnet-calculator": async () => ({
-    default: (await import("./IpSubnetCalculatorTool")).IpSubnetCalculatorTool,
-  }),
-  "password-generator": async () => ({
-    default: (await import("./PasswordGeneratorTool")).PasswordGeneratorTool,
-  }),
-  "nanoid-generator": async () => ({
-    default: (await import("./NanoidGeneratorTool")).NanoidGeneratorTool,
-  }),
-  "ulid-generator": async () => ({
-    default: (await import("./UlidGeneratorTool")).UlidGeneratorTool,
-  }),
-  "objectid-generator": async () => ({
-    default: (await import("./ObjectIdGeneratorTool")).ObjectIdGeneratorTool,
-  }),
-  "mock-data": async () => ({ default: (await import("./MockDataTool")).MockDataTool }),
-  "qr-code": async () => ({ default: (await import("./QrCodeTool")).QrCodeTool }),
-  "unix-timestamp": async () => ({ default: (await import("./UnixTimestampTool")).UnixTimestampTool }),
-  "case-converter": async () => ({
-    default: (await import("./CaseConverterTool")).CaseConverterTool,
-  }),
-  "sort-lines": async () => ({ default: (await import("./SortLinesTool")).SortLinesTool }),
-  "dedupe-lines": async () => ({ default: (await import("./DedupeLinesTool")).DedupeLinesTool }),
-  "text-reverser": async () => ({
-    default: (await import("./TextReverserTool")).TextReverserTool,
-  }),
-  "text-stats": async () => ({ default: (await import("./TextStatsTool")).TextStatsTool }),
-  "text-diff": async () => ({ default: (await import("./TextDiffTool")).TextDiffTool }),
-  "regex-tester": async () => ({ default: (await import("./RegexTesterTool")).RegexTesterTool }),
-  "lorem-ipsum": async () => ({ default: (await import("./LoremIpsumTool")).LoremIpsumTool }),
-  "random-port": async () => ({ default: (await import("./RandomPortTool")).RandomPortTool }),
-  "random-number": async () => ({ default: (await import("./RandomNumberTool")).RandomNumberTool }),
-  "json-escape": async () => ({ default: (await import("./JsonEscapeTool")).JsonEscapeTool }),
+  "json-to-csv": fromNamed("json-to-csv", () => import("@kitland/ui/tools/JsonToCsvTool"), "JsonToCsvTool"),
+  "json-to-toml": fromNamed("json-to-toml", () => import("@kitland/ui/tools/JsonToTomlTool"), "JsonToTomlTool"),
+  "xml-formatter": fromNamed("xml-formatter", 
+    () => import("@kitland/ui/tools/XmlFormatterTool"),
+    "XmlFormatterTool",
+  ),
+  "sql-formatter": fromNamed("sql-formatter", 
+    () => import("@kitland/ui/tools/SqlFormatterTool"),
+    "SqlFormatterTool",
+  ),
+  "markdown-preview": fromNamed("markdown-preview", 
+    () => import("@kitland/ui/tools/MarkdownPreviewTool"),
+    "MarkdownPreviewTool",
+  ),
+  "url-encode": fromEncoding("url-encode"),
+  "uuid-id": fromNamed("uuid-id", () => import("@kitland/ui/tools/UuidIdTool"), "UuidIdTool"),
+  "html-entities": fromEncoding("html-entities"),
+  "hex-text": fromEncoding("hex-text"),
+  "unicode-converter": fromEncoding("unicode-converter"),
+  "binary-text": fromEncoding("binary-text"),
+  "rot13-caesar": fromEncoding("rot13-caesar"),
+  "sha-hash": fromNamed("sha-hash", () => import("@kitland/ui/tools/ShaHashTool"), "ShaHashTool"),
+  "hmac-generator": fromNamed("hmac-generator", 
+    () => import("@kitland/ui/tools/HmacGeneratorTool"),
+    "HmacGeneratorTool",
+  ),
+  "aes-cipher": fromNamed("aes-cipher", () => import("@kitland/ui/tools/AesCipherTool"), "AesCipherTool"),
+  "bcrypt-hash": fromNamed("bcrypt-hash", () => import("@kitland/ui/tools/BcryptHashTool"), "BcryptHashTool"),
+  "jwt-decoder": fromNamed("jwt-decoder", () => import("@kitland/ui/tools/JwtDecoderTool"), "JwtDecoderTool"),
+  "token-generator": fromNamed("token-generator", 
+    () => import("@kitland/ui/tools/TokenGeneratorTool"),
+    "TokenGeneratorTool",
+  ),
+  "rsa-key-pair": fromNamed("rsa-key-pair", () => import("@kitland/ui/tools/RsaKeyPairTool"), "RsaKeyPairTool"),
+  "url-parser": fromNamed("url-parser", () => import("@kitland/ui/tools/UrlParserTool"), "UrlParserTool"),
+  "http-status-codes": fromNamed("http-status-codes", 
+    () => import("@kitland/ui/tools/HttpStatusCodesTool"),
+    "HttpStatusCodesTool",
+  ),
+  "mime-types": fromNamed("mime-types", () => import("@kitland/ui/tools/MimeTypesTool"), "MimeTypesTool"),
+  "user-agent-parser": fromNamed("user-agent-parser", 
+    () => import("@kitland/ui/tools/UserAgentParserTool"),
+    "UserAgentParserTool",
+  ),
+  "basic-auth-header": fromNamed("basic-auth-header", 
+    () => import("@kitland/ui/tools/BasicAuthHeaderTool"),
+    "BasicAuthHeaderTool",
+  ),
+  "curl-converter": fromNamed("curl-converter", 
+    () => import("@kitland/ui/tools/CurlConverterTool"),
+    "CurlConverterTool",
+  ),
+  "cron-parser": fromNamed("cron-parser", () => import("@kitland/ui/tools/CronParserTool"), "CronParserTool"),
+  "ip-subnet-calculator": fromNamed("ip-subnet-calculator", 
+    () => import("@kitland/ui/tools/IpSubnetCalculatorTool"),
+    "IpSubnetCalculatorTool",
+  ),
+  "password-generator": fromNamed("password-generator", 
+    () => import("@kitland/ui/tools/PasswordGeneratorTool"),
+    "PasswordGeneratorTool",
+  ),
+  "nanoid-generator": fromNamed("nanoid-generator", 
+    () => import("@kitland/ui/tools/NanoidGeneratorTool"),
+    "NanoidGeneratorTool",
+  ),
+  "ulid-generator": fromNamed("ulid-generator", 
+    () => import("@kitland/ui/tools/UlidGeneratorTool"),
+    "UlidGeneratorTool",
+  ),
+  "objectid-generator": fromNamed("objectid-generator", 
+    () => import("@kitland/ui/tools/ObjectIdGeneratorTool"),
+    "ObjectIdGeneratorTool",
+  ),
+  "mock-data": fromNamed("mock-data", () => import("@kitland/ui/tools/MockDataTool"), "MockDataTool"),
+  "qr-code": fromNamed("qr-code", () => import("@kitland/ui/tools/QrCodeTool"), "QrCodeTool"),
+  "unix-timestamp": fromNamed("unix-timestamp", 
+    () => import("@kitland/ui/tools/UnixTimestampTool"),
+    "UnixTimestampTool",
+  ),
+  "case-converter": fromNamed("case-converter", 
+    () => import("@kitland/ui/tools/CaseConverterTool"),
+    "CaseConverterTool",
+  ),
+  "sort-lines": fromNamed("sort-lines", () => import("@kitland/ui/tools/SortLinesTool"), "SortLinesTool"),
+  "dedupe-lines": fromNamed("dedupe-lines", () => import("@kitland/ui/tools/DedupeLinesTool"), "DedupeLinesTool"),
+  "text-reverser": fromNamed("text-reverser", 
+    () => import("@kitland/ui/tools/TextReverserTool"),
+    "TextReverserTool",
+  ),
+  "text-stats": fromNamed("text-stats", () => import("@kitland/ui/tools/TextStatsTool"), "TextStatsTool"),
+  "text-diff": fromNamed("text-diff", () => import("@kitland/ui/tools/TextDiffTool"), "TextDiffTool"),
+  "regex-tester": async () => {
+    const [{ RegexTesterTool }, { useRegexTester }] = await Promise.all([
+      import("@kitland/ui/tools/RegexTesterTool"),
+      import("@/hooks/useRegexTester"),
+    ]);
+    return {
+      default: (props) => (
+        <RegexTesterTool
+          useTester={useRegexTester}
+          capabilities={capabilitiesForWebTool("regex-tester")}
+          {...props}
+        />
+      ),
+    };
+  },
+  "lorem-ipsum": fromNamed("lorem-ipsum", () => import("@kitland/ui/tools/LoremIpsumTool"), "LoremIpsumTool"),
+  "random-port": fromNamed("random-port", () => import("@kitland/ui/tools/RandomPortTool"), "RandomPortTool"),
+  "random-number": fromNamed("random-number", 
+    () => import("@kitland/ui/tools/RandomNumberTool"),
+    "RandomNumberTool",
+  ),
+  "json-escape": fromNamed("json-escape", () => import("@kitland/ui/tools/JsonEscapeTool"), "JsonEscapeTool"),
+  "morse-code": fromEncoding("morse-code"),
+  "split-to-newlines": fromNamed("split-to-newlines", 
+    () => import("@kitland/ui/tools/SplitToNewlinesTool"),
+    "SplitToNewlinesTool",
+  ),
+  "json-to-typescript": fromNamed("json-to-typescript", 
+    () => import("@kitland/ui/tools/JsonToTypescriptTool"),
+    "JsonToTypescriptTool",
+  ),
+  "json-to-js-const": fromNamed("json-to-js-const", 
+    () => import("@kitland/ui/tools/JsonToJsConstTool"),
+    "JsonToJsConstTool",
+  ),
+  "html-to-jsx": fromNamed("html-to-jsx", () => import("@kitland/ui/tools/HtmlToJsxTool"), "HtmlToJsxTool"),
+  "number-base": fromNamed("number-base", () => import("@kitland/ui/tools/NumberBaseTool"), "NumberBaseTool"),
+  temperature: fromNamed("temperature", () => import("@kitland/ui/tools/TemperatureTool"), "TemperatureTool"),
+  "data-size": fromNamed("data-size", () => import("@kitland/ui/tools/DataSizeTool"), "DataSizeTool"),
+  "color-converter": fromNamed("color-converter", 
+    () => import("@kitland/ui/tools/ColorConverterTool"),
+    "ColorConverterTool",
+  ),
+  "duration-formatter": fromNamed("duration-formatter", 
+    () => import("@kitland/ui/tools/DurationFormatterTool"),
+    "DurationFormatterTool",
+  ),
+  "timezone-converter": fromNamed("timezone-converter", 
+    () => import("@kitland/ui/tools/TimezoneConverterTool"),
+    "TimezoneConverterTool",
+  ),
+  "date-calculator": fromNamed("date-calculator", 
+    () => import("@kitland/ui/tools/DateCalculatorTool"),
+    "DateCalculatorTool",
+  ),
+  "age-calculator": fromNamed("age-calculator", 
+    () => import("@kitland/ui/tools/AgeCalculatorTool"),
+    "AgeCalculatorTool",
+  ),
 } satisfies Record<AvailableToolSlug, ToolRendererLoader>);
 
 const rendererCache = new Map<AvailableToolSlug, ToolRenderer>();
@@ -122,12 +245,12 @@ export function hasToolRenderer(slug: string): boolean {
 }
 
 export function isRegisteredToolSlug(slug: string): slug is AvailableToolSlug {
-  return isAvailableToolSlug(slug) && Object.hasOwn(TOOL_RENDERER_LOADERS, slug);
+  return isWebAvailableToolSlug(slug) && Object.hasOwn(TOOL_RENDERER_LOADERS, slug);
 }
 
 function assertRendererRegistryComplete(): void {
-  const availableSlugs = listAvailableTools().map((tool) => tool.slug);
-  const registeredSlugs = Object.keys(TOOL_RENDERER_LOADERS);
+  const availableSlugs = listWebAvailableTools().map((tool) => tool.slug);
+  const registeredSlugs = Object.keys(TOOL_RENDERER_LOADERS).filter(isWebAvailableToolSlug);
   const complete =
     availableSlugs.length === registeredSlugs.length &&
     availableSlugs.every((slug) => registeredSlugs.includes(slug));

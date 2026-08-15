@@ -21,3 +21,7 @@ https://:deployment.kitland.pages.dev/*
 # can safely retain them until the next filename changes.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Pre-rendered static Open Graph social preview images
+/og/*
+  Cache-Control: public, max-age=31536000, immutable

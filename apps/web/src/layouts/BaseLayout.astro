@@ -1,5 +1,7 @@
 ---
 import "@/styles/global.css";
+import "@/components/ui/codemirror.css";
+import { ClientRouter } from "astro:transitions";
 
 type JsonLd = Record<string, unknown>;
 
@@ -8,6 +10,8 @@ type Props = {
   description: string;
   canonicalPath?: string;
   robots?: string;
+  socialImageAlt?: string;
+  socialImagePath?: string;
   structuredData?: JsonLd | readonly JsonLd[];
 };
 
@@ -16,11 +20,22 @@ const {
   description,
   canonicalPath = Astro.url.pathname,
   robots = "index,follow",
+  socialImageAlt = "Kitland local-first developer tool workbench",
+  socialImagePath,
   structuredData,
 } = Astro.props;
 const site = Astro.site ?? new URL("https://kitland.dev");
 const canonicalUrl = new URL(canonicalPath, site).toString();
-const socialImageUrl = new URL("/og-kitland-workbench.png", site).toString();
+const resolvedSocialImagePath =
+  socialImagePath ??
+  (canonicalPath === "/"
+    ? "/og/index.png"
+    : canonicalPath === "/explore" || canonicalPath === "/explore/"
+      ? "/og/explore.png"
+      : canonicalPath.startsWith("/explore/")
+        ? `/og/${canonicalPath.replace(/^\/explore\/?/, "").replace(/\/$/, "")}.png`
+        : "/og-kitland-workbench.png");
+const socialImageUrl = new URL(resolvedSocialImagePath, site).toString();
 const schemas = structuredData
   ? Array.isArray(structuredData)
     ? structuredData
@@ -55,14 +70,39 @@ Astro.csp?.insertStyleResource({ resource: "'none'", kind: "attribute" });
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={socialImageUrl} />
-    <meta property="og:image:width" content="1731" />
-    <meta property="og:image:height" content="909" />
+    <meta property="og:image:alt" content={socialImageAlt} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImageUrl} />
+    <meta name="twitter:image:alt" content={socialImageAlt} />
     <title>{title}</title>
+    <script is:inline>
+      (function () {
+        try {
+          var raw = localStorage.getItem("kitland.theme");
+          if (!raw) return;
+          var parsed = JSON.parse(raw);
+          var value =
+            parsed && typeof parsed === "object" && "value" in parsed ? parsed.value : parsed;
+          if (value === "light" || value === "dark") {
+            document.documentElement.dataset.theme = value;
+          }
+        } catch (error) {
+          /* Storage can be unavailable; keep the static data-theme. */
+        }
+      })();
+    </script>
+    <ClientRouter fallback="none" />
+    <script>
+      document.addEventListener("astro:before-swap", (event) => {
+        const theme = document.documentElement.dataset.theme;
+        if (theme) event.newDocument.documentElement.dataset.theme = theme;
+      });
+    </script>
 
     {
       schemas.length > 0 ? (

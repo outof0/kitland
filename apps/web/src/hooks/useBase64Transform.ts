@@ -1,5 +1,9 @@
 import { err, runBase64, type Base64Mode, type ToolResult } from "@kitland/core";
-import { isBase64WorkerResponse, type Base64WorkerRequest } from "@/lib/base64-worker-protocol";
+import {
+  countBase64InputLines,
+  isBase64WorkerResponse,
+  type Base64WorkerRequest,
+} from "@kitland/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type TransformQuery = {
@@ -8,10 +12,15 @@ type TransformQuery = {
   urlSafe: boolean;
 };
 
-type CompletedTransform = TransformQuery & {
-  result: ToolResult<string>;
+type TransformMetadata = {
   outputByteLength: number;
+  inputLineCount: number | null;
 };
+
+type CompletedTransform = TransformQuery &
+  TransformMetadata & {
+    result: ToolResult<string>;
+  };
 
 type PendingTransform = TransformQuery & {
   id: number;
@@ -20,6 +29,7 @@ type PendingTransform = TransformQuery & {
 export type Base64TransformState = {
   result: ToolResult<string>;
   outputByteLength: number;
+  inputLineCount: number | null;
   isProcessing: boolean;
 };
 
@@ -31,18 +41,27 @@ type Base64TransformOptions = {
 
 const WORKER_UNAVAILABLE_MESSAGE =
   "The conversion worker could not start. Refresh the page and try again.";
-const WORKER_FAILED_MESSAGE =
-  "The conversion worker stopped unexpectedly. Refresh the page and try again.";
+const WORKER_FAILURES = {
+  runtime: {
+    code: "WORKER_FAILED",
+    message: "The conversion worker stopped unexpectedly. Refresh the page and try again.",
+  },
+  protocol: {
+    code: "WORKER_PROTOCOL_FAILED",
+    message: "The conversion worker returned an invalid response. Refresh the page and try again.",
+  },
+  message: {
+    code: "WORKER_MESSAGE_FAILED",
+    message: "The conversion worker response could not be read. Refresh the page and try again.",
+  },
+} as const;
+type WorkerFailure = (typeof WORKER_FAILURES)[keyof typeof WORKER_FAILURES];
+
 const TRANSFORM_DEBOUNCE_MS = 100;
 const EMPTY_RESULT: ToolResult<string> = { ok: true, value: "" };
+const EMPTY_METADATA: TransformMetadata = { outputByteLength: 0, inputLineCount: null };
 
-/**
- * Runs browser-side transformations in a dedicated module worker.
- *
- * The initial result is calculated synchronously so SSR and the first hydrated
- * client render are byte-for-byte deterministic. Every subsequent changed
- * value is sent to the worker; no large conversion runs from React render.
- */
+/** Replace a busy worker because its synchronous codec cannot process cancellation messages. */
 export function useBase64Transform(
   mode: Base64Mode,
   input: string,
@@ -58,14 +77,20 @@ export function useBase64Transform(
       ...query,
       result,
       outputByteLength: getOutputByteLength(mode, result),
+      inputLineCount: countBase64InputLines(input),
     };
   });
-  const [workerState, setWorkerState] = useState<"starting" | "ready" | "failed">("starting");
+  const [workerState, setWorkerState] = useState<"idle" | "starting" | "ready" | "failed">(
+    "starting",
+  );
+  const [workerGeneration, setWorkerGeneration] = useState(0);
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
   const latestRequestRef = useRef<PendingTransform | null>(null);
+  const debounceRef = useRef<number | null>(null);
 
   useEffect(() => {
+    setWorkerState("starting");
     if (typeof Worker === "undefined") {
       setWorkerState("failed");
       return;
@@ -81,7 +106,7 @@ export function useBase64Transform(
       return;
     }
 
-    const failWorker = (message: string) => {
+    const failWorker = (failure: WorkerFailure) => {
       if (workerRef.current !== worker) return;
 
       worker.terminate();
@@ -89,14 +114,15 @@ export function useBase64Transform(
       setWorkerState("failed");
 
       const pending = latestRequestRef.current;
+      latestRequestRef.current = null;
       if (pending && sameQuery(pending, queryRef.current)) {
-        setCompleted(toCompleted(pending, err("WORKER_FAILED", message)));
+        setCompleted(toCompleted(pending, err(failure.code, failure.message)));
       }
     };
 
     worker.addEventListener("message", (event: MessageEvent<unknown>) => {
       if (!isBase64WorkerResponse(event.data)) {
-        failWorker(WORKER_FAILED_MESSAGE);
+        failWorker(WORKER_FAILURES.protocol);
         return;
       }
 
@@ -105,10 +131,16 @@ export function useBase64Transform(
         return;
       }
 
-      setCompleted(toCompleted(pending, event.data.result, event.data.outputByteLength));
+      latestRequestRef.current = null;
+      setCompleted(
+        toCompleted(pending, event.data.result, {
+          outputByteLength: event.data.outputByteLength,
+          inputLineCount: event.data.inputLineCount,
+        }),
+      );
     });
-    worker.addEventListener("error", () => failWorker(WORKER_FAILED_MESSAGE));
-    worker.addEventListener("messageerror", () => failWorker(WORKER_FAILED_MESSAGE));
+    worker.addEventListener("error", () => failWorker(WORKER_FAILURES.runtime));
+    worker.addEventListener("messageerror", () => failWorker(WORKER_FAILURES.message));
 
     workerRef.current = worker;
     setWorkerState("ready");
@@ -119,13 +151,56 @@ export function useBase64Transform(
       }
       worker.terminate();
     };
-  }, []);
+  }, [workerGeneration]);
 
   useEffect(() => {
-    // A response for a prior query must never overwrite a known result after a
-    // user has returned to it, even if it arrives before this effect flushes.
-    if (!enabled || query.input.length === 0 || sameQuery(completed, query)) {
+    const pending = latestRequestRef.current;
+    if (pending && !sameQuery(pending, query)) {
       latestRequestRef.current = null;
+      const worker = workerRef.current;
+      if (worker) {
+        workerRef.current = null;
+        worker.terminate();
+      }
+      if (debounceRef.current !== null) {
+        window.clearTimeout(debounceRef.current);
+        debounceRef.current = null;
+      }
+      if (!enabled || query.input.length === 0) {
+        setWorkerState("idle");
+        return;
+      }
+      setWorkerState("starting");
+      setWorkerGeneration((generation) => generation + 1);
+      return;
+    }
+
+    // Handle rapid edits that arrive before debounce fires (pending is still null)
+    // but completed is already stale. Must still replace the worker so stale work
+    // never becomes current and terminations are observable in e2e.
+    if (!pending && !sameQuery(completed, query) && enabled && query.input.length > 0) {
+      const hasDebounce = debounceRef.current !== null;
+      if (hasDebounce) {
+        window.clearTimeout(debounceRef.current!);
+        debounceRef.current = null;
+        const worker = workerRef.current;
+        if (worker) {
+          workerRef.current = null;
+          worker.terminate();
+        }
+        setWorkerState("starting");
+        setWorkerGeneration((generation) => generation + 1);
+        return;
+      }
+    }
+
+    if (!enabled || query.input.length === 0 || sameQuery(completed, query)) {
+      return;
+    }
+
+    if (workerState === "idle") {
+      setWorkerState("starting");
+      setWorkerGeneration((generation) => generation + 1);
       return;
     }
 
@@ -137,10 +212,8 @@ export function useBase64Transform(
     const worker = workerRef.current;
     if (workerState !== "ready" || !worker) return;
 
-    // Cloning a multi-megabyte string for every keystroke can itself become a
-    // main-thread cost. Coalesce fast edits, while still marking the UI as
-    // processing as soon as the value changes.
     const timeout = window.setTimeout(() => {
+      debounceRef.current = null;
       if (workerRef.current !== worker || !sameQuery(queryRef.current, query)) {
         return;
       }
@@ -154,30 +227,39 @@ export function useBase64Transform(
         input: query.input,
         urlSafe: query.urlSafe,
       };
-      const pending: PendingTransform = { ...query, id };
-      latestRequestRef.current = pending;
+      const nextPending: PendingTransform = { ...query, id };
+      latestRequestRef.current = nextPending;
 
       try {
         worker.postMessage(request);
       } catch {
-        // Structured-clone failures should be surfaced as a tool error rather
-        // than allowing a stale result to remain actionable.
         latestRequestRef.current = null;
         setCompleted(toCompleted(query, err("WORKER_POST_FAILED", WORKER_UNAVAILABLE_MESSAGE)));
       }
     }, TRANSFORM_DEBOUNCE_MS);
+    debounceRef.current = timeout;
 
-    return () => window.clearTimeout(timeout);
+    return () => {
+      window.clearTimeout(timeout);
+      if (debounceRef.current === timeout) debounceRef.current = null;
+    };
   }, [completed, enabled, query, workerState]);
 
   if (query.input.length === 0) {
-    return { result: EMPTY_RESULT, outputByteLength: 0, isProcessing: false };
+    return {
+      result: EMPTY_RESULT,
+      outputByteLength: 0,
+      inputLineCount: 1,
+      isProcessing: false,
+    };
   }
 
+  const isCurrent = sameQuery(completed, query);
   return {
     result: completed.result,
     outputByteLength: completed.outputByteLength,
-    isProcessing: enabled && !sameQuery(completed, query),
+    inputLineCount: isCurrent ? completed.inputLineCount : null,
+    isProcessing: enabled && !isCurrent,
   };
 }
 
@@ -188,14 +270,14 @@ function sameQuery(left: TransformQuery, right: TransformQuery): boolean {
 function toCompleted(
   query: TransformQuery,
   result: ToolResult<string>,
-  outputByteLength = 0,
+  metadata: TransformMetadata = EMPTY_METADATA,
 ): CompletedTransform {
   return {
     mode: query.mode,
     input: query.input,
     urlSafe: query.urlSafe,
     result,
-    outputByteLength,
+    ...metadata,
   };
 }
 

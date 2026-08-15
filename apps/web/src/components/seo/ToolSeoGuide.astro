@@ -1,5 +1,5 @@
 ---
-import type { ToolDefinition } from "@kitland/tool-catalog";
+import type { ToolDefinition } from "@kitland/tools";
 import type { ToolSeoContent } from "@/data/toolSeo";
 import "@/styles/seo.css";
 
@@ -38,7 +38,10 @@ const headingId = `${tool.slug}-guide-heading`;
     <h3 id={`${tool.slug}-faq`}>Frequently asked questions</h3>
     {content.faqs.map((faq) => (
       <details>
-        <summary>{faq.question}</summary>
+        <summary>
+          <span>{faq.question}</span>
+          <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
         <p>{faq.answer}</p>
       </details>
     ))}

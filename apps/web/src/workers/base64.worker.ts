@@ -1,9 +1,14 @@
 import { err, runBase64 } from "@kitland/core";
-import { isBase64WorkerRequest, type Base64WorkerResponse } from "@/lib/base64-worker-protocol";
+import {
+  countBase64InputLines,
+  isBase64WorkerRequest,
+  type Base64WorkerResponse,
+} from "@kitland/ui/base64-protocol";
 
 /**
  * This module is bundled as a dedicated worker by Vite/Astro. Keep its
  * message contract serializable: the UI only transfers strings and a result.
+ * The protocol subpath import keeps React out of the worker bundle.
  */
 globalThis.addEventListener("message", (event: MessageEvent<unknown>) => {
   if (!isBase64WorkerRequest(event.data)) return;
@@ -23,6 +28,7 @@ globalThis.addEventListener("message", (event: MessageEvent<unknown>) => {
     id,
     result,
     outputByteLength: outputByteLength(mode, result),
+    inputLineCount: countBase64InputLines(input),
   };
 
   // The DOM lib types global postMessage as Window#postMessage. A dedicated

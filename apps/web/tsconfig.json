@@ -25,7 +25,9 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@kitland/ui/tools/*": ["../../packages/ui/src/tools/*"],
+      "@kitland/ui/catalog": ["../../packages/ui/src/tools/shared-catalog-tools.tsx"]
     }
   },
   "include": [".astro/types.d.ts", "src", "e2e", "playwright.config.ts"]

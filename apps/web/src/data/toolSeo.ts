@@ -1,4 +1,4 @@
-import type { ToolDefinition } from "@kitland/tool-catalog";
+import type { ToolDefinition } from "@kitland/tools";
 
 export type ToolSeoContent = {
   heading: string;
@@ -13,8 +13,8 @@ export type ToolSeoContent = {
 
 function localTransformSeo(toolName: string, detail: string): ToolSeoContent {
   return {
-    heading: `${toolName} runs locally in your browser`,
-    introduction: `${detail} Kitland processes the text locally, so ordinary inputs do not leave your device.`,
+    heading: `${toolName} — keep data local, tools out and work on`,
+    introduction: `${detail} Kitland processes all data locally on your device with no account, no uploads, and zero payload telemetry.`,
     steps: [
       "Paste or type a value in the input editor.",
       "Choose the available format or direction options when the tool offers them.",
@@ -29,7 +29,7 @@ function localTransformSeo(toolName: string, detail: string): ToolSeoContent {
       {
         question: "Does Kitland upload my input?",
         answer:
-          "No. These transformations run in the browser. Avoid sharing screenshots or copied results that contain secrets.",
+          "No. These transformations run locally on your device. Avoid sharing screenshots or copied results that contain secrets.",
       },
       {
         question: "What happens when the input is invalid?",
@@ -114,10 +114,39 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "YAML to JSON",
     "Convert supported YAML mappings and sequences into formatted JSON.",
   ),
-  "json-toolbox": localTransformSeo(
-    "JSON Toolbox",
-    "Validate a JSON document and inspect its root type, value count, and nesting depth.",
-  ),
+  "json-formatter": {
+    heading: "Format and inspect JSON locally with clear structural statistics",
+    introduction:
+      "JSON Formatter validates one JSON document—including object, array, string, number, boolean, and null roots—then beautifies it with exactly 2 or 4 spaces or minifies it, and reports value-type counts and maximum depth. Work stays in your browser, with a 1,000,000 UTF-16 code-unit input and output limit.",
+    steps: [
+      "Paste a single JSON document or load the built-in sample.",
+      "Choose Beautify or Minify; indentation applies to Beautify, then let the local worker inspect the current source.",
+      "Review the root type, total values, object, array, string, number, boolean, null, and depth statistics before copying the current JSON output.",
+    ],
+    useCases: [
+      "Confirm that an API payload or configuration snippet has valid JSON syntax before using it.",
+      "Reformat compact JSON for code review while preserving native JavaScript JSON behavior.",
+      "Minify a validated JSON payload for transport without uploading it.",
+      "Estimate document structure and nesting from bounded local statistics without uploading data.",
+    ],
+    faqs: [
+      {
+        question: "Does JSON validation prove that the data matches a schema?",
+        answer:
+          "No. This inspector proves JSON syntax only. It does not validate a schema, repair input, sort keys, or establish that values are trustworthy.",
+      },
+      {
+        question: "How are duplicate keys, large numbers, and integer-like keys handled?",
+        answer:
+          "The tool uses native JSON parsing: the last duplicate key wins, numbers use JavaScript binary64 and may be respelled, and integer-like object keys may appear in native enumeration order.",
+      },
+      {
+        question: "Does JSON Formatter upload or retain my document?",
+        answer:
+          "No. Inspection runs in a dedicated browser worker, no network request is made, and the current payload is kept only in memory for the open tool session.",
+      },
+    ],
+  },
   "json-to-csv": localTransformSeo(
     "JSON to CSV",
     "Convert JSON records into escaped RFC 4180 CSV while keeping the conversion local.",
@@ -198,10 +227,48 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "Basic Auth Header",
     "Build and decode Basic Authorization headers locally; use HTTPS for credentials.",
   ),
-  "curl-converter": localTransformSeo(
-    "cURL Converter",
-    "Turn a portable cURL command into Fetch code locally without sending or running the request.",
-  ),
+  "curl-converter": {
+    heading: "Convert cURL commands to Fetch without sending a request",
+    introduction:
+      "Turn a bounded, portable cURL command into readable JavaScript Fetch source entirely in your browser. Kitland parses the command but never executes it, sends a network request, reads a local file, stores the payload, or adds it to the URL.",
+    steps: [
+      "Paste a cURL command that starts with curl and contains one absolute HTTP or HTTPS URL.",
+      "Review the live Fetch result, including its method, ordered headers, query data, and optional body.",
+      "Copy the generated JavaScript after checking credentials and request data for secrets.",
+    ],
+    useCases: [
+      "Translate an API documentation example into Fetch code for a browser or JavaScript project.",
+      "Preserve repeated headers and body fragments while reviewing how a request maps to Fetch.",
+      "Inspect a request locally before moving a sanitized version into source code or a test fixture.",
+    ],
+    faqs: [
+      {
+        question: "Which cURL options are supported?",
+        answer:
+          "The converter supports request method, headers, inline data, Basic authentication, HEAD, GET query transfer, --url, and one positional HTTP or HTTPS URL. Common transport-only flags such as --silent, --location, and --compressed are ignored; other options are rejected.",
+      },
+      {
+        question: "Will the converter read @file request bodies?",
+        answer:
+          "No. File-backed -d, --data, --data-raw, and --data-binary values are rejected because this local converter cannot and should not read the referenced file.",
+      },
+      {
+        question: "Does converting a cURL command send the request?",
+        answer:
+          "No. Parsing and formatting are synchronous and local. The generated Fetch source is displayed as text and is never executed by Kitland.",
+      },
+      {
+        question: "Are Basic authentication credentials safe to paste?",
+        answer:
+          "The conversion stays on this device, but Basic authentication is only encoding, not encryption. Treat the generated Authorization header as sensitive and use HTTPS when you eventually send it elsewhere.",
+      },
+      {
+        question: "What are the cURL converter limits?",
+        answer:
+          "Input is limited to 100,000 JavaScript UTF-16 code units and 1,000 parsed tokens so conversion remains predictable and responsive.",
+      },
+    ],
+  },
   "cron-parser": localTransformSeo(
     "Cron Parser",
     "Explain a standard five-field Unix cron expression and preview its upcoming local-time runs.",
@@ -234,7 +301,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "QR Code",
     "Generate downloadable QR codes locally from text or URLs.",
   ),
-  "unix-timestamp": localTransformSeo("Unix Timestamp", "Convert Unix seconds or milliseconds to ISO time locally."),
+  "unix-timestamp": localTransformSeo(
+    "Unix Timestamp",
+    "Convert Unix seconds or milliseconds to ISO time locally.",
+  ),
   "case-converter": localTransformSeo(
     "Case Converter",
     "Move identifiers and phrases between camel, snake, kebab, title, and sentence case.",
@@ -274,6 +344,58 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
   "random-number": localTransformSeo(
     "Random Number",
     "Generate cryptographically secure random numbers within a chosen range locally.",
+  ),
+  "morse-code": localTransformSeo(
+    "Morse Code",
+    "Encode or decode ITU Morse for Latin letters and digits without leaving the browser.",
+  ),
+  "split-to-newlines": localTransformSeo(
+    "Split to Newlines",
+    "Split comma, semicolon, whitespace, or custom-delimited text into one value per line.",
+  ),
+  "json-to-typescript": localTransformSeo(
+    "JSON to TypeScript",
+    "Infer a TypeScript type declaration from a JSON sample locally.",
+  ),
+  "json-to-js-const": localTransformSeo(
+    "JSON to JS const",
+    "Turn a JSON value into a pretty-printed JavaScript const declaration.",
+  ),
+  "html-to-jsx": localTransformSeo(
+    "HTML to JSX",
+    "Convert HTML attribute names into JSX-friendly form without executing markup.",
+  ),
+  "number-base": localTransformSeo(
+    "Number Base",
+    "Convert integers between bases 2–36 for debugging and encoding work.",
+  ),
+  temperature: localTransformSeo(
+    "Temperature",
+    "Convert Celsius, Fahrenheit, and Kelvin values with absolute-zero checks.",
+  ),
+  "data-size": localTransformSeo(
+    "Data Size",
+    "Convert SI and binary data sizes such as MB and MiB locally.",
+  ),
+  "color-converter": localTransformSeo(
+    "Color Converter",
+    "Convert colors between hex, RGB, and HSL without uploading design tokens.",
+  ),
+  "duration-formatter": localTransformSeo(
+    "Duration Formatter",
+    "Format second counts into day, hour, minute, and second labels.",
+  ),
+  "timezone-converter": localTransformSeo(
+    "Timezone Converter",
+    "Convert wall times between a fixed local IANA offset set without network lookups.",
+  ),
+  "date-calculator": localTransformSeo(
+    "Date Calculator",
+    "Diff ISO dates and apply day offsets using UTC calendar rules.",
+  ),
+  "age-calculator": localTransformSeo(
+    "Age Calculator",
+    "Compute years, months, and days between two ISO dates locally.",
   ),
 };
 

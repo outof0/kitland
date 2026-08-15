@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Catalog-registered tool renderers", () => {
   for (const tool of [
-    { slug: "json-toolbox", title: "JSON Toolbox", input: "JSON input" },
+    { slug: "json-formatter", title: "JSON Formatter", input: "JSON input" },
     { slug: "text-stats", title: "Text Stats", input: "Text to measure", copy: false },
     { slug: "lorem-ipsum", title: "Lorem Ipsum", input: undefined },
   ]) {

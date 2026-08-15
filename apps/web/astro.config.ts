@@ -16,6 +16,9 @@ export default defineConfig({
   site: "https://kitland.dev",
   output: "static",
   trailingSlash: "never",
+  devToolbar: {
+    enabled: false,
+  },
   build: {
     format: "file",
   },
@@ -33,7 +36,7 @@ export default defineConfig({
         "default-src 'self'",
         "base-uri 'self'",
         "connect-src 'self'",
-        "font-src 'self'",
+        "font-src 'self' data:",
         "form-action 'self'",
         "frame-ancestors 'none'",
         "frame-src 'none'",
@@ -45,6 +48,29 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: [
+        "qrcode",
+        "lucide-react",
+        "bcryptjs",
+        "@uiw/react-codemirror",
+        "@codemirror/lang-javascript",
+        "@codemirror/lang-json",
+        "@codemirror/lang-markdown",
+        "@codemirror/lang-sql",
+        "@codemirror/lang-xml",
+        "@codemirror/lang-yaml",
+        "@codemirror/language",
+        "@codemirror/search",
+        "@codemirror/state",
+        "@codemirror/view",
+        "@lezer/highlight",
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge",
+        "radix-ui",
+      ],
+    },
     resolve: {
       alias: {
         "@": path.resolve(rootDir, "src"),
