@@ -799,3 +799,124 @@ export function findHttpStatuses(query: string): readonly HttpStatus[] {
     return haystack.includes(q);
   });
 }
+
+export function generateHttpWireResponse(status: HttpStatus, dateOverride?: string): string {
+  const dateStr = dateOverride ?? new Date().toUTCString();
+  const headers = [
+    `HTTP/1.1 ${status.code} ${status.name}`,
+    `Date: ${dateStr}`,
+    "Server: kitland/1.0",
+    "Content-Type: application/json; charset=utf-8",
+  ];
+
+  if (status.commonHeaders?.includes("Location")) {
+    headers.push("Location: https://example.com/resource/123");
+  }
+  if (status.commonHeaders?.includes("Retry-After")) {
+    headers.push("Retry-After: 60");
+  }
+  if (status.commonHeaders?.includes("WWW-Authenticate")) {
+    headers.push('WWW-Authenticate: Bearer realm="api", error="invalid_token"');
+  }
+  if (status.commonHeaders?.includes("Allow")) {
+    headers.push("Allow: GET, POST, HEAD, OPTIONS");
+  }
+  if (status.commonHeaders?.includes("ETag")) {
+    headers.push('ETag: W/"1a2b3c4d5e"');
+  }
+
+  if (status.hasResponseBody === "none") {
+    return headers.join("\r\n");
+  }
+
+  const isError = status.category === "Client Error" || status.category === "Server Error";
+  const body = isError
+    ? JSON.stringify(
+        {
+          statusCode: status.code,
+          error: status.name,
+          message: status.description,
+        },
+        null,
+        2,
+      )
+    : JSON.stringify(
+        {
+          statusCode: status.code,
+          message: status.description,
+          data: {},
+        },
+        null,
+        2,
+      );
+
+  return `${headers.join("\r\n")}\r\nContent-Length: ${body.length}\r\n\r\n${body}`;
+}
+
+export function generateClientFetchSnippet(status: HttpStatus): string {
+  const isError = status.category === "Client Error" || status.category === "Server Error";
+  if (status.code === 204) {
+    return `// JavaScript Fetch Client (204 No Content)
+const response = await fetch('/api/resource/123', {
+  method: 'DELETE',
+});
+
+if (response.status === 204) {
+  console.log('Resource deleted successfully (no content returned).');
+}`;
+  }
+
+  if (isError) {
+    return `// JavaScript Fetch Client (${status.code} ${status.name})
+try {
+  const response = await fetch('/api/resource');
+
+  if (response.status === ${status.code}) {
+    const errorData = await response.json();
+    console.error('${status.name} (${status.code}):', errorData.message);
+  }
+} catch (err) {
+  console.error('Network request failed:', err);
+}`;
+  }
+
+  return `// JavaScript Fetch Client (${status.code} ${status.name})
+const response = await fetch('/api/resource');
+
+if (response.status === ${status.code}) {
+  const payload = await response.json();
+  console.log('Success (${status.code}):', payload);
+}`;
+}
+
+export function generateServerExpressSnippet(status: HttpStatus): string {
+  const isError = status.category === "Client Error" || status.category === "Server Error";
+  if (status.hasResponseBody === "none") {
+    return `// Express / Node.js (${status.code} ${status.name})
+app.delete('/api/resource/:id', (req, res) => {
+  // Return ${status.code} ${status.name} without body
+  return res.status(${status.code}).end();
+});`;
+  }
+
+  if (isError) {
+    return `// Express / Node.js (${status.code} ${status.name})
+app.get('/api/resource/:id', (req, res) => {
+  return res.status(${status.code}).json({
+    statusCode: ${status.code},
+    error: ${JSON.stringify(status.name)},
+    message: ${JSON.stringify(status.description)},
+  });
+});`;
+  }
+
+  return `// Express / Node.js (${status.code} ${status.name})
+app.get('/api/resource/:id', (req, res) => {
+  return res.status(${status.code}).json({
+    statusCode: ${status.code},
+    message: ${JSON.stringify(status.description)},
+    data: { id: req.params.id },
+  });
+});`;
+}
+

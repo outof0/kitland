@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { findHttpStatuses, getHttpStatus, HTTP_STATUS_CODES } from "./http-status-codes";
+import {
+  findHttpStatuses,
+  generateClientFetchSnippet,
+  generateHttpWireResponse,
+  generateServerExpressSnippet,
+  getHttpStatus,
+  HTTP_STATUS_CODES,
+} from "./http-status-codes";
 
 describe("HTTP statuses", () => {
   it("has full coverage across all 5 series", () => {
@@ -36,4 +43,33 @@ describe("HTTP statuses", () => {
     const s429 = getHttpStatus(429);
     expect(s429?.commonHeaders).toContain("Retry-After");
   });
+
+  it("generates deterministic HTTP wire response snippets", () => {
+    const s404 = getHttpStatus(404)!;
+    const wire404 = generateHttpWireResponse(s404, "Fri, 21 Aug 2026 00:00:00 GMT");
+    expect(wire404).toContain("HTTP/1.1 404 Not Found");
+    expect(wire404).toContain("Date: Fri, 21 Aug 2026 00:00:00 GMT");
+    expect(wire404).toContain('"statusCode": 404');
+    expect(wire404).toContain('"error": "Not Found"');
+
+    const s204 = getHttpStatus(204)!;
+    const wire204 = generateHttpWireResponse(s204, "Fri, 21 Aug 2026 00:00:00 GMT");
+    expect(wire204).toContain("HTTP/1.1 204 No Content");
+    expect(wire204).not.toContain("Content-Length:");
+  });
+
+  it("generates fetch client and express server snippets", () => {
+    const s404 = getHttpStatus(404)!;
+    const fetchSnippet = generateClientFetchSnippet(s404);
+    expect(fetchSnippet).toContain("response.status === 404");
+    expect(fetchSnippet).toContain("Not Found");
+
+    const expressSnippet = generateServerExpressSnippet(s404);
+    expect(expressSnippet).toContain("res.status(404).json");
+
+    const s204 = getHttpStatus(204)!;
+    const express204 = generateServerExpressSnippet(s204);
+    expect(express204).toContain("res.status(204).end()");
+  });
 });
+

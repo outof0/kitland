@@ -142,6 +142,9 @@ export { parseUrl, URL_PARSER_MAX_INPUT_CHARS, type ParsedUrl } from "./tools/ur
 export {
   findHttpStatuses,
   getHttpStatus,
+  generateHttpWireResponse,
+  generateClientFetchSnippet,
+  generateServerExpressSnippet,
   HTTP_STATUS_CODES,
   type HttpStatus,
   type HttpStatusCategory,

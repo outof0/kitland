@@ -1,21 +1,37 @@
 import {
+  findHttpStatuses,
+  generateClientFetchSnippet,
+  generateHttpWireResponse,
+  generateServerExpressSnippet,
   getHttpStatus,
   HTTP_STATUS_CODES,
   type HttpStatus,
   type HttpStatusCategory,
 } from "@kitland/core";
-import { Check, Copy, Globe2, Layers, Search } from "lucide-react";
-import { useMemo, useState, useCallback } from "react";
-import { useCopyFeedback } from "../hooks/useCopyFeedback";
+import {
+  Check,
+  Code2,
+  Copy,
+  Globe2,
+  Layers,
+  Search,
+  Server,
+  Terminal,
+  X,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FieldLabel, SampleAction, StatusBar, ToolHeader } from "../components/tool-form";
+import { useCopyFeedback } from "../hooks/useCopyFeedback";
 
-const CATEGORIES: readonly { id: HttpStatusCategory | "All"; label: string; prefix: string }[] = [
-  { id: "All", label: "All", prefix: "*" },
-  { id: "Informational", label: "1xx Info", prefix: "1xx" },
-  { id: "Success", label: "2xx Success", prefix: "2xx" },
-  { id: "Redirection", label: "3xx Redirect", prefix: "3xx" },
-  { id: "Client Error", label: "4xx Client", prefix: "4xx" },
-  { id: "Server Error", label: "5xx Server", prefix: "5xx" },
+type SnippetTab = "wire" | "fetch" | "express";
+
+const CATEGORIES: readonly { id: HttpStatusCategory | "All"; label: string; short: string }[] = [
+  { id: "All", label: "All", short: "All" },
+  { id: "Informational", label: "1xx Informational", short: "1xx Info" },
+  { id: "Success", label: "2xx Success", short: "2xx Success" },
+  { id: "Redirection", label: "3xx Redirection", short: "3xx Redirect" },
+  { id: "Client Error", label: "4xx Client Error", short: "4xx Client" },
+  { id: "Server Error", label: "5xx Server Error", short: "5xx Server" },
 ];
 
 const COMMON_CODES = [200, 201, 204, 301, 304, 400, 401, 403, 404, 422, 429, 500, 502, 503];
@@ -24,100 +40,59 @@ function getCategoryColor(category: HttpStatusCategory) {
   switch (category) {
     case "Informational":
       return {
-        badge: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-        text: "text-blue-400",
-        ring: "ring-blue-500/30",
+        badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/25",
+        text: "text-blue-600 dark:text-blue-400",
+        ring: "ring-blue-500/30 border-blue-500/50",
         card: "border-blue-500/25 bg-blue-500/5",
+        dot: "bg-blue-500",
+        activeItem: "bg-blue-500/10 border-blue-500/40 text-blue-600 dark:text-blue-400",
       };
     case "Success":
       return {
-        badge: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-        text: "text-emerald-400",
-        ring: "ring-emerald-500/30",
+        badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
+        text: "text-emerald-600 dark:text-emerald-400",
+        ring: "ring-emerald-500/30 border-emerald-500/50",
         card: "border-emerald-500/25 bg-emerald-500/5",
+        dot: "bg-emerald-500",
+        activeItem: "bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400",
       };
     case "Redirection":
       return {
-        badge: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-        text: "text-amber-400",
-        ring: "ring-amber-500/30",
+        badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25",
+        text: "text-amber-600 dark:text-amber-400",
+        ring: "ring-amber-500/30 border-amber-500/50",
         card: "border-amber-500/25 bg-amber-500/5",
+        dot: "bg-amber-500",
+        activeItem: "bg-amber-500/10 border-amber-500/40 text-amber-600 dark:text-amber-400",
       };
     case "Client Error":
       return {
-        badge: "bg-rose-500/15 text-rose-400 border-rose-500/30",
-        text: "text-rose-400",
-        ring: "ring-rose-500/30",
+        badge: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25",
+        text: "text-rose-600 dark:text-rose-400",
+        ring: "ring-rose-500/30 border-rose-500/50",
         card: "border-rose-500/25 bg-rose-500/5",
+        dot: "bg-rose-500",
+        activeItem: "bg-rose-500/10 border-rose-500/40 text-rose-600 dark:text-rose-400",
       };
     case "Server Error":
       return {
-        badge: "bg-red-600/15 text-red-400 border-red-600/30",
-        text: "text-red-400",
-        ring: "ring-red-600/30",
-        card: "border-red-600/25 bg-red-600/5",
+        badge: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/25",
+        text: "text-red-600 dark:text-red-400",
+        ring: "ring-red-500/30 border-red-500/50",
+        card: "border-red-500/25 bg-red-500/5",
+        dot: "bg-red-500",
+        activeItem: "bg-red-500/10 border-red-500/40 text-red-600 dark:text-red-400",
       };
   }
-}
-
-function generateHttpSnippet(status: HttpStatus): string {
-  const dateStr = new Date().toUTCString();
-  const headers = [
-    `HTTP/1.1 ${status.code} ${status.name}`,
-    `Date: ${dateStr}`,
-    "Server: kitland/1.0",
-    "Content-Type: application/json; charset=utf-8",
-  ];
-
-  if (status.commonHeaders?.includes("Location")) {
-    headers.push("Location: https://example.com/resource/123");
-  }
-  if (status.commonHeaders?.includes("Retry-After")) {
-    headers.push("Retry-After: 60");
-  }
-  if (status.commonHeaders?.includes("WWW-Authenticate")) {
-    headers.push('WWW-Authenticate: Bearer realm="api", error="invalid_token"');
-  }
-  if (status.commonHeaders?.includes("Allow")) {
-    headers.push("Allow: GET, POST, HEAD, OPTIONS");
-  }
-  if (status.commonHeaders?.includes("ETag")) {
-    headers.push('ETag: W/"1a2b3c4d5e"');
-  }
-
-  if (status.hasResponseBody === "none") {
-    return headers.join("\r\n");
-  }
-
-  const isError = status.category === "Client Error" || status.category === "Server Error";
-  const body = isError
-    ? JSON.stringify(
-        {
-          status: status.code,
-          error: status.name,
-          message: status.description,
-        },
-        null,
-        2,
-      )
-    : JSON.stringify(
-        {
-          status: status.code,
-          message: status.description,
-          data: {},
-        },
-        null,
-        2,
-      );
-
-  return `${headers.join("\r\n")}\r\nContent-Length: ${body.length}\r\n\r\n${body}`;
 }
 
 export function HttpStatusCodesTool() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<HttpStatusCategory | "All">("All");
   const [selectedCode, setSelectedCode] = useState<number>(404);
+  const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>("wire");
 
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { isCopied, copy } = useCopyFeedback();
 
   const selectedStatus = useMemo(
@@ -158,6 +133,24 @@ export function HttpStatusCodesTool() {
     setSearchQuery("");
     setSelectedCategory("All");
     setSelectedCode(404);
+    setActiveSnippetTab("wire");
+  }, []);
+
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery("");
+    searchInputRef.current?.focus();
+  }, []);
+
+  // Keyboard shortcut '/' to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "/" && document.activeElement !== searchInputRef.current) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const related = useMemo(() => {
@@ -168,7 +161,17 @@ export function HttpStatusCodesTool() {
   }, [selectedStatus]);
 
   const colorStyles = getCategoryColor(selectedStatus.category);
-  const httpSnippet = useMemo(() => generateHttpSnippet(selectedStatus), [selectedStatus]);
+
+  const activeSnippet = useMemo(() => {
+    switch (activeSnippetTab) {
+      case "wire":
+        return generateHttpWireResponse(selectedStatus);
+      case "fetch":
+        return generateClientFetchSnippet(selectedStatus);
+      case "express":
+        return generateServerExpressSnippet(selectedStatus);
+    }
+  }, [activeSnippetTab, selectedStatus]);
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 font-ui">
@@ -179,24 +182,39 @@ export function HttpStatusCodesTool() {
         actions={<SampleAction onClick={handleSample} label="Sample (404)" />}
       />
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[360px_minmax(0,1fr)] xl:grid-cols-[400px_minmax(0,1fr)]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[360px_minmax(0,1fr)] xl:grid-cols-[400px_minmax(0,1fr)] lg:h-[calc(100dvh-175px)] lg:max-h-[920px]">
         {/* Left Column: Search, Categories, and Code List */}
-        <section className="flex min-h-[480px] flex-col rounded-[14px] border border-outline bg-bg-elevated p-4 max-lg:max-h-[380px]">
+        <section className="flex h-full min-h-0 flex-col rounded-[14px] border border-outline bg-bg-elevated p-3.5 max-lg:min-h-[460px]">
           {/* Search box */}
           <div className="relative mb-3 flex items-center">
             <Search className="pointer-events-none absolute left-3 size-4 text-on-faint" />
             <input
+              ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search code, name, RFC, headers…"
+              placeholder="Search code (404), name, RFC, header…"
               aria-label="Search HTTP status codes"
-              className="h-10 w-full rounded-[9px] border border-outline bg-surface pl-9 pr-3 font-ui text-[13px] text-on-surface outline-none placeholder:text-on-faint focus:border-primary focus:ring-1 focus:ring-primary/40 transition-all"
+              className="h-10 w-full rounded-[9px] border border-outline bg-surface pl-9 pr-14 font-ui text-[13px] text-on-surface outline-none placeholder:text-on-faint focus:border-primary focus:ring-1 focus:ring-primary/40 transition-all"
             />
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="absolute right-2.5 flex size-5 items-center justify-center rounded-full bg-surface-high text-on-muted hover:text-on-surface transition-colors cursor-pointer"
+                aria-label="Clear search"
+              >
+                <X className="size-3" />
+              </button>
+            ) : (
+              <kbd className="pointer-events-none absolute right-3 hidden rounded border border-outline bg-surface-low px-1.5 py-0.5 font-mono text-[10px] text-on-faint sm:inline-block">
+                /
+              </kbd>
+            )}
           </div>
 
           {/* Category Tabs */}
-          <div className="mb-3 flex flex-wrap gap-1">
+          <div className="mb-2.5 flex flex-wrap gap-1">
             {CATEGORIES.map((cat) => {
               const active = selectedCategory === cat.id;
               const count =
@@ -209,13 +227,13 @@ export function HttpStatusCodesTool() {
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
                   aria-pressed={active}
-                  className={`flex h-7 items-center gap-1.5 rounded-[7px] px-2.5 font-mono text-[11px] font-semibold transition-all cursor-pointer ${
+                  className={`flex h-7 items-center gap-1.5 rounded-[7px] px-2 font-mono text-[11px] font-semibold transition-all cursor-pointer ${
                     active
                       ? "bg-primary text-on-primary shadow-sm"
                       : "bg-surface text-on-muted hover:bg-surface-high hover:text-on-surface"
                   }`}
                 >
-                  <span>{cat.label}</span>
+                  <span>{cat.short}</span>
                   <span
                     className={`rounded-full px-1 text-[9.5px] ${
                       active ? "bg-black/20 text-white" : "bg-surface-low text-on-faint"
@@ -229,9 +247,9 @@ export function HttpStatusCodesTool() {
           </div>
 
           {/* Quick Common Code Chips */}
-          <div className="mb-2 flex flex-wrap items-center gap-1">
+          <div className="mb-2.5 flex flex-wrap items-center gap-1">
             <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-on-faint mr-1">
-              Quick:
+              Popular:
             </span>
             {COMMON_CODES.map((code) => {
               const isSelected = selectedStatus.code === code;
@@ -266,23 +284,27 @@ export function HttpStatusCodesTool() {
                     type="button"
                     onClick={() => selectCode(status.code)}
                     aria-selected={isSelected}
-                    className={`flex items-center gap-3 rounded-[10px] border p-2.5 text-left transition-all cursor-pointer ${
+                    className={`group relative flex items-center gap-2.5 rounded-[10px] border p-2 text-left transition-all cursor-pointer ${
                       isSelected
                         ? "border-primary bg-surface shadow-sm ring-1 ring-primary/40"
-                        : "border-transparent bg-surface/60 hover:bg-surface hover:border-outline"
+                        : "border-transparent bg-surface/50 hover:bg-surface hover:border-outline"
                     }`}
                   >
                     <span
-                      className={`flex h-8 w-12 shrink-0 items-center justify-center rounded-[6px] font-mono text-[13px] font-bold border ${catColor.badge}`}
+                      className={`flex h-8 w-12 shrink-0 items-center justify-center rounded-[6px] font-mono text-[13px] font-bold border transition-colors ${catColor.badge}`}
                     >
                       {status.code}
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-1">
-                        <span className="truncate text-[13px] font-semibold text-on-surface">
+                        <span
+                          className={`truncate text-[13px] font-semibold ${
+                            isSelected ? "text-on-surface" : "text-on-surface"
+                          }`}
+                        >
                           {status.name}
                         </span>
-                        <span className="shrink-0 font-mono text-[10px] text-on-faint">
+                        <span className="shrink-0 font-mono text-[9.5px] text-on-faint">
                           {status.spec.split(" ")[0]}
                         </span>
                       </div>
@@ -301,7 +323,7 @@ export function HttpStatusCodesTool() {
                     setSearchQuery("");
                     setSelectedCategory("All");
                   }}
-                  className="mt-1 text-[11px] text-primary hover:underline"
+                  className="mt-1 text-[11px] text-primary hover:underline cursor-pointer"
                 >
                   Clear filters
                 </button>
@@ -317,7 +339,7 @@ export function HttpStatusCodesTool() {
         </section>
 
         {/* Right Column: In-depth Detail Inspector */}
-        <section className="flex min-h-[480px] min-w-0 flex-1 flex-col gap-4 rounded-[14px] border border-outline bg-surface p-5 overflow-y-auto">
+        <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col gap-4 rounded-[14px] border border-outline bg-surface p-5 sm:p-6 overflow-y-auto">
           {/* Header Row */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-outline pb-4">
             <div className="flex flex-wrap items-center gap-2">
@@ -330,7 +352,7 @@ export function HttpStatusCodesTool() {
                 {selectedStatus.spec}
               </span>
               {selectedStatus.cacheable === true && (
-                <span className="rounded-[7px] border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10.5px] font-semibold text-emerald-400">
+                <span className="rounded-[7px] border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10.5px] font-semibold text-emerald-600 dark:text-emerald-400">
                   Cacheable
                 </span>
               )}
@@ -344,7 +366,7 @@ export function HttpStatusCodesTool() {
                   void copy("copy-status", `${selectedStatus.code} ${selectedStatus.name}`)
                 }
                 className="flex h-8 items-center gap-1.5 rounded-[7px] border border-outline bg-surface-low px-2.5 text-[12px] font-semibold text-on-surface hover:bg-surface-high transition-colors cursor-pointer"
-                title="Copy code and phrase"
+                title="Copy code and phrase (e.g. 404 Not Found)"
               >
                 {isCopied("copy-status") ? (
                   <Check className="size-3.5 text-success" />
@@ -355,25 +377,29 @@ export function HttpStatusCodesTool() {
               </button>
               <button
                 type="button"
-                onClick={() => void copy("copy-http", httpSnippet)}
+                onClick={() => void copy("copy-snippet", activeSnippet)}
                 className="flex h-8 items-center gap-1.5 rounded-[7px] border border-outline bg-surface-low px-2.5 text-[12px] font-semibold text-on-surface hover:bg-surface-high transition-colors cursor-pointer"
-                title="Copy HTTP raw response"
+                title="Copy active code snippet"
               >
-                <Layers className="size-3.5 text-on-muted" />
-                <span>Copy HTTP Response</span>
+                {isCopied("copy-snippet") ? (
+                  <Check className="size-3.5 text-success" />
+                ) : (
+                  <Layers className="size-3.5 text-on-muted" />
+                )}
+                <span>Copy Snippet</span>
               </button>
             </div>
           </div>
 
           {/* Main Hero Code & Title */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-baseline gap-4 flex-wrap">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-baseline gap-3.5 flex-wrap">
               <span
-                className={`font-mono text-[52px] font-extrabold leading-none tracking-tight ${colorStyles.text}`}
+                className={`font-mono text-[44px] sm:text-[52px] font-extrabold leading-none tracking-tight ${colorStyles.text}`}
               >
                 {selectedStatus.code}
               </span>
-              <h3 className="m-0 text-[26px] font-bold font-display text-on-surface">
+              <h3 className="m-0 text-[24px] sm:text-[28px] font-bold font-display text-on-surface">
                 {selectedStatus.name}
               </h3>
             </div>
@@ -436,32 +462,85 @@ export function HttpStatusCodesTool() {
                     key={header}
                     type="button"
                     onClick={() => void copy(`header-${header}`, header)}
-                    className="flex items-center gap-1.5 rounded-[7px] border border-outline bg-bg-elevated px-2.5 py-1 font-mono text-[12px] text-on-surface hover:bg-surface-high transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 rounded-[7px] border border-outline bg-bg-elevated px-2.5 py-1 font-mono text-[12px] text-on-surface hover:bg-surface-high hover:border-outline-strong transition-colors cursor-pointer"
                     title={`Click to copy "${header}" header`}
                   >
                     <span>{header}</span>
-                    <Copy className="size-3 text-on-faint" />
+                    {isCopied(`header-${header}`) ? (
+                      <Check className="size-3 text-success" />
+                    ) : (
+                      <Copy className="size-3 text-on-faint" />
+                    )}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* HTTP Raw Response Snippet */}
+          {/* Multi-Tab Interactive Code Snippet */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <FieldLabel>HTTP Response Wire Representation</FieldLabel>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              {/* Tabs */}
+              <div className="flex items-center gap-1 rounded-[8px] bg-bg-elevated p-1 border border-outline">
+                <button
+                  type="button"
+                  onClick={() => setActiveSnippetTab("wire")}
+                  className={`flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 font-mono text-[11.5px] font-semibold transition-all cursor-pointer ${
+                    activeSnippetTab === "wire"
+                      ? "bg-surface text-on-surface shadow-sm border border-outline"
+                      : "text-on-muted hover:text-on-surface border border-transparent"
+                  }`}
+                >
+                  <Layers className="size-3.5" />
+                  <span>HTTP/1.1 Wire</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSnippetTab("fetch")}
+                  className={`flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 font-mono text-[11.5px] font-semibold transition-all cursor-pointer ${
+                    activeSnippetTab === "fetch"
+                      ? "bg-surface text-on-surface shadow-sm border border-outline"
+                      : "text-on-muted hover:text-on-surface border border-transparent"
+                  }`}
+                >
+                  <Code2 className="size-3.5" />
+                  <span>Fetch Client</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSnippetTab("express")}
+                  className={`flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 font-mono text-[11.5px] font-semibold transition-all cursor-pointer ${
+                    activeSnippetTab === "express"
+                      ? "bg-surface text-on-surface shadow-sm border border-outline"
+                      : "text-on-muted hover:text-on-surface border border-transparent"
+                  }`}
+                >
+                  <Server className="size-3.5" />
+                  <span>Express Server</span>
+                </button>
+              </div>
+
               <button
                 type="button"
-                onClick={() => void copy("copy-http-snippet", httpSnippet)}
+                onClick={() => void copy("copy-tab-snippet", activeSnippet)}
                 className="flex items-center gap-1 font-mono text-[11px] text-primary hover:underline cursor-pointer"
               >
-                <Copy className="size-3" />
-                <span>Copy</span>
+                {isCopied("copy-tab-snippet") ? (
+                  <>
+                    <Check className="size-3 text-success" />
+                    <span className="text-success">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="size-3" />
+                    <span>Copy Code</span>
+                  </>
+                )}
               </button>
             </div>
-            <pre className="m-0 overflow-x-auto rounded-[10px] border border-outline bg-marketing-canvas p-3.5 font-mono text-[12px] leading-relaxed text-on-surface select-all">
-              {httpSnippet}
+
+            <pre className="m-0 overflow-x-auto rounded-[10px] border border-outline bg-surface-low p-3.5 font-mono text-[12px] leading-relaxed text-on-surface select-all">
+              {activeSnippet}
             </pre>
           </div>
 
@@ -475,12 +554,16 @@ export function HttpStatusCodesTool() {
                     key={rel.code}
                     type="button"
                     onClick={() => selectCode(rel.code)}
-                    className="flex items-center gap-2 rounded-[8px] border border-outline bg-bg-elevated p-2 text-left transition-colors hover:bg-surface-high cursor-pointer"
+                    className="flex items-center gap-2.5 rounded-[8px] border border-outline bg-bg-elevated p-2 text-left transition-colors hover:bg-surface-high hover:border-outline-strong cursor-pointer"
                   >
-                    <span className="shrink-0 font-mono text-[13px] font-bold text-on-surface">
+                    <span
+                      className={`shrink-0 font-mono text-[12.5px] font-bold ${
+                        getCategoryColor(rel.category).text
+                      }`}
+                    >
                       {rel.code}
                     </span>
-                    <span className="min-w-0 flex-1 truncate text-[12px] text-on-muted">
+                    <span className="min-w-0 flex-1 truncate text-[12px] text-on-surface font-medium">
                       {rel.name}
                     </span>
                   </button>
@@ -505,3 +588,4 @@ export function HttpStatusCodesTool() {
     </div>
   );
 }
+
