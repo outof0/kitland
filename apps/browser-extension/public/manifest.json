@@ -20,8 +20,7 @@
     }
   },
   "background": {
-    "service_worker": "sw.js",
-    "scripts": ["sw.js"]
+    "service_worker": "sw.js"
   },
   "permissions": [],
   "host_permissions": [],

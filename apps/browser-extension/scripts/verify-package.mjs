@@ -52,12 +52,10 @@ function verifyDistribution() {
   const launcherOnly =
     background !== undefined &&
     background.service_worker === "sw.js" &&
-    Array.isArray(background.scripts) &&
-    background.scripts.length === 1 &&
-    background.scripts[0] === "sw.js";
+    !Array.isArray(background.scripts);
   if (!launcherOnly) {
     fail(
-      "background must be exactly the sw.js launcher (service_worker + scripts) that opens the tool tab.",
+      "background must be the sw.js launcher (service_worker only, Manifest V3) that opens the tool tab.",
     );
   }
   if (

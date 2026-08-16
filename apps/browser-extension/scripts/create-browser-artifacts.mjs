@@ -48,12 +48,14 @@ const firefoxFiles = files.map((absolutePath) => {
   let data = readFileSync(absolutePath);
   if (name === "manifest.json") {
     const manifest = JSON.parse(data.toString("utf8"));
+    const { scripts, ...background } = manifest.background ?? {};
     const patched = {
       ...manifest,
+      background,
       browser_specific_settings: {
         gecko: {
           id: "kitland@outof0.dev",
-          strict_min_version: "109.0",
+          strict_min_version: "115.0",
         },
       },
     };

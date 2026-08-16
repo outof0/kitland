@@ -1,10 +1,17 @@
 name: Release
 
 # Unified release pipeline for all Kitland distribution surfaces.
-# - npm (MCP): follows hotpug trusted-publishing pattern (OIDC + provenance)
-# - VS Code Marketplace + Open VSX: follows nexusdiff tag-driven flow
-# - Chrome Web Store + Firefox AMO: deterministic browser artifacts
+# - Auth: GitHub OIDC -> Google Cloud Workload Identity Federation (no long-lived keys)
+# - Secrets: store publishing credentials live in GCP Secret Manager, pulled at runtime
+# - npm (MCP): trusted publishing + provenance (GitHub OIDC)
+# - VS Code Marketplace + Open VSX: PATs from Secret Manager
+# - Chrome Web Store + Firefox AMO: deterministic browser artifacts, creds from Secret Manager
 # Trigger via explicit tag push (Conventional Commits) or manual dispatch.
+
+# Read-only by default; OIDC token is used only for GCP WIF, not for repo writes.
+permissions:
+  contents: read
+  id-token: write
 
 on:
   push:
@@ -25,10 +32,6 @@ on:
         type: boolean
         default: false
 
-permissions:
-  contents: write
-  id-token: write
-
 concurrency:
   group: release
   cancel-in-progress: false
@@ -44,16 +47,51 @@ jobs:
     if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    # Match hotpug production environment guard – creation not required for tag flow
     environment:
       name: production
       url: https://kitland.dev
 
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # --- OIDC -> Google Cloud Workload Identity Federation (no static keys) ---
+      - id: auth
+        name: Authenticate to Google Cloud (WIF)
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          token_format: access_token
+
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # --- Pull all publishing credentials from Secret Manager into the job env ---
+      # Required GCP Secret Manager secrets (per environment):
+      #   chrome-extension-id, chrome-client-id, chrome-client-secret, chrome-refresh-token
+      #   firefox-api-key, firefox-api-secret
+      #   vscode-marketplace-pat, openvsx-pat
+      #   npm-token
+      - name: Pull publishing credentials from Secret Manager
+        run: |
+          sm() { gcloud secrets versions access latest --secret="$1" --project="${{ secrets.GCP_PROJECT_ID }}" 2>/dev/null; }
+          {
+            echo "CHROME_EXTENSION_ID=$(sm chrome-extension-id)"
+            echo "CHROME_CLIENT_ID=$(sm chrome-client-id)"
+            echo "CHROME_CLIENT_SECRET=$(sm chrome-client-secret)"
+            echo "CHROME_REFRESH_TOKEN=$(sm chrome-refresh-token)"
+            echo "WEB_EXT_API_KEY=$(sm firefox-api-key)"
+            echo "WEB_EXT_API_SECRET=$(sm firefox-api-secret)"
+            echo "VSCE_PAT=$(sm vscode-marketplace-pat)"
+            echo "OVSX_PAT=$(sm openvsx-pat)"
+            echo "NODE_AUTH_TOKEN=$(sm npm-token)"
+          } >> "$GITHUB_ENV"
 
       - name: Validate tag matches package version (tag pushes)
         if: github.ref_type == 'tag'
@@ -81,9 +119,6 @@ jobs:
           node-version: 22.12.0
           cache: pnpm
           registry-url: https://registry.npmjs.org/
-
-      - name: Select OIDC-capable npm CLI (hotpug parity)
-        run: npm install --global npm@11.6.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -116,28 +151,24 @@ jobs:
         id: mcp_tarball
         run: |
           TARBALL="$(pnpm --filter @kitland/mcp pack --dry-run 2>&1 | grep -oE 'kitland-mcp-.*\.tgz' | head -1)"
-          # Fallback: npm pack json output
           if [ -z "$TARBALL" ]; then
             TARBALL="$(npm pack --json --prefix packages/mcp 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0,'utf8'))[0]?.filename || ''")"
           fi
           echo "tarball=$TARBALL" >> "$GITHUB_OUTPUT"
           echo "MCP tarball: $TARBALL"
 
-      # --- Publish: npm (MCP) with trusted publishing + provenance ---
+      # --- Publish: npm (MCP) with provenance ---
       - name: Publish @kitland/mcp to npm
         if: inputs.skip_npm != true
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
         run: |
           PKG_VERSION="$(node -p "require('./packages/mcp/package.json').version")"
           TARBALL="packages/mcp/kitland-mcp-${PKG_VERSION}.tgz"
-          # Prefer built tarball from verify step; rebuild if missing
           if [ ! -f "$TARBALL" ]; then
             (cd packages/mcp && npm pack)
             TARBALL="packages/mcp/kitland-mcp-${PKG_VERSION}.tgz"
           fi
-          # Idempotency: skip if already published with same integrity (hotpug pattern)
           VIEW_OUT="$(mktemp)"; VIEW_ERR="$(mktemp)"
           if npm view "@kitland/mcp@${PKG_VERSION}" dist.integrity --json >"$VIEW_OUT" 2>"$VIEW_ERR"; then
             PUBLISHED="$(node -e "process.stdout.write(JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')))" "$VIEW_OUT")"
@@ -151,22 +182,18 @@ jobs:
             fi
           elif grep -Eq 'E404|404 Not Found' "$VIEW_ERR"; then
             echo "First publish for @kitland/mcp@${PKG_VERSION}"
-            if [ -n "${NODE_AUTH_TOKEN:-}" ]; then npm whoami --registry=https://registry.npmjs.org/ || true; fi
             npm publish "$TARBALL" --access public --provenance --ignore-scripts
           else
             cat "$VIEW_ERR"; exit 1
           fi
 
-      # --- Publish: VS Code Marketplace + Open VSX (nexusdiff parity) ---
+      # --- Publish: VS Code Marketplace + Open VSX ---
       - name: Publish VS Code extension to Marketplace
         if: inputs.skip_vscode != true
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
-          VSIX="apps/vscode-extension/artifacts/kitland-developer-tools.vsix"
-          if [ ! -f "$VSIX" ]; then VSIX="$(ls apps/vscode-extension/artifacts/*.vsix | head -1)"; fi
+          VSIX="$(ls apps/vscode-extension/artifacts/*.vsix | head -1)"
           if [ -z "${VSCE_PAT:-}" ]; then
-            echo "::notice::VSCE_PAT not set – skipping Marketplace publish (artifact remains in GitHub Release)."
+            echo "::notice::VSCE_PAT not set – skipping Marketplace publish."
             exit 0
           fi
           echo "Publishing $VSIX to VS Code Marketplace…"
@@ -174,11 +201,8 @@ jobs:
 
       - name: Publish VS Code extension to Open VSX
         if: inputs.skip_vscode != true
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
         run: |
-          VSIX="apps/vscode-extension/artifacts/kitland-developer-tools.vsix"
-          if [ ! -f "$VSIX" ]; then VSIX="$(ls apps/vscode-extension/artifacts/*.vsix | head -1)"; fi
+          VSIX="$(ls apps/vscode-extension/artifacts/*.vsix | head -1)"
           if [ -z "${OVSX_PAT:-}" ]; then
             echo "::notice::OVSX_PAT not set – skipping Open VSX publish."
             exit 0
@@ -186,70 +210,43 @@ jobs:
           echo "Publishing $VSIX to Open VSX…"
           pnpm exec ovsx publish "$VSIX" -p "$OVSX_PAT" --skip-duplicate || pnpm dlx ovsx publish "$VSIX" -p "$OVSX_PAT"
 
-      # --- Publish: Chrome Web Store (optional, secret-gated) ---
+      # --- Publish: Chrome Web Store ---
       - name: Publish Chrome extension to Web Store
         if: inputs.skip_browser != true
-        env:
-          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
-          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
-          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
-          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
         run: |
           if [ -z "${CHROME_EXTENSION_ID:-}" ] || [ -z "${CHROME_CLIENT_ID:-}" ]; then
-            echo "::notice::Chrome Web Store credentials not set – skipping store submit."
+            echo "::notice::Chrome Web Store credentials not available – skipping store submit."
             exit 0
           fi
           ZIP="apps/browser-extension/artifacts/kitland-chrome-v$(node -p "require('./package.json').version").zip"
           echo "Uploading $ZIP to Chrome Web Store (extension $CHROME_EXTENSION_ID)…"
-          # Uses chrome-webstore-upload-cli; install on demand to avoid workspace dep
-          npx --yes chrome-webstore-upload-cli@3 upload --source "$ZIP" --extension-id "$CHROME_EXTENSION_ID" --client-id "$CHROME_CLIENT_ID" --client-secret "$CHROME_CLIENT_SECRET" --refresh-token "$CHROME_REFRESH_TOKEN" --auto-publish
+          npx --yes chrome-webstore-upload-cli@3 upload \
+            --source "$ZIP" \
+            --extension-id "$CHROME_EXTENSION_ID" \
+            --client-id "$CHROME_CLIENT_ID" \
+            --client-secret "$CHROME_CLIENT_SECRET" \
+            --refresh-token "$CHROME_REFRESH_TOKEN" \
+            --auto-publish
 
-      # --- Publish: Firefox AMO (optional, secret-gated) ---
+      # --- Publish: Firefox AMO ---
       - name: Publish Firefox add-on to AMO
         if: inputs.skip_browser != true
-        env:
-          WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
-          WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
         run: |
           if [ -z "${WEB_EXT_API_KEY:-}" ]; then
-            echo "::notice::Firefox AMO credentials not set – skipping AMO submit."
+            echo "::notice::Firefox AMO credentials not available – skipping AMO submit."
             exit 0
           fi
-          ZIP="apps/browser-extension/artifacts/kitland-firefox-v$(node -p "require('./package.json').version").zip"
-          echo "Submitting $ZIP to Firefox AMO…"
-          # web-ext sign expects sources or built xpi; we submit the deterministic zip
-          # Use npx web-ext to lint then sign (AMO will return signed xpi) – keep zip as release artifact
+          echo "Linting and submitting dist to Firefox AMO…"
           npx --yes web-ext lint --source-dir apps/browser-extension/dist
-          # Submit – requires AMO JWT issuer/secret
-          npx --yes web-ext sign --source-dir apps/browser-extension/dist --artifacts-dir apps/browser-extension/artifacts --api-key "$WEB_EXT_API_KEY" --api-secret "$WEB_EXT_API_SECRET" --channel listed || echo "::warning::web-ext sign failed – AMO submission requires manual review"
+          npx --yes web-ext sign \
+            --source-dir apps/browser-extension/dist \
+            --artifacts-dir apps/browser-extension/artifacts \
+            --api-key "$WEB_EXT_API_KEY" \
+            --api-secret "$WEB_EXT_API_SECRET" \
+            --channel listed || echo "::warning::web-ext sign deferred – AMO may require manual review"
 
-      # --- GitHub Release with all artifacts (nexusdiff + hotpug parity) ---
-      - name: Create GitHub Release with artifacts
-        if: github.ref_type == 'tag'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PKG_VERSION="$(node -p "require('./package.json').version")"
-          TAG="${GITHUB_REF_NAME}"
-          test "$TAG" = "v$PKG_VERSION"
-          echo "Creating release $TAG with artifacts…"
-          # Collect artifacts
-          ARTIFACTS=(
-            "apps/browser-extension/artifacts/kitland-chrome-v${PKG_VERSION}.zip"
-            "apps/browser-extension/artifacts/kitland-firefox-v${PKG_VERSION}.zip"
-            "apps/browser-extension/artifacts/kitland-browser-extension-v${PKG_VERSION}.zip"
-            "apps/vscode-extension/artifacts/kitland-developer-tools.vsix"
-          )
-          # Add MCP tarball if present
-          MCP_TARBALL="packages/mcp/kitland-mcp-${PKG_VERSION}.tgz"
-          if [ -f "$MCP_TARBALL" ]; then ARTIFACTS+=("$MCP_TARBALL"); fi
-          # Filter existing
-          EXISTING=()
-          for f in "${ARTIFACTS[@]}"; do [ -f "$f" ] && EXISTING+=("$f"); done
-          gh release create "$TAG" "${EXISTING[@]}" --verify-tag --generate-notes --title "$TAG" || gh release upload "$TAG" "${EXISTING[@]}" --clobber
-        # For workflow_dispatch without tag, upload as pre-release draft is not created – artifacts remain as workflow artifacts
-
-      - name: Upload workflow artifacts (always)
+      # --- Always keep artifacts for manual follow-up ---
+      - name: Upload workflow artifacts
         if: always()
         uses: actions/upload-artifact@b7a3adfd02109298307a45a2e7492601e1a1d781 # v7
         with:
