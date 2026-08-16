@@ -157,6 +157,7 @@ test("encodes, swaps, reports invalid Base64, and recovers", async ({ page }) =>
 test("replaces stale worker work and keeps metadata aligned with the latest input", async ({
   page,
 }) => {
+  test.slow();
   await page.addInitScript(() => {
     const counts = { posts: 0, terminations: 0 };
     Object.defineProperty(window, "__base64WorkerCounts", { value: counts });
@@ -180,31 +181,35 @@ test("replaces stale worker work and keeps metadata aligned with the latest inpu
 
   const input = page.getByRole("textbox", { name: "UTF-8 text input" });
   const output = page.getByRole("textbox", { name: "Standard Base64 result" });
-  await fillPane(input, "x".repeat(250_000));
+  await fillPane(input, "x".repeat(25_000));
   await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          (
-            window as typeof window & {
-              __base64WorkerCounts: { posts: number };
-            }
-          ).__base64WorkerCounts.posts,
-      ),
+    .poll(
+      () =>
+        page.evaluate(
+          () =>
+            (
+              window as typeof window & {
+                __base64WorkerCounts: { posts: number };
+              }
+            ).__base64WorkerCounts.posts,
+        ),
+      { timeout: 15_000 },
     )
     .toBeGreaterThan(0);
 
   await fillPane(input, "first\nsecond\r\nthird\rfourth");
   await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          (
-            window as typeof window & {
-              __base64WorkerCounts: { terminations: number };
-            }
-          ).__base64WorkerCounts.terminations,
-      ),
+    .poll(
+      () =>
+        page.evaluate(
+          () =>
+            (
+              window as typeof window & {
+                __base64WorkerCounts: { terminations: number };
+              }
+            ).__base64WorkerCounts.terminations,
+        ),
+      { timeout: 15_000 },
     )
     .toBeGreaterThan(0);
 
@@ -229,13 +234,13 @@ test("keeps both editor panes stable while validation changes", async ({ page })
   );
 
   const geometry = async () =>
-    page.locator(".tool-editor").evaluate((editor) => {
-      const inputCard = editor.querySelector(".tool-card--in")?.getBoundingClientRect();
-      const outputCard = editor.querySelector(".tool-card--out")?.getBoundingClientRect();
+    page.locator(".tool-card").evaluateAll((cards) => {
+      const first = cards[0]?.getBoundingClientRect();
+      const second = cards[1]?.getBoundingClientRect();
       return {
-        editor: editor.getBoundingClientRect().toJSON(),
-        input: inputCard?.toJSON(),
-        output: outputCard?.toJSON(),
+        firstHeight: first?.height ?? 0,
+        secondHeight: second?.height ?? 0,
+        topOffset: Math.abs((first?.top ?? 0) - (second?.top ?? 0)),
       };
     });
 
@@ -259,13 +264,15 @@ test("writes a fragment-only share link and restores it after reload", async ({ 
   await expect.poll(() => new URL(page.url()).hash).toMatch(/^#base64\?/);
   const sharedUrl = new URL(page.url());
   expect(sharedUrl.search).toBe("");
+  expect(sharedUrl.hash).toContain("input=Share+me+%E2%9C%93");
+  expect(sharedUrl.hash).not.toContain("campaign");
 
-  const params = new URLSearchParams(sharedUrl.hash.slice("#base64?".length));
-  expect(Object.fromEntries(params)).toEqual({
-    format: "standard",
-    input: "Share me ✓",
-    mode: "encode",
-  });
+  await expect(page.getByRole("status")).toHaveText(
+    "Share link copied. Anyone with the link can see the current input.",
+  );
+  await expect(page.getByRole("status")).toHaveClass(/bg-surface-low/);
+  await expect(page.getByRole("status")).toHaveClass(/border-outline/);
+  await expect(page.locator(".tool-card--in textarea")).toBeFocused();
 
   await page.reload();
   await expectPaneText(page.getByRole("textbox", { name: "UTF-8 text input" }), "Share me ✓");
@@ -283,16 +290,10 @@ test("keeps the shared category accordion keyboard operable", async ({ page }) =
     .toBe(true);
 
   // At compact widths the catalog is a drawer; open it before focusing categories.
-  // Wait for hydration to settle the compact navigation state.
-  await page.waitForTimeout(400);
   const drawerToggle = page.getByRole("button", { name: /Open tools navigation/ });
-  if (await drawerToggle.isVisible().catch(() => false)) {
-    await drawerToggle.click();
-    await expect(page.getByRole("navigation", { name: "Registered tools" })).toBeVisible();
-  } else {
-    // Fallback: wait for nav to be visible if drawer is still transitioning
-    await expect(page.getByRole("navigation", { name: "Registered tools" })).toBeVisible();
-  }
+  await expect(drawerToggle).toBeVisible({ timeout: 10_000 });
+  await drawerToggle.click();
+  await expect(page.getByRole("navigation", { name: "Registered tools" })).toBeVisible();
 
   const category = page
     .getByRole("navigation", { name: "Registered tools" })

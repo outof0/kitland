@@ -89,7 +89,7 @@ Pushing `v*` re-runs the reusable `ci.yml` quality gate (lint, typecheck, test, 
 | Chrome  | `pnpm --filter @kitland/browser-extension package:chrome`  | `artifacts/kitland-chrome-v*.zip`                                           | `verify-package.mjs` + CSP/permission checks                |
 | Firefox | `pnpm --filter @kitland/browser-extension package:firefox` | `artifacts/kitland-firefox-v*.zip` (adds `browser_specific_settings.gecko`) | same + gecko.id check                                       |
 | Generic | `package` alias                                            | `kitland-browser-extension-v*.zip` (same as Chrome)                         | same                                                        |
-| VS Code | `pnpm --filter kitland-tools package:vsix`       | `artifacts/kitland-tools.vsix`                                    | `package-smoke.mjs` (VSCE)                                  |
+| VS Code | `pnpm --filter kitland-tools package:vsix`                 | `artifacts/kitland-tools.vsix`                                              | `package-smoke.mjs` (VSCE)                                  |
 | MCP npm | `pnpm --filter @kitland/mcp package:check`                 | `kitland-mcp-*.tgz` + OIDC provenance                                       | `verify-package.mjs` (tarball allowlist + live stdio smoke) |
 
 `pnpm artifacts:all` builds all three in one go. Browser zips are identical except Firefox adds the AMO-required `gecko.id`; both are created deterministically via `create-browser-artifacts.mjs` (DEFLATE level 9, fixed timestamps).

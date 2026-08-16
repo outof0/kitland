@@ -1,10 +1,4 @@
-import {
-  err,
-  ok,
-  testRegex,
-  type RegexTestResult,
-  type ToolResult,
-} from "@kitland/core";
+import { err, ok, testRegex, type RegexTestResult, type ToolResult } from "@kitland/core";
 import {
   isRegexTesterWorkerResponse,
   type RegexTesterWorkerRequest,
@@ -47,7 +41,10 @@ export function useRegexTester(pattern: string, input: string, flags: string): S
     const timer = window.setTimeout(() => {
       if (!active) return;
       if (typeof Worker === "undefined") {
-        setState({ result: testRegex(query.pattern, query.input, { flags: query.flags }), isProcessing: false });
+        setState({
+          result: testRegex(query.pattern, query.input, { flags: query.flags }),
+          isProcessing: false,
+        });
         return;
       }
       try {
@@ -55,7 +52,10 @@ export function useRegexTester(pattern: string, input: string, flags: string): S
           type: "module",
         });
       } catch {
-        setState({ result: err(UNAVAILABLE_ERROR.code, UNAVAILABLE_ERROR.message), isProcessing: false });
+        setState({
+          result: err(UNAVAILABLE_ERROR.code, UNAVAILABLE_ERROR.message),
+          isProcessing: false,
+        });
         return;
       }
 
@@ -65,7 +65,10 @@ export function useRegexTester(pattern: string, input: string, flags: string): S
         if (!active) return;
         active = false;
         worker?.terminate();
-        setState({ result: err(UNAVAILABLE_ERROR.code, UNAVAILABLE_ERROR.message), isProcessing: false });
+        setState({
+          result: err(UNAVAILABLE_ERROR.code, UNAVAILABLE_ERROR.message),
+          isProcessing: false,
+        });
       };
       worker.addEventListener("message", (event: MessageEvent<unknown>) => {
         if (!active) return;

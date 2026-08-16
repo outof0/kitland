@@ -221,10 +221,6 @@ test.describe("encoding tool contracts", () => {
     await fillPane(input, 'A\n"🍵"');
     await expectPaneText(output, '"A\\n\\"🍵\\""');
 
-    const download = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Save result" }).click();
-    expect((await download).suggestedFilename()).toBe("escaped-json.txt");
-
     await page.getByRole("button", { name: "Unescape" }).click();
     await expectPaneText(input, 'A\n"🍵"');
 

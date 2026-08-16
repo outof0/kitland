@@ -1,8 +1,5 @@
 import { err, type RegexTestResult, type ToolResult } from "@kitland/core";
-import {
-  REGEX_TEST_MAX_INPUT_CHARS,
-  REGEX_TEST_MAX_PATTERN_CHARS,
-} from "@kitland/core";
+import { REGEX_TEST_MAX_INPUT_CHARS, REGEX_TEST_MAX_PATTERN_CHARS } from "@kitland/core";
 
 export const REGEX_WORKER_TIMEOUT_MS = 2500;
 
@@ -97,9 +94,10 @@ export async function runRegexIsolated(
     let settled = false;
     let worker: InstanceType<NonNullable<typeof WorkerCtor>> | null = null;
     try {
-      const Ctor = WorkerCtor as unknown as new (code: string, opts: unknown) => InstanceType<
-        NonNullable<typeof WorkerCtor>
-      >;
+      const Ctor = WorkerCtor as unknown as new (
+        code: string,
+        opts: unknown,
+      ) => InstanceType<NonNullable<typeof WorkerCtor>>;
       worker = new Ctor(workerCode, {
         eval: true,
         workerData: { pattern, input, flags },

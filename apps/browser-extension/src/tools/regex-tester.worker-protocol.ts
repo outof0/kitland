@@ -27,18 +27,16 @@ export function isRegexTesterWorkerRequest(value: unknown): value is RegexTester
   const record = exactRecord(value, ["type", "id", "pattern", "input", "flags"]);
   return Boolean(
     record &&
-      record.type === "test" &&
-      isRequestId(record.id) &&
-      isBoundedString(record.pattern, REGEX_TEST_MAX_PATTERN_CHARS) &&
-      isBoundedString(record.input, REGEX_TEST_MAX_INPUT_CHARS) &&
-      isBoundedString(record.flags, 16) &&
-      /^[dgimsuvy]*$/u.test(record.flags as string),
+    record.type === "test" &&
+    isRequestId(record.id) &&
+    isBoundedString(record.pattern, REGEX_TEST_MAX_PATTERN_CHARS) &&
+    isBoundedString(record.input, REGEX_TEST_MAX_INPUT_CHARS) &&
+    isBoundedString(record.flags, 16) &&
+    /^[dgimsuvy]*$/u.test(record.flags as string),
   );
 }
 
-export function isRegexTesterWorkerResponse(
-  value: unknown,
-): value is RegexTesterWorkerResponse {
+export function isRegexTesterWorkerResponse(value: unknown): value is RegexTesterWorkerResponse {
   const record = exactRecord(value, ["type", "id", "result"]);
   return Boolean(
     record && record.type === "result" && isRequestId(record.id) && isResult(record.result),
@@ -64,8 +62,8 @@ function isResult(value: unknown): value is ToolResult<RegexTestResult> {
     const error = exactRecord(record.error, ["code", "message"]);
     return Boolean(
       error &&
-        isBoundedString(error.code, MAX_ERROR_CODE_CHARS, false) &&
-        isBoundedString(error.message, MAX_ERROR_MESSAGE_CHARS, false),
+      isBoundedString(error.code, MAX_ERROR_CODE_CHARS, false) &&
+      isBoundedString(error.message, MAX_ERROR_MESSAGE_CHARS, false),
     );
   }
   return false;

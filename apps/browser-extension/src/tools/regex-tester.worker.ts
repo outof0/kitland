@@ -14,7 +14,7 @@ globalThis.addEventListener("message", (event: MessageEvent<unknown>) => {
     result = err("REGEX_TEST_FAILED", "The regular expression could not be evaluated.");
   }
   const response: RegexTesterWorkerResponse = { type: "result", id, result };
-  (
-    globalThis as unknown as { postMessage(message: RegexTesterWorkerResponse): void }
-  ).postMessage(response);
+  (globalThis as unknown as { postMessage(message: RegexTesterWorkerResponse): void }).postMessage(
+    response,
+  );
 });

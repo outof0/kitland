@@ -1,10 +1,4 @@
-import {
-  err,
-  ok,
-  testRegex,
-  type RegexTestResult,
-  type ToolResult,
-} from "@kitland/core";
+import { err, ok, testRegex, type RegexTestResult, type ToolResult } from "@kitland/core";
 import {
   isRegexTesterWorkerResponse,
   type RegexTesterWorkerRequest,

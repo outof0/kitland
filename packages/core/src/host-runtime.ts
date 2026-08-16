@@ -37,7 +37,9 @@ type CryptoLike = {
  */
 export function createWebCryptoHostRuntime(
   cryptoApi: unknown,
-  extras: Partial<Pick<HostRuntime, "bcryptHash" | "bcryptCompare" | "generateRsaPem">> & { now?: () => number } = {},
+  extras: Partial<Pick<HostRuntime, "bcryptHash" | "bcryptCompare" | "generateRsaPem">> & {
+    now?: () => number;
+  } = {},
 ): HostRuntime {
   const maybeCrypto = cryptoApi as CryptoLike | undefined;
   if (!maybeCrypto?.getRandomValues || !maybeCrypto.subtle) {
@@ -69,7 +71,9 @@ export function createWebCryptoHostRuntime(
         false,
         ["sign"],
       );
-      return new Uint8Array(await cryptoLike.subtle.sign("HMAC", cryptoKey, asBufferSource(message)));
+      return new Uint8Array(
+        await cryptoLike.subtle.sign("HMAC", cryptoKey, asBufferSource(message)),
+      );
     },
     aes: {
       async encrypt(key, nonce, text) {

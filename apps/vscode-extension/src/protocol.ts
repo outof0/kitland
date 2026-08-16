@@ -510,9 +510,7 @@ export function parseHostMessage(value: unknown): HostMessage | undefined {
     const record = exactRecord(value, ["type", "requestId", "result"]);
     if (!record || !isRequestId(record.requestId)) return undefined;
     const result = parseRegexTestResult(record.result);
-    return result
-      ? { type: "regexResult", requestId: record.requestId, result }
-      : undefined;
+    return result ? { type: "regexResult", requestId: record.requestId, result } : undefined;
   }
   return undefined;
 }
@@ -597,7 +595,8 @@ function parseInspection(value: unknown): JsonInspection | undefined {
 
 function parseRegexTestResult(value: unknown): ToolResult<RegexTestResult> | undefined {
   const candidate = value as UnknownRecord | null;
-  if (typeof candidate !== "object" || candidate === null || Array.isArray(candidate)) return undefined;
+  if (typeof candidate !== "object" || candidate === null || Array.isArray(candidate))
+    return undefined;
   if (candidate.ok === true) {
     const inner = exactRecord(value, ["ok", "value"]);
     if (!inner) return undefined;
