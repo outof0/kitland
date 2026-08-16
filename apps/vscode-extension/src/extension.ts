@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   statusBarItem.text = "$(tools) Kitland";
-  statusBarItem.tooltip = "Open Kitland Developer Tools";
+  statusBarItem.tooltip = "Open Kitland Tools";
   statusBarItem.command = OPEN_TOOL;
   statusBarItem.show();
 
@@ -129,7 +129,7 @@ async function chooseAdapter(requestedToolId?: unknown): Promise<ToolAdapter | u
       adapter,
     })),
     {
-      title: "Kitland Developer Tools",
+      title: "Kitland Tools",
       placeHolder: "Choose a local tool",
       matchOnDescription: true,
     },

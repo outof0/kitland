@@ -46,7 +46,7 @@ export function renderWebviewHtml(options: WebviewHtmlOptions): string {
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="${escapeAttribute(csp)}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitland Developer Tools</title>
+    <title>Kitland Tools</title>
     <link rel="stylesheet" href="${escapeAttribute(options.styleUri)}">
   </head>
   <body class="m-0 min-h-full bg-bg font-ui text-on-surface antialiased">

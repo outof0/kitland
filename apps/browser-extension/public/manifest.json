@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Kitland Developer Tools",
+  "name": "Kitland Tools",
   "short_name": "Kitland",
   "version": "0.1.0",
   "description": "A local-first developer tool suite with no uploads, accounts, website access, or extension permissions.",
@@ -13,7 +13,7 @@
     "128": "icons/icon-128.png"
   },
   "action": {
-    "default_title": "Open Kitland Developer Tools",
+    "default_title": "Open Kitland Tools",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png"

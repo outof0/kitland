@@ -27,7 +27,7 @@ export class ToolPanel implements vscode.Disposable {
 
     const panel = vscode.window.createWebviewPanel(
       "kitland.toolWorkbench",
-      "Kitland Developer Tools",
+      "Kitland Tools",
       vscode.ViewColumn.Active,
       {
         enableScripts: true,

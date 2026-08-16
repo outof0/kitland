@@ -1,6 +1,6 @@
 {
   "name": "kitland-developer-tools",
-  "displayName": "Kitland — Developer Tools",
+  "displayName": "Kitland Tools",
   "version": "0.1.0",
   "private": true,
   "description": "Privacy-first developer tools that run locally in Visual Studio Code.",

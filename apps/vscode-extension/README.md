@@ -1,4 +1,4 @@
-# Kitland Developer Tools for VS Code
+# Kitland Tools for VS Code
 
 The VS Code surface for Kitland's local, privacy-first developer-tool suite. This package is a
 catalog-driven host: only tools declared `available` on `vscode-extension` appear here. Web

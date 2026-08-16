@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import * as vscode from "vscode";
 
-suite("Kitland Developer Tools extension", () => {
+suite("Kitland Tools extension", () => {
   test("registers generic, Base64, and cURL commands", async () => {
     const extension = vscode.extensions.getExtension("outof0.kitland-developer-tools");
     assert.ok(extension, "Extension under test was not discovered");

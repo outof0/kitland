@@ -56,7 +56,7 @@ const SURFACES = [
     description:
       "Editor commands and local panels. Transform the active selection without leaving your editor.",
     icon: MonitorCog,
-    install: "Kitland — Developer Tools",
+    install: "Kitland Tools",
     href: "https://github.com/outof0/kitland/tree/HEAD/apps/vscode-extension",
     action: "Get the extension",
   },

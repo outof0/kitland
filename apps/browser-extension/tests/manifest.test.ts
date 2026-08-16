@@ -21,17 +21,17 @@ const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as Manifest;
 describe("Manifest V3 privacy contract", () => {
   it("opens the full tool page from a cross-browser MV3 action", () => {
     expect(manifest.manifest_version).toBe(3);
-    expect(manifest.name).toBe("Kitland Developer Tools");
+    expect(manifest.name).toBe("Kitland Tools");
     expect(manifest.description).not.toMatch(/Base64/i);
     expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(manifest.action?.default_title).toBe("Open Kitland Developer Tools");
+    expect(manifest.action?.default_title).toBe("Open Kitland Tools");
     // No popup: the toolbar click opens the packaged page as a full tab.
     expect(manifest.action?.default_popup).toBeUndefined();
   });
 
   it("keeps the background to the launcher that opens the tool tab", () => {
     expect(manifest.background?.service_worker).toBe("sw.js");
-    expect(manifest.background?.scripts).toEqual(["sw.js"]);
+    expect(manifest.background?.scripts).toBeUndefined();
   });
 
   it("requests no extension or website permissions", () => {
