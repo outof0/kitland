@@ -12,47 +12,38 @@ export const REGEX_WORKER_TIMEOUT_MS = 2500;
  * synchronous core testRegex (best-effort: cannot preempt ReDoS in
  * browser/web extension host but still enforces size limits).
  */
-export function runRegexIsolated(
+export async function runRegexIsolated(
   pattern: string,
   input: string,
   flags: string,
   timeoutMs: number = REGEX_WORKER_TIMEOUT_MS,
 ): Promise<ToolResult<RegexTestResult>> {
   if (pattern.length > REGEX_TEST_MAX_PATTERN_CHARS) {
-    return Promise.resolve(
-      err(
-        "PATTERN_TOO_LARGE",
-        `Regular expression exceeds ${REGEX_TEST_MAX_PATTERN_CHARS.toLocaleString()} characters.`,
-      ),
+    return err(
+      "PATTERN_TOO_LARGE",
+      `Regular expression exceeds ${REGEX_TEST_MAX_PATTERN_CHARS.toLocaleString()} characters.`,
     );
   }
   if (input.length > REGEX_TEST_MAX_INPUT_CHARS) {
-    return Promise.resolve(
-      err(
-        "INPUT_TOO_LARGE",
-        `Test text exceeds ${REGEX_TEST_MAX_INPUT_CHARS.toLocaleString()} characters.`,
-      ),
+    return err(
+      "INPUT_TOO_LARGE",
+      `Test text exceeds ${REGEX_TEST_MAX_INPUT_CHARS.toLocaleString()} characters.`,
     );
   }
 
   // Browser/web extension host has no node:worker_threads.
   let WorkerCtor: typeof import("node:worker_threads").Worker | undefined;
   try {
-    // Use eval to avoid esbuild static bundling; browser build has no node:worker_threads.
-    // eslint-disable-next-line no-eval
-    const dynRequire = eval("require") as (id: string) => unknown;
-    const wt = dynRequire("node:worker_threads") as typeof import("node:worker_threads");
+    const wt = await import("node:worker_threads");
     WorkerCtor = wt.Worker;
   } catch {
     WorkerCtor = undefined;
   }
 
   if (!WorkerCtor) {
-    return Promise.resolve(
-      err(
-        "WORKER_UNAVAILABLE",
-        "The local regex tester is unavailable. Reopen the extension and try again.",
-      ),
+    return err(
+      "WORKER_UNAVAILABLE",
+      "The local regex tester is unavailable. Reopen the extension and try again.",
     );
   }
 
