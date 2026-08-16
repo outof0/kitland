@@ -5,15 +5,14 @@ import {
   err,
   getTextStats,
   ok,
-  REGEX_TEST_MAX_INPUT_CHARS,
-  REGEX_TEST_MAX_PATTERN_CHARS,
   reverseText,
   sortLines,
   splitToNewlines,
-  testRegex,
+  joinLines,
   type CaseFormat,
   type RegexTestResult,
   type SplitDelimiter,
+  type JoinLinesDelimiter,
   type TextDiffResult,
   type TextReverseCase,
   type TextReverseMode,
@@ -463,78 +462,17 @@ function runRegexWorker(
   timeoutMs: number,
 ): Promise<ToolResult<RegexTestResult>> {
   return new Promise((resolve) => {
-    if (pattern.length > REGEX_TEST_MAX_PATTERN_CHARS) {
-      return resolve(
-        err(
-          "PATTERN_TOO_LARGE",
-          `Regular expression exceeds ${REGEX_TEST_MAX_PATTERN_CHARS.toLocaleString()} characters.`,
-        ),
-      );
-    }
-    if (input.length > REGEX_TEST_MAX_INPUT_CHARS) {
-      return resolve(
-        err(
-          "INPUT_TOO_LARGE",
-          `Test text exceeds ${REGEX_TEST_MAX_INPUT_CHARS.toLocaleString()} characters.`,
-        ),
-      );
-    }
-
-    const workerCode = `
-      const { parentPort, workerData } = require("node:worker_threads");
-      const { pattern, input, flags } = workerData;
-
-      function withGlobalFlag(f) {
-        return f.includes("g") ? f : f + "g";
-      }
-      function advanceStringIndex(str, idx, unicode) {
-        if (!unicode) return idx + 1;
-        const first = str.charCodeAt(idx);
-        const second = str.charCodeAt(idx + 1);
-        if (first >= 0xd800 && first <= 0xdbff && second >= 0xdc00 && second <= 0xdfff) return idx + 2;
-        return idx + 1;
-      }
-
-      try {
-        const expression = new RegExp(pattern, withGlobalFlag(flags));
-        const matches = [];
-        while (matches.length < 1000) {
-          const match = expression.exec(input);
-          if (!match) {
-            parentPort.postMessage({ ok: true, value: { matches, truncated: false } });
-            break;
-          }
-          matches.push({
-            value: match[0] ?? "",
-            index: match.index,
-            end: match.index + (match[0]?.length ?? 0),
-            captures: match.slice(1).map((val, i) => ({ index: i + 1, value: val ?? null })),
-            namedCaptures: match.groups ? { ...match.groups } : {},
-          });
-          if (match[0] === "") {
-            expression.lastIndex = advanceStringIndex(input, expression.lastIndex, expression.unicode);
-          }
-        }
-        if (matches.length >= 1000) {
-          parentPort.postMessage({ ok: true, value: { matches, truncated: true } });
-        }
-      } catch (e) {
-        parentPort.postMessage({
-          ok: false,
-          error: { code: "INVALID_REGEX", message: e instanceof Error ? e.message : "Invalid regular expression." }
-        });
-      }
-    `;
-
     let settled = false;
     let worker: Worker | null = null;
     try {
-      worker = new Worker(workerCode, {
-        eval: true,
+      const workerEntry = import.meta.url.endsWith("/dist/cli.js")
+        ? new URL("./regex-worker.js", import.meta.url)
+        : new URL("../../dist/regex-worker.js", import.meta.url);
+      worker = new Worker(workerEntry, {
         workerData: { pattern, input, flags },
       });
     } catch {
-      return resolve(testRegex(pattern, input, { flags }));
+      return resolve(err("INTERNAL_ERROR", "Regex worker could not be started."));
     }
 
     const timer = setTimeout(() => {
@@ -656,6 +594,60 @@ export const kitlandSplitToNewlinesExposure: McpExposure<SplitToNewlinesInput, T
   mapCoreError: mapError,
 };
 
+type JoinLinesInput = {
+  readonly input: string;
+  readonly delimiter?: "comma" | "semicolon" | "whitespace" | "pipe" | "custom";
+  readonly customDelimiter?: string;
+  readonly trimItems?: boolean;
+  readonly dropEmpty?: boolean;
+};
+
+const JOIN_LINES_INPUT_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["input"],
+  properties: {
+    input: { type: "string", description: "Lines to join into delimited text." },
+    delimiter: {
+      type: "string",
+      enum: ["comma", "semicolon", "whitespace", "pipe", "custom"],
+      description: "Delimiter type (default 'comma').",
+    },
+    customDelimiter: {
+      type: "string",
+      description: "Custom delimiter string when delimiter is 'custom'.",
+    },
+    trimItems: { type: "boolean", description: "Trim whitespace from items (default true)." },
+    dropEmpty: { type: "boolean", description: "Drop empty items (default true)." },
+  },
+} as const;
+
+export const kitlandJoinLinesExposure: McpExposure<JoinLinesInput, TextOnlyOutput> = {
+  mcpName: "kitland_join_lines",
+  operationId: "join_lines",
+  contractVersion: 1,
+  registryToolId: "join-lines",
+  title: "Join Lines",
+  description:
+    "Join newline-separated lines into delimited text (comma, semicolon, whitespace, pipe, custom).",
+  inputSchema: JOIN_LINES_INPUT_SCHEMA,
+  outputSchema: buildAdvertisedOutputSchema(TEXT_ONLY_SUCCESS_SCHEMA),
+  successSchema: TEXT_ONLY_SUCCESS_SCHEMA,
+  limits: DEFAULT_MCP_LIMITS,
+  safety: DEFAULT_MCP_SAFETY,
+  invoke: (args: JoinLinesInput): ToolResult<TextOnlyOutput> => {
+    const res = joinLines(args.input, {
+      delimiter: (args.delimiter as JoinLinesDelimiter) ?? "comma",
+      ...(args.customDelimiter !== undefined ? { customDelimiter: args.customDelimiter } : {}),
+      trimItems: args.trimItems ?? true,
+      dropEmpty: args.dropEmpty ?? true,
+    });
+    if (!res.ok) return res;
+    return ok({ output: res.value });
+  },
+  mapCoreError: mapError,
+};
+
 export const TEXT_REGEX_EXPOSURES = [
   kitlandCaseConvertExposure,
   kitlandSortLinesExposure,
@@ -665,4 +657,5 @@ export const TEXT_REGEX_EXPOSURES = [
   kitlandTextDiffExposure,
   kitlandRegexTestExposure,
   kitlandSplitToNewlinesExposure,
+  kitlandJoinLinesExposure,
 ] as const;

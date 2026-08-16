@@ -83,12 +83,23 @@ export function CurlConverterTool({
   const state = useDeferredTextTransform(source, mode, transform);
 
   const onSwap = useCallback(() => {
-    if (state.isProcessing || !state.result.ok) return;
+    if (state.isProcessing || !state.result.ok || !state.result.value) return;
     const output = state.result.value;
-    if (!output) return;
     setSource(output);
     setMode((current) => (current === "to-fetch" ? "to-curl" : "to-fetch"));
   }, [state.isProcessing, state.result]);
+
+  const switchMode = useCallback(
+    (nextMode: CurlMode) => {
+      if (nextMode === mode) return;
+      const output = state.result.ok ? state.result.value : "";
+      if (output) {
+        setSource(output);
+      }
+      setMode(nextMode);
+    },
+    [mode, state.result],
+  );
 
   const onSample = useCallback(() => {
     if (mode === "to-fetch") {
@@ -144,7 +155,7 @@ export function CurlConverterTool({
                     ? "text-primary-strong"
                     : "text-on-muted hover:text-on-surface"
                 }`}
-                onClick={() => setMode(option.value)}
+                onClick={() => switchMode(option.value)}
               >
                 {option.label}
               </button>

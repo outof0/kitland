@@ -7,9 +7,8 @@ extension adapter.
 
 Specialty adapters (Base64, cURL Converter, JSON Formatter) ship dedicated UIs.
 Other registry-available pure transforms share a lazy generic local transform
-mount powered by `@kitland/core` host-transform specs. Generators, diff tools,
-many inspectors, and crypto stay registry-planned on this host until specialized
-adapters exist.
+mount powered by `@kitland/core` host-transform specs. The registry remains the
+source of truth for every host capability and renderer.
 
 ## Architecture
 
@@ -110,7 +109,7 @@ Load unpacked `dist/` in clean Chromium and Firefox profiles, then verify:
    states, maximum input, keyboard path, and cleanup pass its contract.
 3. Closing and reopening restores no previous payload.
 4. The browser reports zero extension and host permissions.
-5. The full 64-tool inventory matches the shared platform contract; no planned
+5. The full 65-tool inventory matches the shared platform contract; no planned
    or unsupported tool is accidentally exposed.
 
 ## Release integration remaining

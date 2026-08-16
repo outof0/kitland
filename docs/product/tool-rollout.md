@@ -1,15 +1,16 @@
-# 64-tool registry and rollout playbook
+# 65-tool registry and rollout playbook
 
-Status: canonical 64-tool inventory committed; all 64 tools release-ready
+Status: canonical 65-tool inventory committed; all 65 tools are release-ready
+with resolved Pencil design evidence before the coordinated release.
 Release policy: [ADR 0003](../adr/0003-release-the-complete-tool-suite.md)
 
 ## Product scope is committed
 
-`design/design.pen` contains the 64 authoritative tool artboards. Its ordered
-identity list is committed in the release manifest, and every artboard now has
-one matching `ToolDefinition`. The definitions are intentionally `planned`
-until an agent delivers the vertical slice. The registry is the metadata source
-of truth for:
+The release manifest commits the ordered 65-tool identity list. Every entry
+has an authoritative artboard in `design/design.pen` and one matching
+`ToolDefinition`. The
+definitions are intentionally `planned` until an agent delivers the vertical
+slice. The registry is the metadata source of truth for:
 
 - stable id, slug, public name, short name, family, and search keywords;
 - UI pattern (`transform`, `generate`, `diff`, or `inspect`);
@@ -23,7 +24,8 @@ definitions own all descriptive and platform metadata so the repository does
 not maintain two copies that can drift. Registry tests validate the committed
 inventory and static design-frame metadata; a design review resolves those ids
 through Pencil MCP. No test or script parses `design/design.pen`. The strict
-release gate compares every registry id/slug to the manifest.
+release gate compares every registry id/slug to the manifest and rejects
+missing or placeholder design evidence.
 
 ## Agent ownership model
 
@@ -85,7 +87,7 @@ The full-suite gate is intentionally not the only way to ship a finished tool.
 declared for one surface in `releasePlatforms`. A target must be canonical,
 `release-ready`, and available on the selected surface. The gate is non-empty
 by design so a rollout cannot pass as an accidental no-op. It does not change
-`getRegistryReleaseReadiness()` or the 64-tool product-release policy.
+`getRegistryReleaseReadiness()` or the 65-tool product-release policy.
 
 The target set is registry-driven: promoting a tool requires its focused host
 checks, then a reviewed `releasePlatforms` declaration for that surface. This
@@ -97,7 +99,7 @@ the web rollout targets and verifies the normal full-registry web artifact. Its
 artifact verifier rejects a build that drops a registry-available tool's static
 route, sitemap URL, public link, or lazy renderer import; a separate browser
 smoke test exercises the complete registry. The landing page and Explore registry
-always show the 64-tool roadmap, every `available` entry remains runnable, and
+always show the 65-tool roadmap, every `available` entry remains runnable, and
 planned entries remain visibly planned. GitHub Actions deploys this normal
 artifact only with `CLOUDFLARE_PAGES_ROLLOUT_ENABLED=true`.
 
@@ -106,13 +108,13 @@ The default rollout command certifies `web`. To evaluate another surface, run
 or replace the platform with `vscode-extension`. Those registry checks do not
 publish a browser extension ZIP, VS Code VSIX, or npm package; each package and
 marketplace release remains a distinct approval. No per-surface rollout alters
-the requirements below for the coordinated 64-tool launch.
+the requirements below for the coordinated 65-tool launch.
 
 ## Suite release gate
 
 The product is release-ready only when all of these are true:
 
-1. the committed inventory contains exactly the agreed 64 unique tools;
+1. the committed inventory contains exactly the agreed 65 unique tools;
 2. every inventory tool has a matching registry definition and core contract;
 3. every required platform entry is available and has an exhaustive renderer;
 4. all route, search, accessibility, unit, integration, bundle, security audit,

@@ -165,6 +165,26 @@ describe("webview protocol", () => {
     expect(parseHostMessage(message)).toEqual(message);
   });
 
+  it("preserves the host's explicit sidebar layout mode", () => {
+    const message = {
+      type: "toolsList",
+      tools: [
+        {
+          id: "base64",
+          slug: "base64",
+          shortName: "Base64",
+          name: "Base64",
+          description: "Encode and decode locally.",
+          family: "encode-decode",
+        },
+      ],
+      activeToolId: "base64",
+      initialInput: "",
+      collapseSidebar: true,
+    };
+    expect(parseHostMessage(message)).toEqual(message);
+  });
+
   it("validates exact JSON inspect descriptors, requests, and structured results", () => {
     const inspectTool = {
       id: "json-formatter",

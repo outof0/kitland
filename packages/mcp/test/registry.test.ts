@@ -7,7 +7,7 @@ describe("McpRegistry", () => {
     const registry = new McpRegistry();
     const list = registry.list();
 
-    expect(list.length).toBe(79);
+    expect(list.length).toBe(80);
     expect(list[0]!.mcpName).toBe("kitland_aes_decrypt");
     expect(list[1]!.mcpName).toBe("kitland_aes_encrypt");
   });
@@ -23,13 +23,15 @@ describe("McpRegistry", () => {
     const registry = new McpRegistry();
     const defs = registry.toToolDefinitions();
 
-    expect(defs.length).toBe(79);
+    expect(defs.length).toBe(80);
     expect(defs[0]!.name).toBe("kitland_aes_decrypt");
     expect(defs[0]!.inputSchema).toHaveProperty("type", "object");
     expect(defs[0]!.annotations).toEqual({
-      readOnly: true,
-      idempotent: true,
+      readOnlyHint: true,
+      idempotentHint: true,
     });
+    expect(registry.get("kitland_uuid_generate")?.safety.deterministic).toBe(false);
+    expect(registry.get("kitland_base64_encode")?.safety.deterministic).toBe(true);
   });
 
   it("rejects duplicate operation names", () => {

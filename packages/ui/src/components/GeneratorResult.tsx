@@ -76,7 +76,7 @@ export function GeneratorResult({
       )}
 
       {/* Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)] gap-4 flex-1 min-h-[380px]">
+      <div className="tool-editor-stage grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
         {/* Controls Card */}
         <div className="bg-surface-low border border-outline rounded-[12px] p-5 flex flex-col justify-between">
           {controls}

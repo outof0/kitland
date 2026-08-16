@@ -212,7 +212,9 @@ export function HmacGeneratorTool({
               </code>
             ) : (
               <div className="font-mono text-[13px] italic text-on-faint">
-                {busy ? "Computing signature..." : "No signature yet. Enter key and message to generate HMAC."}
+                {busy
+                  ? "Computing signature..."
+                  : "No signature yet. Enter key and message to generate HMAC."}
               </div>
             )}
             <div className="select-none font-mono text-[12px] text-on-faint">

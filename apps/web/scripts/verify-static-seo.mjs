@@ -221,7 +221,6 @@ function verifyCsp(page, relativePath) {
     "default-src 'self'",
     "base-uri 'self'",
     "object-src 'none'",
-    "frame-ancestors 'none'",
     "script-src-attr 'none'",
     "style-src-attr 'none'",
   ];

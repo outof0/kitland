@@ -2,6 +2,7 @@ import "./styles.css";
 import { createRoot } from "react-dom/client";
 import { Component, Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
 import { WorkspaceShell } from "@kitland/ui";
+import { CodeEditorProvider } from "./components/CodeEditorProvider";
 import { getToolBySlug } from "@kitland/tools";
 import { getToolRegistration, getToolRenderer } from "./registry";
 
@@ -79,40 +80,42 @@ function App() {
   const tool = getToolBySlug(activeSlug);
 
   return (
-    <WorkspaceShell
-      activeSlug={activeSlug}
-      onSelectTool={selectTool}
-      theme={theme}
-      onToggleTheme={toggleTheme}
-      favorites={favorites}
-      onToggleFavorite={toggleFavorite}
-      platform="browser-extension"
-      securityBadge=""
-    >
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        {!tool ? (
-          <NotFound slug={activeSlug} />
-        ) : (
-          <ToolLoadBoundary key={activeSlug} name={tool.name}>
-            <Suspense
-              fallback={
-                <div aria-live="polite" aria-busy="true">
-                  <h2 className="m-0 font-display text-xl font-semibold text-on-surface">
-                    {tool.name}
-                  </h2>
-                  <p className="mt-1 mb-0 flex items-center gap-2.5 text-sm leading-[1.45] text-on-muted">
-                    <span className="loading-pulse" aria-hidden="true" />
-                    Loading {tool.shortName}…
-                  </p>
-                </div>
-              }
-            >
-              <ToolBySlug slug={activeSlug} />
-            </Suspense>
-          </ToolLoadBoundary>
-        )}
-      </div>
-    </WorkspaceShell>
+    <CodeEditorProvider>
+      <WorkspaceShell
+        activeSlug={activeSlug}
+        onSelectTool={selectTool}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        favorites={favorites}
+        onToggleFavorite={toggleFavorite}
+        platform="browser-extension"
+        securityBadge=""
+      >
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          {!tool ? (
+            <NotFound slug={activeSlug} />
+          ) : (
+            <ToolLoadBoundary key={activeSlug} name={tool.name}>
+              <Suspense
+                fallback={
+                  <div aria-live="polite" aria-busy="true">
+                    <h2 className="m-0 font-display text-xl font-semibold text-on-surface">
+                      {tool.name}
+                    </h2>
+                    <p className="mt-1 mb-0 flex items-center gap-2.5 text-sm leading-[1.45] text-on-muted">
+                      <span className="loading-pulse" aria-hidden="true" />
+                      Loading {tool.shortName}…
+                    </p>
+                  </div>
+                }
+              >
+                <ToolBySlug slug={activeSlug} />
+              </Suspense>
+            </ToolLoadBoundary>
+          )}
+        </div>
+      </WorkspaceShell>
+    </CodeEditorProvider>
   );
 }
 

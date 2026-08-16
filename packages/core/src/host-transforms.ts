@@ -29,6 +29,7 @@ import { jsonToTypescript } from "./tools/json-to-typescript";
 import { jsonToJsConst } from "./tools/json-to-js-const";
 import { htmlToJsx } from "./tools/html-to-jsx";
 import { splitToNewlines, type SplitDelimiter } from "./tools/split-to-newlines";
+import { joinLines, type JoinDelimiter } from "./tools/join-lines";
 import { convertNumberBase } from "./tools/number-base";
 import { convertTemperature, type TemperatureUnit } from "./tools/temperature";
 import { convertDataSize, type DataSizeUnit } from "./tools/data-size";
@@ -192,6 +193,22 @@ const HOST_CORE_TRANSFORM_SPECS: readonly HostTransformSpec[] = [
     defaultOptionId: "comma",
     transform: (request) =>
       splitToNewlines(request.input, { delimiter: request.optionId as SplitDelimiter }),
+  },
+  {
+    slug: "join-lines",
+    maxInputChars: 1_000_000,
+    operations: [{ id: "join", label: "Join", actionLabel: "Join" }],
+    options: [
+      { id: "comma", label: "Comma" },
+      { id: "semicolon", label: "Semicolon" },
+      { id: "whitespace", label: "Whitespace" },
+      { id: "pipe", label: "Pipe" },
+    ],
+    optionLabel: "Delimiter",
+    defaultOperationId: "join",
+    defaultOptionId: "comma",
+    transform: (request) =>
+      joinLines(request.input, { delimiter: request.optionId as JoinDelimiter }),
   },
   {
     slug: "number-base",

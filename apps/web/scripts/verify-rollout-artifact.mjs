@@ -119,12 +119,30 @@ function verifyRendererChunkCoverage(expectedTools) {
   }
 
   const source = readFileSync(resolve(assetDirectory, workspaceEntries[0]), "utf8");
-  const lazyRendererImports = [...source.matchAll(/import\(["'`]\.\/[^"'`]+\.js["'`]\)/gu)];
-  if (lazyRendererImports.length !== expectedTools.length) {
-    fail(
-      `Workspace emits ${lazyRendererImports.length} lazy renderer imports for ${expectedTools.length} runnable registry tools.`,
-    );
+  const missingRendererEntries = expectedTools.filter(
+    (slug) =>
+      !new RegExp(
+        `(?:(?:["'\\x60])${escapeRegExp(slug)}(?:["'\\x60])|\\b${escapeRegExp(slug)})\\s*:`,
+        "u",
+      ).test(source),
+  );
+  if (missingRendererEntries.length > 0) {
+    fail(`Workspace omits lazy renderer entries for: ${missingRendererEntries.join(", ")}.`);
   }
+
+  const referencedAssets = [...source.matchAll(/["']_astro\/([^"']+\.(?:js|css))["']/gu)].map(
+    (match) => match[1],
+  );
+  const missingAssets = [...new Set(referencedAssets)].filter(
+    (asset) => !existsSync(resolve(distDirectory, "_astro", asset)),
+  );
+  if (missingAssets.length > 0) {
+    fail(`Workspace references missing lazy assets: ${missingAssets.join(", ")}.`);
+  }
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[|\\{}()[\]^$+*?.]/gu, "\\$&");
 }
 
 function listHtmlFiles(directory) {

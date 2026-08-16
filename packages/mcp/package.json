@@ -1,7 +1,7 @@
 {
   "name": "@kitland/mcp",
   "version": "0.1.0",
-  "description": "Deterministic, local-only Model Context Protocol (MCP) server for Kitland developer tools.",
+  "description": "Local-only Model Context Protocol (MCP) server for Kitland developer tools, with deterministic transforms and explicit generators.",
   "homepage": "https://kitland.dev",
   "bugs": {
     "url": "https://github.com/OutOf0/kitland/issues"
@@ -33,8 +33,8 @@
     "build": "node ./scripts/build.mjs",
     "typecheck": "tsc --noEmit --pretty false",
     "lint": "oxlint src test scripts --vitest-plugin --deny-warnings",
-    "test": "vitest run --config vitest.config.ts",
-    "test:protocol": "vitest run --config vitest.config.ts test/stdio-transcript.test.ts test/process-boundary.test.ts",
+    "test": "pnpm build && vitest run --config vitest.config.ts",
+    "test:protocol": "pnpm build && vitest run --config vitest.config.ts test/stdio-transcript.test.ts test/process-boundary.test.ts",
     "package": "pnpm build && npm pack --dry-run",
     "package:check": "pnpm build && node ./scripts/verify-package.mjs",
     "release:verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm package:check"

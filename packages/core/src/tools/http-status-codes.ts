@@ -919,4 +919,3 @@ app.get('/api/resource/:id', (req, res) => {
   });
 });`;
 }
-

@@ -99,4 +99,45 @@ describe("CurlConverterTool", () => {
     );
     expect(screen.queryByRole("alert")).toBeNull();
   });
+
+  it("keeps an invalid transform in its safe state when swap is blocked", async () => {
+    render(<CurlConverterTool />);
+    fireEvent.change(input(), { target: { value: "not curl" } });
+    await waitFor(() => expect(screen.getByRole("alert")).toBeDefined());
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Use the result as input and switch direction" }),
+    );
+
+    expect(input().value).toBe("not curl");
+    expect(screen.getByRole("button", { name: "To fetch" }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
+  });
+
+  it("switches direction via mode buttons and preserves converted result without error", async () => {
+    render(<CurlConverterTool />);
+    fireEvent.change(input(), { target: { value: "curl https://example.test" } });
+    await waitFor(() => expect(output().value).toContain('method: "GET"'));
+
+    // Click "To curl" button
+    fireEvent.click(screen.getByRole("button", { name: "To curl" }));
+    const fetchInput = screen.getByRole("textbox", {
+      name: "Fetch request",
+    }) as HTMLTextAreaElement;
+    const curlOutput = screen.getByRole("textbox", { name: "cURL command" }) as HTMLTextAreaElement;
+    expect(fetchInput.value).toContain('fetch("https://example.test"');
+    await waitFor(() => expect(curlOutput.value).toContain("curl 'https://example.test'"));
+    expect(screen.queryByRole("alert")).toBeNull();
+
+    // Click "To fetch" button
+    fireEvent.click(screen.getByRole("button", { name: "To fetch" }));
+    const curlInput = screen.getByRole("textbox", { name: "cURL command" }) as HTMLTextAreaElement;
+    const fetchOutput = screen.getByRole("textbox", {
+      name: "Fetch result",
+    }) as HTMLTextAreaElement;
+    expect(curlInput.value).toContain("curl 'https://example.test'");
+    await waitFor(() => expect(fetchOutput.value).toContain('fetch("https://example.test"'));
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
 });

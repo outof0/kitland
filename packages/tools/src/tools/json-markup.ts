@@ -85,7 +85,14 @@ export const jsonFormatterTool = defineTool({
   platforms: {
     web: {
       status: "available",
-      capabilities: ["transform-text", "inspect-text", "clipboard-write", "share-link"],
+      capabilities: [
+        "transform-text",
+        "inspect-text",
+        "clipboard-write",
+        "file-import",
+        "file-export",
+        "share-link",
+      ],
     },
     "browser-extension": {
       status: "available",

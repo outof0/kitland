@@ -11,6 +11,10 @@ name: Release
 # Read-only by default; OIDC token is used only for GCP WIF, not for repo writes.
 permissions:
   contents: read
+  # The reusable CI contract declares its Cloudflare deployment jobs even
+  # though their branch-only conditions skip them for a release tag. GitHub
+  # validates those nested job permissions before evaluating conditions.
+  deployments: write
   id-token: write
 
 on:
@@ -19,6 +23,10 @@ on:
       - "v*"
   workflow_dispatch:
     inputs:
+      release_tag:
+        description: "Release tag matching package.json, for example v0.1.0"
+        required: true
+        type: string
       skip_npm:
         description: "Skip npm publishing (MCP)"
         type: boolean
@@ -44,7 +52,10 @@ jobs:
   release:
     name: Build, package and publish
     needs: quality
-    if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
+    if: >-
+      github.ref_type == 'tag'
+      || (github.event_name == 'workflow_dispatch'
+      && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
     runs-on: ubuntu-latest
     timeout-minutes: 40
     environment:
@@ -93,10 +104,11 @@ jobs:
             echo "NODE_AUTH_TOKEN=$(sm npm-token)"
           } >> "$GITHUB_ENV"
 
-      - name: Validate tag matches package version (tag pushes)
-        if: github.ref_type == 'tag'
+      - name: Validate release tag and package versions
+        env:
+          RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || inputs.release_tag }}
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          TAG="$RELEASE_TAG"
           PKG_VERSION="$(node -p "require('./package.json').version")"
           MCP_VERSION="$(node -p "require('./packages/mcp/package.json').version")"
           BROWSER_VERSION="$(node -p "require('./apps/browser-extension/package.json').version")"
@@ -122,6 +134,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Verify complete-suite release gate
+        run: pnpm release:verify
 
       - name: Build all packages
         run: pnpm build
@@ -248,7 +263,7 @@ jobs:
       # --- Always keep artifacts for manual follow-up ---
       - name: Upload workflow artifacts
         if: always()
-        uses: actions/upload-artifact@b7a3adfd02109298307a45a2e7492601e1a1d781 # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: kitland-release-${{ github.ref_name }}-${{ github.sha }}
           path: |

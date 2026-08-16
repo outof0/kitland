@@ -11,10 +11,10 @@ describe("KIT-0004 tool factory / conformance harness", () => {
     expect(isInventoryToolId("")).toBe(false);
   });
 
-  it("every inventory entry is unique and registrys match count 64", () => {
+  it("every inventory entry is unique and registrys match count 65", () => {
     const ids = CANONICAL_TOOL_INVENTORY.map((e) => e.id);
-    expect(new Set(ids).size).toBe(64);
-    expect(listTools()).toHaveLength(64);
+    expect(new Set(ids).size).toBe(65);
+    expect(listTools()).toHaveLength(65);
   });
 
   it("available web tools require a renderer slug and every tool has a budget", () => {
@@ -33,8 +33,8 @@ describe("KIT-0004 tool factory / conformance harness", () => {
         .map((t) => t.slug),
     });
 
-    expect(report.inventoryCount).toBe(64);
-    expect(report.registryCount).toBe(64);
+    expect(report.inventoryCount).toBe(65);
+    expect(report.registryCount).toBe(65);
     expect(report.issues.filter((i) => i.code === "MISSING_PLATFORM_ADAPTER")).toEqual([]);
     expect(report.ready).toBe(true);
 

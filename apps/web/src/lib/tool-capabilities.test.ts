@@ -8,12 +8,14 @@ describe("capabilitiesForWebTool", () => {
     // URL Encode reuses the shared transform platform, which omits file powers.
     expect(capabilitiesForWebTool("url-encode")).toEqual({ fileOpen: false, fileSave: false });
 
-    // JSON Formatter / Text Diff / Regex / Text Stats declare no file powers,
-    // so the web host must not re-authorize file I/O the registry omitted.
+    // JSON Formatter explicitly grants local import/export; it remains a
+    // browser-only capability and does not imply an extension file permission.
     expect(capabilitiesForWebTool("json-formatter")).toEqual({
-      fileOpen: false,
-      fileSave: false,
+      fileOpen: true,
+      fileSave: true,
     });
+    // Text Diff / Regex / Text Stats omit file powers, so the web host must
+    // not re-authorize file I/O the registry did not grant.
     expect(capabilitiesForWebTool("text-diff")).toEqual({ fileOpen: false, fileSave: false });
     expect(capabilitiesForWebTool("regex-tester")).toEqual({ fileOpen: false, fileSave: false });
     expect(capabilitiesForWebTool("text-stats")).toEqual({ fileOpen: false, fileSave: false });

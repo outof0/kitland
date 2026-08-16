@@ -1,11 +1,24 @@
 import { spawn } from "node:child_process";
-import { readdir } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const packageRoot = fileURLToPath(new URL("../", import.meta.url));
 
 describe("Process Boundary & Stdio Discipline", () => {
+  it("uses a static regex worker entry rather than evaluating generated code", async () => {
+    const exposurePath = fileURLToPath(new URL("../src/exposures/text-regex.ts", import.meta.url));
+    const workerPath = fileURLToPath(new URL("../src/regex-worker.ts", import.meta.url));
+    const [exposureSource, workerSource] = await Promise.all([
+      readFile(exposurePath, "utf8"),
+      readFile(workerPath, "utf8"),
+    ]);
+
+    expect(exposureSource).toContain("new Worker(workerEntry");
+    expect(exposureSource).not.toContain("eval: true");
+    expect(workerSource).toContain("import { testRegex");
+  });
+
   it("interacts strictly via JSON-RPC on stdout and keeps stderr silent", async () => {
     const cliPath = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
     const child = spawn("node", [cliPath], {

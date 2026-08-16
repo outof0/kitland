@@ -2,6 +2,7 @@ import { WorkspaceShell } from "@kitland/ui";
 import { type RegistryTool } from "@kitland/tools";
 import { listWebAvailableTools, getWebToolBySlug } from "@/lib/release-scope";
 import { STORAGE_KEYS } from "@/lib/storage";
+import { TOOL_MODE_NAVIGATION_EVENT } from "@/lib/tool-mode-navigation";
 import { getToolRenderer } from "@/tools/registry.tsx";
 import { useFavorites } from "@/hooks/useFavorites";
 import { usePersistentState } from "@/hooks/usePersistentState";
@@ -27,6 +28,7 @@ function slugFromPath(pathname: string): string | null {
  */
 export function ToolWorkspace({ slug: initialSlug }: ToolWorkspaceProps) {
   const [slug, setSlug] = useState(initialSlug);
+  const [rendererSlug, setRendererSlug] = useState(initialSlug);
   const tool = getWebToolBySlug(slug);
   const [theme, setTheme] = usePersistentState(STORAGE_KEYS.theme, "dark");
   const { favorites, toggleFavorite } = useFavorites();
@@ -40,14 +42,27 @@ export function ToolWorkspace({ slug: initialSlug }: ToolWorkspaceProps) {
       const next = slugFromPath(window.location.pathname);
       if (next) {
         setSlug(next);
+        setRendererSlug(next);
         window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       }
     };
+    const syncModeNavigation = (event: Event) => {
+      const next = (event as CustomEvent<string>).detail;
+      const nextTool = getWebToolBySlug(next);
+      if (!nextTool) return;
+
+      setSlug(next);
+      window.history.replaceState(null, "", `/explore/${next}`);
+      document.title = `${nextTool.name} — Tools out. Work on. | Kitland`;
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    };
     document.addEventListener("astro:page-load", syncSlug);
     window.addEventListener("popstate", syncSlug);
+    window.addEventListener(TOOL_MODE_NAVIGATION_EVENT, syncModeNavigation);
     return () => {
       document.removeEventListener("astro:page-load", syncSlug);
       window.removeEventListener("popstate", syncSlug);
+      window.removeEventListener(TOOL_MODE_NAVIGATION_EVENT, syncModeNavigation);
     };
   }, []);
 
@@ -55,6 +70,7 @@ export function ToolWorkspace({ slug: initialSlug }: ToolWorkspaceProps) {
     (nextSlug: string) => {
       if (nextSlug === slug) return;
       setSlug(nextSlug);
+      setRendererSlug(nextSlug);
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       void navigate(`/explore/${nextSlug}`);
     },
@@ -89,7 +105,7 @@ export function ToolWorkspace({ slug: initialSlug }: ToolWorkspaceProps) {
         ) : tool.status !== "available" ? (
           <ComingSoon name={tool.name} />
         ) : (
-          <ToolLoadBoundary key={slug} name={tool.name}>
+          <ToolLoadBoundary key={rendererSlug} name={tool.name}>
             <Suspense
               fallback={
                 <div aria-live="polite" aria-busy="true">
@@ -104,7 +120,7 @@ export function ToolWorkspace({ slug: initialSlug }: ToolWorkspaceProps) {
               }
             >
               <CodeEditorProvider>
-                <ToolBySlug slug={slug} />
+                <ToolBySlug slug={rendererSlug} />
               </CodeEditorProvider>
             </Suspense>
           </ToolLoadBoundary>
@@ -118,7 +134,11 @@ function ToolBySlug({ slug }: { slug: string }) {
   const ToolRenderer = getToolRenderer(slug);
   if (!ToolRenderer) return <NotFound slug={slug} />;
 
-  return <ToolRenderer />;
+  return (
+    <div className="contents" data-tool-renderer={slug}>
+      <ToolRenderer />
+    </div>
+  );
 }
 
 function NotFound({ slug }: { slug: string }) {

@@ -32,7 +32,10 @@ const multiHostInspectPlatforms = Object.freeze({
 });
 
 const multiHostComparePlatforms = Object.freeze({
-  web: { status: "available" as const, capabilities: ["compare-text", "clipboard-write"] as const },
+  web: {
+    status: "available" as const,
+    capabilities: ["compare-text", "clipboard-write"] as const,
+  },
   "browser-extension": {
     status: "available" as const,
     capabilities: ["compare-text", "clipboard-write"] as const,
@@ -171,6 +174,22 @@ export const splitToNewlinesTool = defineTool({
   platforms: multiHostTransformPlatforms,
 } as const);
 
+export const joinLinesTool = defineTool({
+  id: "join-lines",
+  slug: "join-lines",
+  name: "Join Lines",
+  shortName: "Join Lines",
+  family: "text-regex",
+  pattern: "transform",
+  status: "available",
+  releaseStage: "release-ready",
+  releasePlatforms: ["web", "browser-extension", "vscode-extension"],
+  description: "Join newline-separated lines into delimited text locally.",
+  keywords: ["join", "lines", "merge", "combine", "delimiter", "text", "csv"],
+  designFrame: "Join Lines (cCFX2)",
+  platforms: multiHostTransformPlatforms,
+} as const);
+
 export const textRegexTools = [
   caseConverterTool,
   sortLinesTool,
@@ -180,4 +199,5 @@ export const textRegexTools = [
   textDiffTool,
   regexTesterTool,
   splitToNewlinesTool,
+  joinLinesTool,
 ] as const satisfies readonly ToolDefinition[];

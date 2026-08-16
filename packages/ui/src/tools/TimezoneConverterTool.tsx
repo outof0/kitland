@@ -144,7 +144,6 @@ export function TimezoneConverterTool() {
               </span>
             </div>
           ))}
-
         </FormPanel>
 
         <ResultPanel>

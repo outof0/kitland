@@ -205,7 +205,7 @@ export function RegexTesterTool({
       )}
 
       {/* Two-Column Editor Layout */}
-      <div className="flex min-h-0 min-w-0 flex-1 gap-3.5 max-lg:flex-col max-lg:overflow-y-auto lg:max-h-[calc(100dvh-17.5rem)]">
+      <div className="tool-editor-stage flex min-h-0 min-w-0 flex-1 gap-3.5 max-lg:flex-col max-lg:overflow-y-auto">
         {/* Input Text Card */}
         <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] border border-outline bg-surface focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all duration-150 max-lg:min-h-72 max-lg:flex-none tool-card tool-card--in">
           <div className="min-h-[46px] bg-surface-low border-b border-outline px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 shrink-0">

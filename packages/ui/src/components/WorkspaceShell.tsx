@@ -66,7 +66,7 @@ const CATEGORIES: readonly CategoryDef[] = [
   },
   {
     id: "text-tools",
-    label: "Text tools",
+    label: "Text",
     family: "text-regex",
     icon: Type,
   },
@@ -103,6 +103,12 @@ export function WorkspaceShell({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(!initialSidebarCollapsed);
   const isCompactMedia = useCompactNavigation();
+
+  // Hosts learn their layout mode asynchronously with the tool registry.
+  // Reflect a later mode message as well as the initial render.
+  useEffect(() => {
+    setDesktopSidebarOpen(!initialSidebarCollapsed);
+  }, [initialSidebarCollapsed]);
 
   const allTools = useMemo(() => {
     const platformTools = listToolsByPlatform(platform);

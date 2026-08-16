@@ -183,7 +183,7 @@
 }
 
 .kitland-cm .cm-activeLine {
-  background-color: rgba(128, 128, 128, 0.05) !important;
+  background-color: transparent !important;
 }
 
 .kitland-cm .cm-activeLineGutter {

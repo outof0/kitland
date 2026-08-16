@@ -1,0 +1,2 @@
+/* Public CSS entrypoint for hosts that mount the lazy CodeMirror adapter. */
+@import "./src/components/codemirror.css";

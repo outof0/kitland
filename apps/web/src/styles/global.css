@@ -3,6 +3,7 @@
 @import "@fontsource-variable/jetbrains-mono/wght.css";
 @import "tailwindcss";
 @import "@kitland/ui/workspace.css";
+@import "@kitland/ui/code-editor.css";
 @source "../../../../packages/ui/src";
 
 /* Marketing palette. The landing/registry intentionally keep a fixed dark

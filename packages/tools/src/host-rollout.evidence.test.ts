@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { listReleaseReadyTools, listTools, listToolsByPlatform } from "./registry";
 
 /**
- * KIT-0020 path B: full multi-host availability for the canonical 64-tool suite.
+ * KIT-0020 path B: full multi-host availability for the canonical 65-tool suite.
  */
 describe("multi-host full registry rollout", () => {
   it("makes every tool available on web, browser-extension, and VS Code", () => {
@@ -12,11 +12,11 @@ describe("multi-host full registry rollout", () => {
     const web = listToolsByPlatform("web");
     const releaseReady = listReleaseReadyTools();
 
-    expect(all).toHaveLength(64);
+    expect(all).toHaveLength(65);
     expect(all.every((tool) => tool.status === "available")).toBe(true);
-    expect(web).toHaveLength(64);
-    expect(be).toHaveLength(64);
-    expect(vs).toHaveLength(64);
+    expect(web).toHaveLength(65);
+    expect(be).toHaveLength(65);
+    expect(vs).toHaveLength(65);
     expect(be.map((tool) => tool.slug).sort()).toEqual(vs.map((tool) => tool.slug).sort());
     expect(be.map((tool) => tool.slug).sort()).toEqual(web.map((tool) => tool.slug).sort());
     expect(releaseReady.length).toBeGreaterThanOrEqual(35);

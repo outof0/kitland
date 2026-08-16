@@ -62,20 +62,19 @@ compiled tests in an Extension Development Host. `package:smoke` builds desktop/
 checks release invariants and forbidden network primitives, then asks `vsce` to enumerate the exact
 VSIX contents.
 
-## Gaps before the complete suite can ship
+## Release follow-up
 
-1. Promote remaining web-only tools (generators, inspectors, diff, crypto, network) only when host
-   adapters, budgets, and privacy disclosures exist; keep those registry hosts `planned` until then.
-2. Add renderer contracts beyond text transformation/inspection (forms, diff, generators) with
-   accessibility and protocol tests per renderer.
-3. Optionally expand hand-reviewed selection commands; host-transform adapters intentionally ship
+The complete registry is available through the shared workbench. These items
+remain marketplace and compatibility work, not hidden product-scope gaps:
+
+1. Optionally expand hand-reviewed selection commands; host-transform adapters intentionally ship
    without automatic selection-command generation.
-4. Introduce worker/streaming protocols and cancellation before any tool exceeds the current
+2. Introduce worker/streaming protocols and cancellation before any tool exceeds the current
    1,000,000-character message ceiling.
-5. Expand the Linux Extension Host and web-bundle CI baseline into the final compatibility matrix;
+3. Expand the Linux Extension Host and web-bundle CI baseline into the final compatibility matrix;
    add VSIX artifact retention, signing/provenance, and Marketplace/Open VSX release promotion.
-6. Confirm ownership of the `outof0` Marketplace publisher, add store assets, and complete the full
-   suite release checklist. Do not publish this Base64-only reference slice as the finished product.
+4. Confirm ownership of the `outof0` Marketplace publisher, add store assets, and complete the
+   marketplace release checklist.
 
 ## Packaging policy
 

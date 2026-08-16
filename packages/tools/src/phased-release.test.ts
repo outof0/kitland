@@ -29,9 +29,9 @@ describe("surface rollout release gate", () => {
       "password-generator",
     ];
 
-    expect(webTargets).toHaveLength(64);
-    expect(browserTargets).toHaveLength(64);
-    expect(vscodeTargets).toHaveLength(64);
+    expect(webTargets).toHaveLength(65);
+    expect(browserTargets).toHaveLength(65);
+    expect(vscodeTargets).toHaveLength(65);
     for (const targets of [webTargets, browserTargets, vscodeTargets]) {
       expect(targets.map((tool) => tool.slug)).toEqual(expect.arrayContaining(certifiedSlugs));
       expect(targets.every((tool) => isToolCertifiedForSurface(tool, "web"))).toBe(true);
@@ -39,7 +39,7 @@ describe("surface rollout release gate", () => {
     expect(getRegistrySurfaceRolloutReadiness("web")).toMatchObject({
       ready: true,
       platform: "web",
-      targetToolCount: 64,
+      targetToolCount: 65,
       issues: [],
     });
   });

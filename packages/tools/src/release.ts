@@ -3,7 +3,7 @@ import { CANONICAL_TOOL_INVENTORY, type CanonicalToolInventoryEntry } from "./in
 
 export const REGISTRY_RELEASE_POLICY = Object.freeze({
   /** Product direction: the first public production release is the full suite. */
-  targetToolCount: 64,
+  targetToolCount: 65,
   requiredWebPlatform: "web" as const satisfies ToolPlatformId,
   requiredReleaseStage: "release-ready" as const,
 });
@@ -17,6 +17,7 @@ export type RegistryReleaseIssueCode =
   | "REGISTRY_INVENTORY_MISMATCH"
   | "DUPLICATE_TOOL_ID"
   | "DUPLICATE_TOOL_SLUG"
+  | "DESIGN_EVIDENCE_UNRESOLVED"
   | "TOOL_NOT_RELEASE_READY"
   | "WEB_PLATFORM_UNAVAILABLE"
   | "PLATFORM_CONTRACT_UNRESOLVED";
@@ -76,6 +77,14 @@ export function evaluateRegistryReleaseReadiness(
     ids.add(tool.id);
     slugs.add(tool.slug);
 
+    if (hasUnresolvedDesignFrame(tool.designFrame)) {
+      issues.push({
+        code: "DESIGN_EVIDENCE_UNRESOLVED",
+        message: `Tool "${tool.slug}" has no resolved Pencil design frame; replace its pending design evidence before release.`,
+        toolSlug: tool.slug,
+      });
+    }
+
     if (tool.releaseStage !== REGISTRY_RELEASE_POLICY.requiredReleaseStage) {
       issues.push({
         code: "TOOL_NOT_RELEASE_READY",
@@ -119,6 +128,10 @@ export function evaluateRegistryReleaseReadiness(
   });
 }
 
+function hasUnresolvedDesignFrame(designFrame: string | undefined): boolean {
+  return !designFrame || /\b(?:pending|todo|tbd)\b/iu.test(designFrame);
+}
+
 function validateCanonicalInventory(
   tools: readonly ToolDefinition[],
   canonicalInventory: readonly CanonicalToolInventoryEntry[] | null,
@@ -128,7 +141,7 @@ function validateCanonicalInventory(
     issues.push({
       code: "CANONICAL_INVENTORY_MISSING",
       message:
-        "The canonical 64-tool inventory has not been committed; placeholder or inferred tool lists cannot unlock a production release.",
+        "The canonical 65-tool inventory has not been committed; placeholder or inferred tool lists cannot unlock a production release.",
     });
     return;
   }

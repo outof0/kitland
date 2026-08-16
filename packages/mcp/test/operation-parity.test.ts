@@ -85,6 +85,7 @@ import {
   kitlandDedupeLinesExposure,
   kitlandRegexTestExposure,
   kitlandSortLinesExposure,
+  kitlandJoinLinesExposure,
   kitlandSplitToNewlinesExposure,
   kitlandTextDiffExposure,
   kitlandTextReverseExposure,
@@ -452,7 +453,7 @@ describe("Text & Regex Exposures Parity", () => {
     expect((diff.structuredContent as { equal: boolean }).equal).toBe(false);
   });
 
-  it("Regex test and Split to newlines", async () => {
+  it("Regex test plus Split and Join Lines", async () => {
     const regex = await executeExposure(kitlandRegexTestExposure, {
       pattern: "\\d+",
       text: "abc 123 def 456",
@@ -464,6 +465,12 @@ describe("Text & Regex Exposures Parity", () => {
       delimiter: "comma",
     });
     expect(split.structuredContent).toEqual({ output: "apple\nbanana\norange" });
+
+    const joined = await executeExposure(kitlandJoinLinesExposure, {
+      input: "apple\n banana\n\norange",
+      delimiter: "pipe",
+    });
+    expect(joined.structuredContent).toEqual({ output: "apple | banana | orange" });
   });
 });
 

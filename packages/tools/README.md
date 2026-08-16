@@ -19,7 +19,7 @@ Do not infer extension or automation exposure from web availability. See the
 and the root [release policy](../../RELEASING.md).
 
 Base64 is a `reference` entry. Use `getRegistryReleaseReadiness()` for the
-machine-readable 64-tool production gate; never treat `listAvailableTools()` as
-a release decision. `CANONICAL_TOOL_INVENTORY` is the ordered set of 64 tool
-artboards approved in `design/design.pen`; tool count alone cannot pass the
-release gate.
+machine-readable 65-tool production gate; never treat `listAvailableTools()` as
+a release decision. `CANONICAL_TOOL_INVENTORY` is the ordered set of 65 product
+identities; every identity needs approved Pencil evidence before the release
+gate can pass. Tool count alone cannot unlock a release.

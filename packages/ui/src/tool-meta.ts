@@ -189,6 +189,9 @@ const TOOL_ICONS: Record<string, string> = {
     '<path d="m7 7 10 10"/><path d="M17 7 7 17"/><rect width="18" height="18" x="3" y="3" rx="2"/>',
   ),
   "split-to-newlines": icon('<path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/>'),
+  "join-lines": icon(
+    '<path d="m8 6 4-4 4 4"/><path d="M12 2v10.3a4 4 0 0 1-1.172 2.872L4 22"/><path d="m20 22-5-5"/>',
+  ),
 };
 
 export function toolIconFor(slug: string): string {
@@ -273,6 +276,7 @@ const TOOL_SAMPLES: Record<string, string> = {
     '<div class="container" style="background-color: #0b0c10; font-size: 14px;"><label for="input">Name:</label><input type="text" id="input" value="Kitland" readonly /></div>',
   "json-escape": '{\n  "message": "Hello \\"World\\" & \'Kitland\'\\nLine 2"\n}',
   "split-to-newlines": "apple,banana,orange,grape,cherry,mango",
+  "join-lines": "apple\nbanana\norange\ngrape\ncherry\nmango",
 };
 
 const TOOL_SECONDARY_SAMPLES: Record<string, string> = {
@@ -286,6 +290,7 @@ const TOOL_SECONDARY_SAMPLES: Record<string, string> = {
   "date-calculator": "2026-08-14",
   "age-calculator": "2026-08-14",
   "split-to-newlines": ",",
+  "join-lines": ",",
 };
 
 export function sampleFor(slug: string, pattern: ToolUiPattern, _isDiff: boolean): string {

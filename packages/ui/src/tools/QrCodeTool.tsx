@@ -117,9 +117,17 @@ export function QrCodeTool() {
           <FieldLabel>PAYLOAD</FieldLabel>
           <div className="box-border flex w-full flex-col rounded-[10px] border border-outline bg-surface p-3 transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30">
             <div className="mb-1 flex items-center justify-between">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-on-faint">Text or URL</span>
+              <span className="text-[11px] font-mono uppercase tracking-wider text-on-faint">
+                Text or URL
+              </span>
               <div className="flex items-center gap-1">
-                <input ref={fileInputRef} type="file" className="hidden" onChange={onFileUpload} accept="*/*" />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={onFileUpload}
+                  accept="*/*"
+                />
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -140,7 +148,11 @@ export function QrCodeTool() {
                       : "text-on-faint hover:text-on-surface hover:bg-surface"
                   }`}
                 >
-                  {isCopied("input") ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
+                  {isCopied("input") ? (
+                    <Check className="size-3.5 text-success" />
+                  ) : (
+                    <Copy className="size-3.5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -164,7 +176,9 @@ export function QrCodeTool() {
                 onClick={() => setLevel(lvl.id)}
                 aria-pressed={level === lvl.id}
                 className={`px-[10px] py-[5px] rounded-[6px] text-[11px] font-semibold transition-colors cursor-pointer ${
-                  level === lvl.id ? "bg-primary text-primary-foreground" : "bg-surface-high text-on-muted hover:text-on-surface"
+                  level === lvl.id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-surface-high text-on-muted hover:text-on-surface"
                 }`}
               >
                 {lvl.label}
@@ -177,7 +191,11 @@ export function QrCodeTool() {
         <ResultPanel>
           <ResultHead
             title="QR Preview"
-            subtitle={status === "Generated" ? `${value.length} chars · ${level} · ${modules}×${modules}` : status}
+            subtitle={
+              status === "Generated"
+                ? `${value.length} chars · ${level} · ${modules}×${modules}`
+                : status
+            }
             onCopy={() => void copy("payload", value)}
             copied={isCopied("payload")}
             copyLabel="Copy"
@@ -204,7 +222,9 @@ export function QrCodeTool() {
               </div>
             )}
             <div className="select-none font-mono text-[12px] text-on-faint text-center">
-              {status === "Generated" ? `${modules}×${modules} • ECC ${level} • PNG 240×240` : "Updates automatically as you type"}
+              {status === "Generated"
+                ? `${modules}×${modules} • ECC ${level} • PNG 240×240`
+                : "Updates automatically as you type"}
             </div>
           </ResultCard>
         </ResultPanel>
@@ -212,11 +232,17 @@ export function QrCodeTool() {
 
       <div className="flex items-center justify-between h-[36px] bg-surface-low border border-outline rounded-[8px] px-3.5 text-[12px] shrink-0 font-ui">
         <div className="flex items-center gap-3">
-          <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${status === "Generated" ? "bg-success-soft text-success" : status === "Error" ? "bg-danger-soft text-error" : "bg-surface-high text-on-muted"}`}>
+          <span
+            className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${status === "Generated" ? "bg-success-soft text-success" : status === "Error" ? "bg-danger-soft text-error" : "bg-surface-high text-on-muted"}`}
+          >
             {status}
           </span>
-          <span className="text-on-faint">{status === "Generated" ? `${modules}×${modules}` : "—"}</span>
-          <span className="text-on-faint hidden sm:inline">{status === "Generated" ? "PNG" : "—"}</span>
+          <span className="text-on-faint">
+            {status === "Generated" ? `${modules}×${modules}` : "—"}
+          </span>
+          <span className="text-on-faint hidden sm:inline">
+            {status === "Generated" ? "PNG" : "—"}
+          </span>
         </div>
         <span className="text-primary-strong font-mono text-[11px] font-semibold">&lt;&gt; QR</span>
       </div>

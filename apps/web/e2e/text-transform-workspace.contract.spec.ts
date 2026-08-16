@@ -114,6 +114,54 @@ test.describe("text transform workspace contract", () => {
     expect(results.violations).toEqual([]);
   });
 
+  test("keeps editor cards bounded and scrolls a long paste internally", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/explore/case-converter");
+
+    const input = page.getByRole("textbox", { name: "Text" });
+    const inputCard = page.locator(".tool-card--in");
+    const initialHeight = await inputCard.evaluate((card) => card.getBoundingClientRect().height);
+    const longPaste = Array.from({ length: 1_200 }, (_, index) => `long pasted line ${index}`).join(
+      "\n",
+    );
+
+    await fillPane(input, longPaste);
+    await expectPaneNotEmpty(input);
+
+    const geometry = await inputCard.evaluate((card) => {
+      const scroller = card.querySelector<HTMLElement>(".cm-scroller");
+      return {
+        cardHeight: card.getBoundingClientRect().height,
+        scrollsInternally: Boolean(scroller && scroller.scrollHeight > scroller.clientHeight),
+      };
+    });
+
+    expect(geometry.cardHeight).toBeCloseTo(initialHeight, 0);
+    expect(geometry.scrollsInternally).toBe(true);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/explore/case-converter");
+
+    const mobileInput = page.getByRole("textbox", { name: "Text" });
+    const mobileInputCard = page.locator(".tool-card--in");
+    const mobileInitialHeight = await mobileInputCard.evaluate(
+      (card) => card.getBoundingClientRect().height,
+    );
+    await fillPane(mobileInput, longPaste);
+
+    const mobileGeometry = await mobileInputCard.evaluate((card) => {
+      const scroller = card.querySelector<HTMLElement>(".cm-scroller");
+      return {
+        cardHeight: card.getBoundingClientRect().height,
+        scrollsInternally: Boolean(scroller && scroller.scrollHeight > scroller.clientHeight),
+      };
+    });
+
+    expect(mobileGeometry.cardHeight).toBeCloseTo(mobileInitialHeight, 0);
+    expect(mobileGeometry.cardHeight).toBeLessThanOrEqual(844 * 0.6 + 1);
+    expect(mobileGeometry.scrollsInternally).toBe(true);
+  });
+
   test("never renders a stale result when the source changes rapidly", async ({ page }) => {
     await page.goto("/explore/case-converter");
     const input = page.getByRole("textbox", { name: "Text" });
@@ -125,5 +173,47 @@ test.describe("text transform workspace contract", () => {
     await page.waitForTimeout(400);
     await expectPaneText(output, "second_input");
     await expect(page.getByLabel("Case Converter status")).toContainText("Ready");
+  });
+
+  test("swaps split-to-newlines and join-lines preserving data without full page reload", async ({
+    page,
+  }) => {
+    await page.goto("/explore/split-to-newlines");
+    const input = page.getByRole("textbox", { name: "Delimited text" });
+    const output = page.getByRole("textbox", { name: "Lines" });
+
+    await page.getByRole("button", { name: "Sample", exact: true }).click();
+    await expectPaneText(input, "apple, banana, orange, grape");
+    await expectPaneText(output, "apple\nbanana\norange\ngrape");
+
+    // Click Swap in Action Rail
+    await page.getByRole("button", { name: "Swap to Join Lines", exact: true }).click();
+
+    await expect(page).toHaveURL(/\/explore\/join-lines$/);
+    await expect(page).toHaveTitle("Join Lines — Tools out. Work on. | Kitland");
+    await expect(
+      page
+        .getByRole("navigation", { name: "Registered tools" })
+        .getByRole("button", { name: "Join Lines", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+    const joinInput = page.getByRole("textbox", { name: "Lines" });
+    const joinOutput = page.getByRole("textbox", { name: "Delimited text" });
+    await expectPaneText(joinInput, "apple\nbanana\norange\ngrape");
+    await expectPaneText(joinOutput, "apple, banana, orange, grape");
+
+    // Click Swap back to Split
+    await page.getByRole("button", { name: "Swap to Split → Newlines", exact: true }).click();
+
+    await expect(page).toHaveURL(/\/explore\/split-to-newlines$/);
+    await expect(page).toHaveTitle("Split → Newlines — Tools out. Work on. | Kitland");
+    await expect(
+      page
+        .getByRole("navigation", { name: "Registered tools" })
+        .getByRole("button", { name: "Split → Newlines", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+    const splitInput = page.getByRole("textbox", { name: "Delimited text" });
+    const splitOutput = page.getByRole("textbox", { name: "Lines" });
+    await expectPaneText(splitInput, "apple, banana, orange, grape");
+    await expectPaneText(splitOutput, "apple\nbanana\norange\ngrape");
   });
 });

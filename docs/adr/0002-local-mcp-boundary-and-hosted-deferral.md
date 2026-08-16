@@ -40,10 +40,11 @@ input/output schemas, operation-level limits, or exposure approval.
    `@kitland/mcp` package using **local stdio only**. A user deliberately
    configures their AI client to launch it; Kitland's browser must never start
    it or transfer browser drafts, fragments, storage, or clipboard data to it.
-4. The first package supports only deterministic, read-only `tools/list` and
-   `tools/call` operations. It has no resources, prompts, sampling, file
-   access, shell access, network calls, background jobs, telemetry, or
-   credentials.
+4. The package supports read-only `tools/list` and `tools/call` operations.
+   Deterministic transforms and explicit local generators are reviewed
+   separately; generators disclose when they use local entropy or current time.
+   It has no resources, prompts, sampling, file access, shell access, network
+   calls, background jobs, telemetry, or credentials.
 5. `@kitland/mcp` is an adapter, not another implementation of a transform. It
    validates an operation-specific contract, applies adapter limits, calls
    `@kitland/core`, and maps its `ToolResult` into a bounded MCP result. The

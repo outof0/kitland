@@ -46,6 +46,7 @@ import {
   buildAdvertisedOutputSchema,
   DEFAULT_MCP_LIMITS,
   DEFAULT_MCP_SAFETY,
+  NONDETERMINISTIC_MCP_SAFETY,
   type McpExposure,
 } from "../contracts.ts";
 import { createMcpError, type McpErrorPayload } from "../errors.ts";
@@ -253,7 +254,7 @@ export const kitlandAgeCalculateExposure: McpExposure<AgeCalculateInput, AgeResu
   outputSchema: buildAdvertisedOutputSchema(AGE_CALCULATE_SUCCESS_SCHEMA),
   successSchema: AGE_CALCULATE_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: (args: AgeCalculateInput): ToolResult<AgeResult> => {
     const ref = args.referenceDate ?? new Date().toISOString().slice(0, 10);
     return calculateAge(args.birthDate, ref);
@@ -1020,7 +1021,7 @@ export const kitlandCronParseExposure: McpExposure<CronParseInput, CronParseOutp
   outputSchema: buildAdvertisedOutputSchema(CRON_PARSE_SUCCESS_SCHEMA),
   successSchema: CRON_PARSE_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: (args: CronParseInput): ToolResult<CronParseOutput> => {
     const parsed = parseCronExpression(args.expression);
     if (!parsed.ok) return parsed;

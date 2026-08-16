@@ -36,6 +36,7 @@ const LOADERS: Record<string, () => Promise<{ default: ComponentType }>> = {
   "html-to-jsx": () => import("./HtmlToJsxTool").then((m) => ({ default: m.HtmlToJsxTool })),
   "split-to-newlines": () =>
     import("./SplitToNewlinesTool").then((m) => ({ default: m.SplitToNewlinesTool })),
+  "join-lines": () => import("./JoinLinesTool").then((m) => ({ default: m.JoinLinesTool })),
   "xml-formatter": () =>
     import("./XmlFormatterTool").then((m) => ({ default: m.XmlFormatterTool })),
   "sql-formatter": () =>

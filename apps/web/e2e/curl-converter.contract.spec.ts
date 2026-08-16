@@ -69,7 +69,9 @@ test.describe("cURL converter contract", () => {
     );
 
     // Swap back to cURL -> Fetch using the swap button
-    await page.getByRole("button", { name: "Use the result as input and switch direction" }).click();
+    await page
+      .getByRole("button", { name: "Use the result as input and switch direction" })
+      .click();
     const swappedSource = pane(page, "cURL command");
     const swappedResult = pane(page, "Fetch result");
     await expectPaneText(
@@ -102,9 +104,10 @@ test.describe("cURL converter contract", () => {
     for (const name of ["Run", "Reverse", "Share"]) {
       await expect(page.getByRole("button", { name, exact: true })).toHaveCount(0);
     }
-    for (const name of ["Convert", "Sample", "Clear input"]) {
+    for (const name of ["Sample", "Clear input"]) {
       await expect(page.getByRole("button", { name, exact: true })).toHaveCount(1);
     }
+    await expect(page.getByRole("button", { name: "Convert", exact: true })).toHaveCount(0);
     // Curl Converter's registry contract declares transform-text and
     // clipboard-write only, so file import/export controls stay hidden.
     for (const name of ["Upload file", "Save result"]) {

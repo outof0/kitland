@@ -15,4 +15,4 @@
   `vscode-extension` and the per-surface rollout gate passes.
 
 0.1.0 is the first complete-suite release candidate: the coordinated release
-gate certifies all 64 tools release-ready across web, browser extension, and VS Code.
+gate certifies all 65 tools release-ready across web, browser extension, and VS Code.

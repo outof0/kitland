@@ -5,9 +5,9 @@
 Everyday developer tools, in one place — local-first, open source, no account.
 
 > **Pre-release development snapshot:** the coordinated product launch remains
-> gated on the exact, product-approved 64-tool registry across the repository's
+> gated on the exact, product-approved 65-tool registry across the repository's
 > platform contracts. Finished tools can be certified for rollout on a specific
-> surface without shrinking the public 64-tool registry or publishing an
+> surface without shrinking the public 65-tool registry or publishing an
 > extension marketplace artifact.
 
 |             |                                   |
@@ -35,7 +35,7 @@ Node **≥ 22.12.0**, pnpm **9**.
 
 ```bash
 pnpm install
-pnpm dev                   # web: http://localhost:5173
+pnpm dev                   # web: http://localhost:4321
 pnpm dev:browser-extension # popup development host
 pnpm test
 pnpm typecheck
@@ -44,14 +44,14 @@ pnpm quality:check         # normal incremental CI gate
 ```
 
 `pnpm release:verify` is deliberately stricter than normal CI. It stays red
-until all 64 Pencil-approved tools are release-ready with resolved platform
+until all 65 tools are release-ready with resolved Pencil and platform
 contracts. `pnpm release:verify:rollout` is separate and certifies only the
 tools explicitly declared for the web surface in `releasePlatforms`. Each
 target must be canonical, `release-ready`, and available on that surface.
-Certification never changes the 64-tool landing page, Explore registry, or
+Certification never changes the 65-tool landing page, Explore registry, or
 which registry-available editor routes ship in the web artifact.
 
-Start with the [64-tool rollout playbook](docs/product/tool-rollout.md),
+Start with the [65-tool rollout playbook](docs/product/tool-rollout.md),
 [interaction pattern contracts](docs/architecture/tool-patterns.md), and
 [platform capability contract](docs/architecture/platform-capabilities.md).
 Each rollout target follows the same registry and surface contract; no one tool
@@ -140,7 +140,7 @@ Actions then deploys the normal full-registry web artifact after validating the
 web rollout targets. It never uploads the browser extension ZIP or VS Code
 VSIX to a marketplace.
 
-For the coordinated 64-tool product launch, unset
+For the coordinated 65-tool product launch, unset
 `CLOUDFLARE_PAGES_ROLLOUT_ENABLED` and set `CLOUDFLARE_PAGES_ENABLED=true`.
 That deploy remains blocked until the machine-readable complete-suite registry
 gate passes. Keeping both variables unset leaves all deploy jobs skipped.

@@ -5,6 +5,7 @@ import { build } from "esbuild";
 const packageRoot = fileURLToPath(new URL("../", import.meta.url));
 const outdir = fileURLToPath(new URL("../dist/", import.meta.url));
 const outCli = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
+const outRegexWorker = fileURLToPath(new URL("../dist/regex-worker.js", import.meta.url));
 const metafilePath = fileURLToPath(new URL("../dist/metafile.json", import.meta.url));
 const coreEntry = fileURLToPath(new URL("../../../packages/core/src/index.ts", import.meta.url));
 const registryEntry = fileURLToPath(
@@ -41,3 +42,22 @@ if (result.metafile) {
 }
 
 await chmod(outCli, 0o755);
+
+await build({
+  absWorkingDir: packageRoot,
+  alias: {
+    "@kitland/core": coreEntry,
+    "@kitland/tools": registryEntry,
+  },
+  bundle: true,
+  entryPoints: ["src/regex-worker.ts"],
+  format: "esm",
+  legalComments: "none",
+  logLevel: "info",
+  minify: true,
+  outfile: outRegexWorker,
+  platform: "node",
+  sourcemap: false,
+  target: "node22",
+  treeShaking: true,
+});

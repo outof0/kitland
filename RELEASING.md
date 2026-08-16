@@ -4,7 +4,7 @@ Kitland is pre-1.0. Source, hosted web artifacts, extension packages, and any
 future npm packages have separate release surfaces and must not silently share
 versioning or permissions.
 
-The coordinated product launch remains the complete 64-tool suite. It is
+The coordinated product launch remains the complete 65-tool suite. It is
 blocked by `pnpm --filter @kitland/tools release:verify` until every
 registry entry meets that contract. A separate web rollout certifies the tools
 explicitly declared for the web surface; it is not a complete-suite release and
@@ -20,7 +20,7 @@ does not publish either extension.
    then proves the web rollout targets are canonical, `release-ready`, and
    available on web. It verifies every registry-available editor route in the
    normal full-registry web artifact, checks bundle and SEO output, and smoke-tests the
-   result. The public landing page, 64-tool registry, and every available editor
+   result. The public landing page, 65-tool registry, and every available editor
    remain accessible; certification is not a visibility rule.
 4. On `main` or `master`, set `CLOUDFLARE_PAGES_ROLLOUT_ENABLED=true` only
    after the Cloudflare credentials and production environment approval are in
@@ -47,8 +47,9 @@ ZIP, a VS Code VSIX, or a package registry release.
    generated route set, extension package checks, and bundle-budget output
    rather than only the exit code.
 4. Run `pnpm release:check`. Its registry gate must prove that exactly the
-   canonical 64 identities are present, `release-ready`, web-available, and
-   have no unresolved `planned` platform contracts. The committed manifest
+   canonical 65 identities are present, `release-ready`, web-available, have
+   resolved Pencil design evidence, and have no unresolved `planned` platform
+   contracts. The committed manifest
    stores stable id/slug pairs only; matching `ToolDefinition` records remain
    the single source of descriptive and platform metadata.
 5. Confirm dependency review, CodeQL, browser tests, capability/permission

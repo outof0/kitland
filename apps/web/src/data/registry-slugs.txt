@@ -62,3 +62,4 @@ json-to-js-const
 html-to-jsx
 json-escape
 split-to-newlines
+join-lines

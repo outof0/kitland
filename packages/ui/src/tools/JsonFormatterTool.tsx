@@ -63,6 +63,7 @@ export function JsonFormatterTool({
   const uploadButtonRef = useRef<HTMLButtonElement>(null);
   const inputCardRef = useRef<HTMLElement>(null);
   const outputCardRef = useRef<HTMLElement>(null);
+  const outputEditorFocusedRef = useRef(false);
   const feedbackTimer = useRef<number | undefined>(undefined);
   const [mode, setMode] = useState<JsonFormatMode>("beautify");
   const [indent, setIndent] = useState<2 | 4>(2);
@@ -109,15 +110,12 @@ export function JsonFormatterTool({
   const inspection = state.status === "success" ? state.inspection : null;
   const liveOutput = inspection?.formatted ?? "";
 
-  const output =
-    outputOverride ??
-    (autoFormat
-      ? manualOutput !== null
-        ? manualOutput
-        : liveOutput
-      : manualOutput !== null
-        ? manualOutput
-        : committedOutput);
+  // Auto mode always displays the current formatter result. Editing the
+  // output explicitly switches to manual mode below, so a stale pane update
+  // can never replace a newly formatted document.
+  const output = autoFormat
+    ? liveOutput
+    : (outputOverride ?? (manualOutput !== null ? manualOutput : committedOutput));
 
   const rawError = state.status === "error" ? state.error.message : null;
   const isInvalid = Boolean(rawError) && Boolean(source.trim());
@@ -189,6 +187,19 @@ export function JsonFormatterTool({
       history.set(next);
     },
     [beginChange, history],
+  );
+
+  const editOutput = useCallback(
+    (next: string) => {
+      // A controlled CodeMirror update may emit a change notification while
+      // reconfiguring. Only a focused output pane is an intentional user edit.
+      if (!outputEditorFocusedRef.current) return;
+      setAutoFormat(false);
+      setManualOutput(next);
+      setCommittedOutput(next);
+      setOutputOverride(null);
+    },
+    [setAutoFormat],
   );
 
   const onSample = useCallback(() => {
@@ -475,7 +486,13 @@ export function JsonFormatterTool({
         onOutputViewChange={setOutputView}
         outputEditorId={outputId}
         output={output}
-        onOutputChange={setOutputOverride}
+        onOutputChange={editOutput}
+        onOutputFocus={() => {
+          outputEditorFocusedRef.current = true;
+        }}
+        onOutputBlur={() => {
+          outputEditorFocusedRef.current = false;
+        }}
         outputTools={{
           disabled: !output,
           onFormatOutput: onFormatOutputInPlace,

@@ -6,6 +6,7 @@ dist
 .turbo
 .wrangler
 apps/web/.astro
+apps/web/dev.pid
 coverage
 apps/web/playwright-report
 apps/web/test-results

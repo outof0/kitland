@@ -20,6 +20,7 @@ import {
   buildAdvertisedOutputSchema,
   DEFAULT_MCP_LIMITS,
   DEFAULT_MCP_SAFETY,
+  NONDETERMINISTIC_MCP_SAFETY,
   type McpExposure,
 } from "../contracts.ts";
 import { createMcpError, type McpErrorPayload } from "../errors.ts";
@@ -246,7 +247,7 @@ export const kitlandAesEncryptExposure: McpExposure<AesEncryptInput, AesEncryptO
   outputSchema: buildAdvertisedOutputSchema(AES_ENCRYPT_SUCCESS_SCHEMA),
   successSchema: AES_ENCRYPT_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: async (args: AesEncryptInput): Promise<ToolResult<AesEncryptOutput>> => {
     let nonceHex = args.nonceHex;
     if (!nonceHex) {
@@ -358,7 +359,7 @@ export const kitlandBcryptHashExposure: McpExposure<BcryptHashInput, BcryptHashO
   outputSchema: buildAdvertisedOutputSchema(BCRYPT_HASH_SUCCESS_SCHEMA),
   successSchema: BCRYPT_HASH_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: async (args: BcryptHashInput): Promise<ToolResult<BcryptHashOutput>> => {
     const cost = args.cost ?? 10;
     const valid = validateBcryptRequest(args.password, cost);
@@ -562,7 +563,7 @@ export const kitlandTokenGenerateExposure: McpExposure<TokenGenerateInput, Token
   outputSchema: buildAdvertisedOutputSchema(TOKEN_GENERATE_SUCCESS_SCHEMA),
   successSchema: TOKEN_GENERATE_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: (args: TokenGenerateInput): ToolResult<TokenGenerateOutput> => {
     const length = args.length ?? 32;
     const format: TokenFormat = args.format ?? "hex";
@@ -621,7 +622,7 @@ export const kitlandRsaKeyPairExposure: McpExposure<RsaKeyInput, RsaKeyOutput> =
   outputSchema: buildAdvertisedOutputSchema(RSA_KEY_SUCCESS_SCHEMA),
   successSchema: RSA_KEY_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: async (args: RsaKeyInput): Promise<ToolResult<RsaKeyOutput>> => {
     const modulusLength = args.modulusLength ?? 2048;
     const valid = validateRsaOptions(modulusLength);
@@ -717,7 +718,7 @@ export const kitlandPasswordGenerateExposure: McpExposure<
   outputSchema: buildAdvertisedOutputSchema(PASSWORD_GENERATE_SUCCESS_SCHEMA),
   successSchema: PASSWORD_GENERATE_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: (args: PasswordGenerateInput): ToolResult<PasswordGenerateOutput> => {
     const options: PasswordOptions = {
       length: args.length ?? 16,

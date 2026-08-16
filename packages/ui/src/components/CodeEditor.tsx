@@ -6,15 +6,36 @@ import { sql } from "@codemirror/lang-sql";
 import { xml } from "@codemirror/lang-xml";
 import { yaml } from "@codemirror/lang-yaml";
 import { search, searchKeymap } from "@codemirror/search";
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import {
+  HighlightStyle,
+  bracketMatching,
+  foldGutter as cmFoldGutter,
+  foldKeymap,
+  indentOnInput,
+  syntaxHighlighting,
+} from "@codemirror/language";
+import {
+  defaultKeymap,
+  history,
+  historyKeymap,
+  indentWithTab as indentWithTabCommand,
+} from "@codemirror/commands";
 import { EditorState, type Extension } from "@codemirror/state";
-import { EditorView, keymap, placeholder as cmPlaceholder, ViewPlugin } from "@codemirror/view";
+import {
+  EditorView,
+  crosshairCursor,
+  drawSelection,
+  dropCursor,
+  highlightActiveLine,
+  highlightActiveLineGutter,
+  keymap,
+  lineNumbers as cmLineNumbers,
+  placeholder as cmPlaceholder,
+  rectangularSelection,
+  ViewPlugin,
+} from "@codemirror/view";
 import { tags as t } from "@lezer/highlight";
-import ReactCodeMirror, {
-  type ReactCodeMirrorProps,
-  type ReactCodeMirrorRef,
-} from "@uiw/react-codemirror";
-import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import { createKitlandSearchPanel } from "./CodeEditorSearchPanel";
 import "./codemirror.css";
 
@@ -159,13 +180,16 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   },
   ref,
 ) {
-  const cmRef = useRef<ReactCodeMirrorRef>(null);
+  const editorHostRef = useRef<HTMLDivElement>(null);
+  const editorViewRef = useRef<EditorView | null>(null);
+  const callbacksRef = useRef({ onBlur, onChange, onFocus, onKeyDown, onSubmit });
+  callbacksRef.current = { onBlur, onChange, onFocus, onKeyDown, onSubmit };
 
   useImperativeHandle(ref, () => ({
     focus: () => {
-      cmRef.current?.view?.focus();
+      editorViewRef.current?.focus();
     },
-    getEditorView: () => cmRef.current?.view,
+    getEditorView: () => editorViewRef.current ?? undefined,
   }));
 
   const finalAriaLabel = ariaLabel ?? rawAriaLabel;
@@ -178,16 +202,38 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       syntaxHighlighting(kitlandHighlight),
       scrollableRegionFocusable,
       attachViewToDOM,
-      EditorState.tabSize.of(indentSize),
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged) callbacksRef.current.onChange?.(update.state.doc.toString());
+      }),
+      drawSelection(),
+      dropCursor(),
+      EditorState.allowMultipleSelections.of(true),
+      indentOnInput(),
+      bracketMatching(),
+      rectangularSelection(),
+      crosshairCursor(),
+      history(),
+      keymap.of([
+        ...defaultKeymap,
+        ...historyKeymap,
+        ...foldKeymap,
+        ...(indentWithTab ? [indentWithTabCommand] : []),
+        ...searchKeymap,
+      ]),
       search({
         top: true,
         createPanel: createKitlandSearchPanel,
       }),
-      keymap.of(searchKeymap),
     ];
 
+    if (lineNumbers) {
+      exts.push(cmLineNumbers(), highlightActiveLineGutter());
+    }
+    if (foldGutter) exts.push(cmFoldGutter());
+    if (!readOnly) exts.push(highlightActiveLine());
+
     if (readOnly) {
-      exts.push(EditorState.readOnly.of(true));
+      exts.push(EditorState.readOnly.of(true), EditorView.editable.of(false));
     }
 
     const contentAttrs: Record<string, string> = {};
@@ -202,16 +248,22 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       exts.push(EditorView.contentAttributes.of(contentAttrs));
     }
 
-    if (onKeyDown) {
-      exts.push(
-        EditorView.domEventHandlers({
-          keydown: (event) => {
-            onKeyDown(event);
-            return false;
-          },
-        }),
-      );
-    }
+    exts.push(
+      EditorView.domEventHandlers({
+        keydown: (event) => {
+          callbacksRef.current.onKeyDown?.(event);
+          return false;
+        },
+        focus: () => {
+          callbacksRef.current.onFocus?.();
+          return false;
+        },
+        blur: () => {
+          callbacksRef.current.onBlur?.();
+          return false;
+        },
+      }),
+    );
 
     const langExt = getLanguageExtension(language);
     if (langExt) {
@@ -222,83 +274,63 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       exts.push(cmPlaceholder(placeholder));
     }
 
-    if (onSubmit) {
-      exts.push(
-        keymap.of([
-          {
-            key: "Mod-Enter",
-            run: () => {
-              onSubmit();
-              return true;
-            },
+    exts.push(
+      keymap.of([
+        {
+          key: "Mod-Enter",
+          run: () => {
+            callbacksRef.current.onSubmit?.();
+            return true;
           },
-        ]),
-      );
-    }
+        },
+      ]),
+    );
 
     return exts;
   }, [
-    indentSize,
     language,
+    lineNumbers,
+    foldGutter,
+    indentWithTab,
     placeholder,
-    onSubmit,
     id,
     finalAriaLabel,
     finalAriaLabelledBy,
     finalAriaDescribedBy,
     finalAriaInvalid,
-    onKeyDown,
     readOnly,
   ]);
 
-  const props: ReactCodeMirrorProps = {
-    value,
-    extensions,
-    editable: true,
-    readOnly: false,
-    // The theme is fully static in codemirror.css (dark and light variants
-    // follow [data-theme]), so no theme extension is needed.
-    theme: "none",
-    basicSetup: {
-      lineNumbers,
-      foldGutter,
-      dropCursor: true,
-      allowMultipleSelections: true,
-      indentOnInput: true,
-      bracketMatching: true,
-      closeBrackets: !readOnly,
-      // Default styles are style-mod based, which the CSP blocks; the
-      // static kitlandHighlight above is the only highlighter in use.
-      syntaxHighlighting: false,
-      autocompletion: false,
-      rectangularSelection: true,
-      crosshairCursor: true,
-      highlightActiveLine: !readOnly,
-      highlightSelectionMatches: true,
-      closeBracketsKeymap: !readOnly,
-      defaultKeymap: true,
-      searchKeymap: true,
-      historyKeymap: true,
-      foldKeymap: true,
-      completionKeymap: false,
-      lintKeymap: false,
-    },
-    autoFocus,
-    indentWithTab,
-    // Flex chain fills the pane and caps the editor height; see
-    // codemirror.css for the .cm-editor fill/max-height rules.
-    className: "kitland-cm flex-1 min-h-0 w-full flex flex-col",
-  };
+  useEffect(() => {
+    const host = editorHostRef.current;
+    if (!host) return;
+    const view = new EditorView({
+      state: EditorState.create({ doc: value, extensions }),
+      parent: host,
+    });
+    editorViewRef.current = view;
+    if (autoFocus) view.focus();
 
-  if (onChange) props.onChange = onChange;
-  if (onFocus) props.onFocus = onFocus;
-  if (onBlur) props.onBlur = onBlur;
+    return () => {
+      if (editorViewRef.current === view) editorViewRef.current = null;
+      view.destroy();
+    };
+  }, [extensions]);
+
+  useEffect(() => {
+    const view = editorViewRef.current;
+    if (!view || value === view.state.doc.toString()) return;
+    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: value } });
+  }, [value]);
 
   return (
     <div
       className={`relative w-full h-full min-h-0 overflow-hidden flex-1 flex flex-col ${className}`}
     >
-      <ReactCodeMirror ref={cmRef} {...props} />
+      <div
+        ref={editorHostRef}
+        className={`kitland-cm kitland-cm--indent-${indentSize} flex min-h-0 w-full flex-1 flex-col`}
+      />
     </div>
   );
 });

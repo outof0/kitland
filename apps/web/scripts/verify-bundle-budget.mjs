@@ -140,7 +140,7 @@ if (!existsSync(ASSET_DIRECTORY)) {
       }
       return total + gzipSync(readFileSync(assetPath), { level: 9 }).byteLength;
     }, 0);
-    // The 64-tool registry expansion, rich design system token set and
+    // The 65-tool registry expansion, rich design system token set and
     // Tailwind 4 utility generation for the full marketing + workspace
     // stylesheet increase the shared CSS. Measured at ~24.4 KiB gzip after
     // the unified token migration; keep ceiling at 28 KiB to prevent

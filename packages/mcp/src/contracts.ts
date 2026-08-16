@@ -1,12 +1,7 @@
 import type { ToolResult } from "@kitland/core";
 import Ajv from "ajv";
 import { createMcpError, SHARED_ERROR_JSON_SCHEMA, type McpErrorPayload } from "./errors.ts";
-import {
-  DEFAULT_MCP_LIMITS,
-  measureJsonUtf8Bytes,
-  measureUtf8Bytes,
-  type McpLimits,
-} from "./limits.ts";
+import { DEFAULT_MCP_LIMITS, measureJsonUtf8Bytes, type McpLimits } from "./limits.ts";
 
 export { DEFAULT_MCP_LIMITS, type McpLimits };
 
@@ -17,6 +12,8 @@ export type JsonSchema = Record<string, unknown>;
 export type McpSafety = {
   readonly readOnly: true;
   readonly idempotent: true;
+  /** Whether identical arguments always produce identical output. */
+  readonly deterministic: boolean;
   readonly network: "none";
   readonly filesystem: "none";
   readonly persistence: "none";
@@ -26,10 +23,22 @@ export type McpSafety = {
 export const DEFAULT_MCP_SAFETY: McpSafety = {
   readOnly: true,
   idempotent: true,
+  deterministic: true,
   network: "none",
   filesystem: "none",
   persistence: "none",
   logs: "metadata-only",
+};
+
+/**
+ * Local generators may use OS-provided entropy or the current time, while
+ * remaining side-effect-free and local-only. Keep that distinction explicit so
+ * documentation and future exposure review cannot accidentally call them
+ * deterministic transforms.
+ */
+export const NONDETERMINISTIC_MCP_SAFETY: McpSafety = {
+  ...DEFAULT_MCP_SAFETY,
+  deterministic: false,
 };
 
 export type McpExposure<Input, Output> = {
@@ -207,8 +216,9 @@ function formatErrorResponse<Input, Output>(
     isError: true,
   };
 
-  // Ensure error envelope also stays within bounds
-  if (measureUtf8Bytes(textContent) > exposure.limits.maxSerializedResultUtf8Bytes) {
+  // Ensure the complete error envelope, including its duplicate structured
+  // representation, remains inside the advertised response budget.
+  if (measureJsonUtf8Bytes(response) > exposure.limits.maxSerializedResultUtf8Bytes) {
     const fallback = createMcpError("INTERNAL_ERROR", "Error response too large.");
     return {
       content: [{ type: "text", text: JSON.stringify(fallback) }],

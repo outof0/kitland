@@ -63,3 +63,21 @@ button:not(:disabled):active,
 .kitland-file-picker {
   display: none;
 }
+
+/*
+ * One bounded canvas for every code-editor workspace. The pane itself owns
+ * scrolling; a large document must never make the surrounding tool page
+ * taller. Keep this in the shared shell so bespoke diff/preview tools follow
+ * the same desktop contract as the standard transform editor.
+ */
+.tool-editor-stage {
+  min-height: 0;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .tool-editor-stage {
+    height: min(44rem, calc(100dvh - 19.3rem));
+    flex: none;
+  }
+}

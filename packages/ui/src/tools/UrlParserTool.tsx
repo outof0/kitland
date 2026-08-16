@@ -71,7 +71,9 @@ export function UrlParserTool() {
               ariaLabel="URL"
               placeholder="Paste a full URL including scheme…"
             />
-            <span className="text-[11px] text-on-muted">Paste a full URL incl. scheme — parses automatically</span>
+            <span className="text-[11px] text-on-muted">
+              Paste a full URL incl. scheme — parses automatically
+            </span>
           </div>
         </FormPanel>
 

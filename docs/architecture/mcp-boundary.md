@@ -1,30 +1,30 @@
 # MCP and AI adapter boundary
 
-**Status:** implementation contract for a future optional package. No
-`@kitland/mcp` package or hosted MCP endpoint exists today.
+**Status:** implementation contract for the published local optional package
+`@kitland/mcp`. No hosted MCP endpoint exists.
 **Decision:** [ADR 0002](../adr/0002-local-mcp-boundary-and-hosted-deferral.md).
 
 This document makes a local stdio adapter implementable without accidentally
 turning the browser registry into a remote data service. It follows MCP's
 tools model for discovery, JSON-Schema arguments, and structured results; the
-future package must pin the exact MCP SDK/protocol version it supports and test
+package pins the exact MCP SDK/protocol version it supports and tests
 that version rather than relying on this document alone.
 
 ## Current boundary and non-goals
 
-| Layer                 | Current responsibility                                                      | MCP rule                                                                                                             |
-| --------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `@kitland/core`       | Pure, bounded domain transforms returning `ToolResult<T>`                   | Remains the single transform implementation. No MCP, Node, DOM, network, or filesystem APIs are added here.          |
-| `@kitland/tools`      | Tool identity, browser copy, family, status, and UI pattern                 | Does **not** make a tool callable. A future operation needs a separate approved exposure declaration.                |
-| `apps/web`            | Local editor UX, clipboard/upload, opt-in fragment sharing, browser storage | Does not import, launch, configure, or talk to `@kitland/mcp`. Browser payloads are never a source of MCP arguments. |
-| Future `@kitland/mcp` | Local protocol adapter                                                      | Validates explicit client arguments, invokes core, and returns bounded MCP results.                                  |
+| Layer            | Current responsibility                                                      | MCP rule                                                                                                             |
+| ---------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `@kitland/core`  | Pure, bounded domain transforms returning `ToolResult<T>`                   | Remains the single transform implementation. No MCP, Node, DOM, network, or filesystem APIs are added here.          |
+| `@kitland/tools` | Tool identity, browser copy, family, status, and UI pattern                 | Does **not** make a tool callable. A future operation needs a separate approved exposure declaration.                |
+| `apps/web`       | Local editor UX, clipboard/upload, opt-in fragment sharing, browser storage | Does not import, launch, configure, or talk to `@kitland/mcp`. Browser payloads are never a source of MCP arguments. |
+| `@kitland/mcp`   | Local protocol adapter                                                      | Validates explicit client arguments, invokes core, and returns bounded MCP results.                                  |
 
 The first adapter deliberately excludes hosted HTTP, OAuth, resources, prompts,
 sampling, filesystem access, network access, shell commands, background jobs,
 state persistence, analytics, and browser extensions. It does not expose
 coming-soon tools or every browser feature.
 
-When the package is opened, keep its dependency direction and source layout
+The package keeps its dependency direction and source layout
 small and one-way:
 
 ```text
@@ -58,7 +58,7 @@ apps/web ── no connection ──► @kitland/mcp
 
 ## Exposure is explicit, operation-level, and immutable
 
-The future package owns an internal `McpExposure` registry. It is generated or
+The package owns an internal `McpExposure` registry. It is generated or
 hand-authored from reviewed declarations, but it is **not** derived by simply
 filtering `listAvailableTools()`.
 
@@ -86,6 +86,7 @@ type McpExposure<Input, Output> = {
   safety: {
     readOnly: true;
     idempotent: true;
+    deterministic: boolean;
     network: "none";
     filesystem: "none";
     persistence: "none";
@@ -110,7 +111,8 @@ Rules for every declaration:
   validation still measures UTF-8 bytes because JSON Schema string length is
   not a byte limit.
 - `outputSchema` defines the exact JSON shape returned in `structuredContent`.
-  Its fields must be finite, deterministic, and safe to show to an AI client.
+  Its fields must be finite and safe to show to an AI client. Operations that
+  use entropy or current time explicitly declare `deterministic: false`.
 - MCP annotations may state read-only/idempotent behavior, but they are hints
   to a client, not an authorization or security boundary. The adapter enforces
   its own restrictions.
@@ -196,9 +198,9 @@ environment variable, or dependency error. Unexpected failures map to a
 generic `INTERNAL_ERROR`; detailed diagnostic data remains local to a
 maintainer's explicitly enabled, metadata-only diagnostic channel.
 
-### Example future Base64 operations
+### Base64 operation examples
 
-These examples demonstrate the boundary; they do not create an MCP API today.
+These examples demonstrate published operation contracts.
 
 | MCP name                | Required arguments                         | Successful structured result                               | Core call                          |
 | ----------------------- | ------------------------------------------ | ---------------------------------------------------------- | ---------------------------------- |

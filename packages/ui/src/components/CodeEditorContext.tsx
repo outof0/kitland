@@ -36,7 +36,7 @@ export type InjectedEditor = FunctionComponent<
 >;
 
 export type CodeEditorContextValue = {
-  /** Lazy loader for the host's syntax-highlighting editor. Absent on textarea-only hosts. */
+  /** Lazy loader for the host's syntax-highlighting editor; absent on textarea-only hosts. */
   readonly loadEditor: () => Promise<{ default: InjectedEditor }>;
   /** When true the result pane is editable in place on this host. */
   readonly editableOutput?: boolean;

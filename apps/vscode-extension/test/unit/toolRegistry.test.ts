@@ -76,7 +76,7 @@ describe("tool registry", () => {
       expect.arrayContaining(["json-formatter", "base64", "curl-converter", "beautify-minify"]),
     );
     expect(ids.length).toBe(listToolsByPlatform("vscode-extension").length);
-    expect(ids.length).toBe(64);
+    expect(ids.length).toBe(65);
 
     const json = listToolAdapters().find((adapter) => adapter.descriptor.id === "json-formatter");
     expect(json?.descriptor.renderer).toMatchObject({

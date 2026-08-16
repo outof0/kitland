@@ -16,13 +16,14 @@
 
 | Surface           | Tools | UI                                                                         |
 | ----------------- | ----: | -------------------------------------------------------------------------- |
-| Web               |    64 | React ToolChrome / pattern workspaces                                      |
-| Browser extension |    64 | **@kitland/ui** shell (61) + specialty Base64/cURL/JSON                    |
-| VS Code           |    64 | Webview **ktu-*** shell (shared tokens from `@kitland/ui`) + host adapters |
+| Web               |    65 | React ToolChrome / pattern workspaces                                      |
+| Browser extension |    65 | **@kitland/ui** shell (61) + specialty Base64/cURL/JSON                    |
+| VS Code           |    65 | Webview **ktu-*** shell (shared tokens from `@kitland/ui`) + host adapters |
 
 - Package: `packages/ui` → **`@kitland/ui`** (renamed from tool-ui).
 - No file-open / share / network on host shells.
-- Registry: 64 available on all three platforms; all 64 tools release-ready.
+- Registry: 65 available and release-ready on all three platforms, with
+  resolved Pencil design evidence.
 
 ## By column
 
@@ -36,10 +37,9 @@
 
 ### Done
 
-- KIT-0003 — 64-tool inventory
+- KIT-0003 — 65-tool inventory
 
 ## Human next
 
 1. Pencil / visual sign-off
-2. ~~Promote remaining implemented → release-ready~~ — complete: all 64 tools release-ready (2026-08-15)
-3. Marketplace publish decision (KIT-0020)
+2. Marketplace publish decision (KIT-0020)

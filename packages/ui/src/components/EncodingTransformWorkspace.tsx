@@ -343,7 +343,7 @@ export function EncodingTransformWorkspace({
       </div>
 
       {/* Editor Area */}
-      <div className="grid min-h-0 min-w-0 flex-1 overflow-hidden grid-cols-1 grid-rows-[minmax(0,16rem)_3rem_minmax(0,16rem)] gap-0 lg:grid-cols-[minmax(0,1fr)_60px_minmax(0,1fr)] lg:grid-rows-[minmax(16rem,1fr)] lg:max-h-[calc(100dvh-19rem)]">
+      <div className="tool-editor-stage grid min-h-0 min-w-0 flex-1 overflow-hidden grid-cols-1 grid-rows-[minmax(0,16rem)_3rem_minmax(0,16rem)] gap-0 lg:grid-cols-[minmax(0,1fr)_60px_minmax(0,1fr)] lg:grid-rows-[minmax(16rem,1fr)]">
         {/* Input Card */}
         <section className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[12px] bg-surface border border-outline focus-within:border-primary focus-within:shadow-[0_0_10px_1px_rgba(37,99,235,0.25)] transition-all duration-150">
           <div className="flex h-[45.5px] shrink-0 items-center justify-between gap-2 bg-surface-low border-b border-outline px-4">

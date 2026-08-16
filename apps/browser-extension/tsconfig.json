@@ -25,6 +25,7 @@
       "@kitland/core/*": ["../../packages/core/src/*"],
       "@kitland/tools": ["../../packages/tools/src/index.ts"],
       "@kitland/ui": ["../../packages/ui/src/index.ts"],
+      "@kitland/ui/code-editor": ["../../packages/ui/src/components/CodeEditor.tsx"],
       "@kitland/ui/registry": ["../../packages/ui/src/tools/shared-registry-tools.tsx"],
       "@kitland/ui/tools/*": ["../../packages/ui/src/tools/*"]
     },

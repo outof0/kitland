@@ -1,3 +1,4 @@
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import type { McpExposure } from "./contracts.ts";
 import { DEFAULT_EXPOSURES } from "./exposures/index.ts";
 import {
@@ -13,10 +14,7 @@ export type McpToolDefinition = {
   readonly description?: string;
   readonly inputSchema: Record<string, unknown>;
   readonly outputSchema?: Record<string, unknown>;
-  readonly annotations?: {
-    readonly readOnly?: boolean;
-    readonly idempotent?: boolean;
-  };
+  readonly annotations?: ToolAnnotations;
 };
 
 const MCP_NAME_PATTERN = /^kitland_[a-z0-9_]{1,120}$/;
@@ -50,6 +48,9 @@ export class McpRegistry {
       // Safety check
       if (!exp.safety.readOnly || !exp.safety.idempotent) {
         throw new Error(`Exposure "${exp.mcpName}" must declare readOnly and idempotent safety.`);
+      }
+      if (typeof exp.safety.deterministic !== "boolean") {
+        throw new Error(`Exposure "${exp.mcpName}" must explicitly declare determinism.`);
       }
       if (
         exp.safety.network !== "none" ||
@@ -102,8 +103,8 @@ export class McpRegistry {
       inputSchema: exp.inputSchema,
       outputSchema: exp.outputSchema,
       annotations: {
-        readOnly: exp.safety.readOnly,
-        idempotent: exp.safety.idempotent,
+        readOnlyHint: exp.safety.readOnly,
+        idempotentHint: exp.safety.idempotent,
       },
     }));
   }

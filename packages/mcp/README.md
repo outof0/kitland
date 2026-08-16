@@ -1,6 +1,6 @@
 # @kitland/mcp
 
-Deterministic, capability-minimal, local Model Context Protocol (MCP) server for Kitland developer utilities.
+Capability-minimal, local Model Context Protocol (MCP) server for Kitland developer utilities.
 
 ## Overview
 
@@ -8,7 +8,7 @@ Deterministic, capability-minimal, local Model Context Protocol (MCP) server for
 
 - **Transport:** Local `stdio` only.
 - **Capabilities:** No network requests, no filesystem persistence, no shell execution, no background listeners, and no telemetry.
-- **Processing:** Deterministic in-memory transforms powered by `@kitland/core`.
+- **Processing:** Bounded in-memory transforms powered by `@kitland/core`, plus explicit local generators that use OS entropy or the current time when their operation requires it.
 
 ## Client Configuration
 
@@ -32,19 +32,25 @@ To configure Kitland MCP in your AI client, pin the exact version:
 3. **Execution context:** The process runs with the privileges of your OS user.
 4. **Model privacy:** Tool arguments and results are exchanged with your configured AI client/provider according to your client's privacy policy. Avoid passing sensitive secrets or private credentials.
 
-## Exposed Operations (v1)
+## Exposed operations
 
-### `kitland_base64_encode`
+At v0.1.0, `tools/list` exposes 80 bounded local operations for the canonical
+65-tool Kitland registry. Most operations are deterministic transforms; UUID,
+token, password, key, random-value, and time-relative operations explicitly
+produce fresh values. Operations are discovered from the running server so
+clients receive the exact current names, descriptions, and JSON Schemas rather
+than relying on a stale hand-maintained list.
 
-- **Input:** `{ "input": string, "urlSafe"?: boolean }`
-- **Output:** `{ "output": string, "format": "standard" | "url-safe" }`
-- **Description:** Encodes UTF-8 text to standard or URL-safe Base64.
+Representative operations include:
 
-### `kitland_base64_decode`
+- `kitland_base64_encode` / `kitland_base64_decode` for UTF-8 Base64.
+- `kitland_json_format` / `kitland_json_minify` for structured JSON text.
+- `kitland_join_lines` and `kitland_split_to_newlines` for bounded text
+  transforms.
 
-- **Input:** `{ "input": string, "urlSafe"?: boolean }`
-- **Output:** `{ "output": string, "format": "standard" | "url-safe" }`
-- **Description:** Decodes standard or URL-safe Base64 to UTF-8 text.
+Use the schema returned by `tools/list` before calling an operation. The server
+rejects malformed arguments and returns structured error results; it never
+falls back to shell, network, or filesystem behavior.
 
 ## Limits
 

@@ -3,6 +3,23 @@ import { expect, test } from "@playwright/test";
 import { expectPaneText, fillPane, pane, paneText } from "./support/editor";
 
 test.describe("structured data tool contracts", () => {
+  test("settles the empty beautify workspace without a React update loop", async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+
+    await page.goto("/explore/beautify-minify");
+    await expect(pane(page, "JSON input")).toBeVisible();
+    // Let mount effects run more than once: the web adapter passes an inline
+    // transform object, which previously retriggered the empty-state effect.
+    await page.waitForTimeout(350);
+
+    expect(consoleErrors).not.toContain(
+      "Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.",
+    );
+  });
+
   test("formats and converts the shared two-pane tools", async ({ page }) => {
     const cases = [
       {
@@ -74,6 +91,23 @@ test.describe("structured data tool contracts", () => {
       await expect(page.getByRole("button", { name: `Copy ${tool.output}` })).toBeEnabled();
       await expect(page.getByRole("button", { name: "Download result" })).toHaveCount(0);
     }
+  });
+
+  test("keeps host navigation synchronized when switching JSON and YAML modes", async ({
+    page,
+  }) => {
+    await page.goto("/explore/json-to-yaml");
+
+    await page.getByRole("main").getByRole("button", { name: "YAML → JSON", exact: true }).click();
+
+    await expect(page).toHaveURL(/\/explore\/yaml-to-json$/);
+    await expect(page).toHaveTitle("YAML → JSON — Tools out. Work on. | Kitland");
+    await expect(
+      page
+        .getByRole("navigation", { name: "Registered tools" })
+        .getByRole("button", { name: "YAML → JSON", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("textbox", { name: "YAML input" })).toBeVisible();
   });
 
   test("uses the standard local transform shell without mobile overflow", async ({ page }) => {

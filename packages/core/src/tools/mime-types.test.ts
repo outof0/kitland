@@ -78,11 +78,16 @@ describe("MIME type lookup", () => {
     expect(generateMimeApacheSnippet(jsonEntry)).toBe(
       "# Apache .htaccess / httpd.conf\nAddType application/json .json .map",
     );
-    expect(generateMimeFetchSnippet(jsonEntry)).toContain('"Content-Type": "application/json; charset=utf-8"');
+    expect(generateMimeFetchSnippet(jsonEntry)).toContain(
+      '"Content-Type": "application/json; charset=utf-8"',
+    );
 
     const octetEntry = MIME_TYPES.find((m) => m.mime === "application/octet-stream")!;
-    expect(generateMimeContentTypeHeader(octetEntry)).toBe("Content-Type: application/octet-stream");
-    expect(generateMimeFetchSnippet(octetEntry)).toContain('"Content-Type": "application/octet-stream"');
+    expect(generateMimeContentTypeHeader(octetEntry)).toBe(
+      "Content-Type: application/octet-stream",
+    );
+    expect(generateMimeFetchSnippet(octetEntry)).toContain(
+      '"Content-Type": "application/octet-stream"',
+    );
   });
 });
-

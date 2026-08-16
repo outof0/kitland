@@ -1,7 +1,7 @@
 # Kitland UI/UX audit and golden-slice standard
 
 Status: implemented baseline
-Scope: 64-tool suite landing, shared tool shell, and Base64 reference implementation across web,
+Scope: 65-tool suite landing, shared tool shell, and Base64 reference implementation across web,
 browser extension, and VS Code
 Method: source review plus interactive checks at 390×844, 768×900, and 1280×800
 
@@ -10,7 +10,7 @@ Method: source review plus interactive checks at 390×844, 768×900, and 1280×8
 The Base64 workspace is useful as a contract test: the input and output are clearly separated,
 conversion happens continuously, invalid data is announced, destructive actions are small and
 reversible, and privacy-sensitive sharing is disclosed next to the action. It is not the product
-center; Kitland's release target is a complete 64-tool suite.
+center; Kitland's release target is a complete 65-tool suite.
 
 The former landing page was visually distinctive but architecturally expensive. It rendered three
 large breakpoint-specific React trees, hydrated the whole page on load, repeated multiple links to
@@ -18,7 +18,7 @@ the same destination, and described the static web build as offline-capable with
 delivery mechanism. That was appropriate as a design prototype, not as the scalable OSS baseline.
 
 The implemented baseline now uses one semantic responsive tree, renders the landing without a
-client-side application island, presents six tool families and the 64-tool release target,
+client-side application island, presents six tool families and the 65-tool release target,
 distinguishes repository foundations from published extensions, and uses copy that describes
 network and privacy behavior precisely. `/explore` is a real registry/status surface rather than a
 redirect to whichever reference tool happened to be implemented first.
@@ -29,29 +29,29 @@ structured-data script remains in the page itself.
 
 The interactive web workspace now resolves each tool through an exhaustive lazy
 registry. Its shared island is about 12 KiB gzip (down from roughly 30 KiB), so
-adding tool renderers does not put all 64 implementations on every tool route.
+adding tool renderers does not put all 65 implementations on every tool route.
 
 ## Findings and decisions
 
-| Area                 | Finding                                                                                                         | Severity | Implemented decision                                                                                   |
-| -------------------- | --------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| Landing architecture | Desktop, tablet, and mobile trees duplicated content and all shipped in the document.                           | High     | Replace them with one responsive, data-driven tree.                                                    |
-| First interaction    | The entire landing hydrated on `client:load` for motion and a hamburger menu.                                   | High     | Render static HTML and use native `<details>` for the mobile disclosure. Motion is CSS-only.           |
+| Area                 | Finding                                                                                                         | Severity | Implemented decision                                                                                    |
+| -------------------- | --------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| Landing architecture | Desktop, tablet, and mobile trees duplicated content and all shipped in the document.                           | High     | Replace them with one responsive, data-driven tree.                                                     |
+| First interaction    | The entire landing hydrated on `client:load` for motion and a hamburger menu.                                   | High     | Render static HTML and use native `<details>` for the mobile disclosure. Motion is CSS-only.            |
 | Information scent    | The primary and secondary hero CTAs both opened Base64.                                                         | High     | Route the primary action to the suite registry; make the secondary action explain local-first behavior. |
-| False affordance     | Four “popular tool” links used different labels but the same Base64 destination.                                | Medium   | Present supported workflows as non-interactive capability labels.                                      |
-| Product truth        | “Offline-capable” was not guaranteed by the current static asset delivery.                                      | High     | Replace it with verifiable local-processing and shared-core claims.                                    |
-| Product scope        | The first implementation was visually positioned as if Base64 were the product.                                 | High     | Present six families and 64 tools; label Base64 only as a reference implementation.                    |
-| Roadmap honesty      | Web, browser, and VS Code could be read as shipped products.                                                    | High     | Label all repository implementations as “Foundation” until the complete suite is released.             |
-| Mobile hierarchy     | The tool repeated “Base64” in both the shell and content heading.                                               | Low      | Keep the shell title “Base64”; use “Encode / Decode” for the task heading.                             |
-| Error recovery       | Decode errors were announced correctly but visually truncated to one short footer line.                         | Medium   | Keep fixed editor geometry while allowing a two-line validation message.                               |
-| Privacy              | Sharing embeds input in the URL fragment and can expose secrets when a URL is shared.                           | High     | Keep sharing opt-in, fragment-only, length-bounded, and disclose the risk beside the action.           |
-| Accessibility        | The workspace already exposed field names, pressed states, live errors, skip navigation, and focus restoration. | Pass     | Preserve those contracts and add responsive/no-overflow regression coverage.                           |
+| False affordance     | Four “popular tool” links used different labels but the same Base64 destination.                                | Medium   | Present supported workflows as non-interactive capability labels.                                       |
+| Product truth        | “Offline-capable” was not guaranteed by the current static asset delivery.                                      | High     | Replace it with verifiable local-processing and shared-core claims.                                     |
+| Product scope        | The first implementation was visually positioned as if Base64 were the product.                                 | High     | Present six families and 65 tools; label Base64 only as a reference implementation.                     |
+| Roadmap honesty      | Web, browser, and VS Code could be read as shipped products.                                                    | High     | Label all repository implementations as “Foundation” until the complete suite is released.              |
+| Mobile hierarchy     | The tool repeated “Base64” in both the shell and content heading.                                               | Low      | Keep the shell title “Base64”; use “Encode / Decode” for the task heading.                              |
+| Error recovery       | Decode errors were announced correctly but visually truncated to one short footer line.                         | Medium   | Keep fixed editor geometry while allowing a two-line validation message.                                |
+| Privacy              | Sharing embeds input in the URL fragment and can expose secrets when a URL is shared.                           | High     | Keep sharing opt-in, fragment-only, length-bounded, and disclose the risk beside the action.            |
+| Accessibility        | The workspace already exposed field names, pressed states, live errors, skip navigation, and focus restoration. | Pass     | Preserve those contracts and add responsive/no-overflow regression coverage.                            |
 
 ## Landing experience model
 
 The landing follows a deliberate question sequence:
 
-1. **What is it?** A 64-tool, local-first developer workbench.
+1. **What is it?** A 65-tool, local-first developer workbench.
 2. **What exists now?** The primary action opens the registry/status page, not a single tool.
 3. **Why trust it?** The hero and proof band state no network uploads, no account, and MIT licensing.
 4. **What is actually ready?** Base64 is explicitly a reference slice; every product surface remains

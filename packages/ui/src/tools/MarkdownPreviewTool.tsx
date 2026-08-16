@@ -83,7 +83,7 @@ export function MarkdownPreviewTool({
       )}
 
       {/* Two-Column Editor Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-[440px]">
+      <div className="tool-editor-stage grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Input Card */}
         <div className="flex flex-col bg-surface border border-outline rounded-[12px] overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all">
           <div className="h-[45.5px] bg-surface-low border-b border-outline px-4 flex items-center justify-between shrink-0">

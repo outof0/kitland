@@ -3,7 +3,7 @@ import { TOOL_PLATFORM_IDS, type ToolDefinition, type ToolPlatformId } from "./t
 
 /**
  * A rollout certifies a tool on one product surface at a time. It is separate
- * from both public discovery and the coordinated 64-tool completion milestone:
+ * from both public discovery and the coordinated 65-tool completion milestone:
  * a web tool may be ready to ship while its extension adapters are still in
  * progress.
  */

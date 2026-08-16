@@ -1,6 +1,6 @@
 # Kitland — Local-first developer tools
 
-> Everyday developer tools, in one place — local-first, open source, no account. All 64 tools run locally in the browser.
+> Everyday developer tools, in one place — local-first, open source, no account. All 65 tools run locally in the browser.
 
 Kitland is a privacy-first workbench for developers who handle sensitive text, configuration, and payloads. Every transformation runs in the current browser via Web Workers or deterministic pure functions in `@kitland/core` — no payload upload, no telemetry, no persistence by default.
 
@@ -15,13 +15,13 @@ Kitland is a privacy-first workbench for developers who handle sensitive text, c
 - Tool guidance, steps, use-cases, and FAQs live in `src/data/toolSeo.ts` and are rendered as static HTML plus `FAQPage`/`WebApplication` schemas — not hidden in client state.
 - Share links are fragment-only (`#input=...`) and never affect canonicals or sitemap entries — safe to ignore for indexing.
 
-## Tool families (6, 64 tools)
+## Tool families (6, 65 tools)
 
 - **JSON & Markup (01):** JSON Formatter, JSON Diff, JSON Escape, JSON → YAML, YAML → JSON, JSON → CSV, JSON → TOML, XML Formatter, SQL Formatter, Markdown Preview, Beautify/Minify, JSON → TypeScript, JSON → JS const, HTML → JSX
 - **Encoding & Text (02):** Base64, URL Encode, HTML Entities, Hex Text, Unicode Converter, Binary Text, ROT13/Caesar, Morse Code
 - **Generators (03):** UUID, NanoID, ULID, ObjectID, Mock Data, QR Code, Lorem Ipsum, Random Port, Random Number, Password Generator
 - **Hash & Crypto (04):** SHA-256, HMAC-SHA-256, AES-256-GCM, Bcrypt, JWT Decoder, Token Generator, RSA Key Pair, Basic Auth
-- **Text & Regex (05):** Case Converter, Sort Lines, Dedupe Lines, Text Reverser, Text Stats, Text Diff, Regex Tester, Split to Newlines
+- **Text & Regex (05):** Case Converter, Sort Lines, Dedupe Lines, Text Reverser, Text Stats, Text Diff, Regex Tester, Split to Newlines, Join Lines
 - **Time & Network (06):** Unix Timestamp, Date Calculator, Age Calculator, Duration Formatter, Number Base, Color Converter, Temperature, Data Size, Timezone Converter, URL Parser, HTTP Status Codes, MIME Types, User Agent Parser, cURL Converter, Cron Parser, IP Subnet Calculator
 
 Full registry and live status: https://kitland.dev/explore

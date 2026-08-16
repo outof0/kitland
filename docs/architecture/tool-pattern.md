@@ -82,11 +82,11 @@ Do **not** put platform APIs (`window`, `vscode`, `chrome`) inside `core`.
 
 ## Sample routes
 
-| Path              | Behavior                                 |
-| ----------------- | ---------------------------------------- |
+| Path              | Behavior                                  |
+| ----------------- | ----------------------------------------- |
 | `/`               | Suite landing (generic CTAs → registry)   |
 | `/explore`        | Static registry and implementation status |
-| `/explore/base64` | Golden Base64 tool                       |
+| `/explore/base64` | Golden Base64 tool                        |
 
 ## localStorage keys
 

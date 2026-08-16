@@ -1010,4 +1010,3 @@ export function generateMimeFetchSnippet(entry: MimeType): string {
   const charset = entry.charset ? `; charset=${entry.charset.toLowerCase()}` : "";
   return `// Standard Web Fetch / Response\nconst response = new Response(data, {\n  status: 200,\n  headers: {\n    "Content-Type": "${entry.mime}${charset}",\n  },\n});`;
 }
-

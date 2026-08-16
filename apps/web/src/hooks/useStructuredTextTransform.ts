@@ -1,6 +1,8 @@
 import { err, type ToolResult } from "@kitland/core";
 import {
   isStructuredTextWorkerResponse,
+  parseStructuredTextTransformKey,
+  structuredTextTransformKey,
   type StructuredTextTransform,
   type StructuredTextWorkerRequest,
 } from "@/lib/structured-text-worker-protocol";
@@ -62,7 +64,17 @@ export function useStructuredTextTransform(
   input: string,
   { enabled = true }: StructuredTextTransformOptions = {},
 ): StructuredTextTransformState {
-  const query = useMemo<TransformQuery>(() => ({ transform, input }), [transform, input]);
+  // Callers commonly build the closed transform object inline. Its reference
+  // must not restart an equivalent request (or keep the empty-state effect in
+  // a render loop), so canonicalize the query from its complete value key.
+  const transformKey = structuredTextTransformKey(transform);
+  const query = useMemo<TransformQuery>(() => {
+    const canonicalTransform = parseStructuredTextTransformKey(transformKey);
+    if (!canonicalTransform) {
+      throw new Error("Could not reconstruct a structured text transform query.");
+    }
+    return { transform: canonicalTransform, input };
+  }, [input, transformKey]);
   const requestId = useRef(0);
   const [completed, setCompleted] = useState<CompletedTransform>({
     ...query,

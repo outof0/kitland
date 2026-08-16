@@ -17,9 +17,10 @@
 
    The pane fills the editor through a flex chain (no percentage heights,
    which do not resolve against the min-height-driven workspace layout):
-   pane body (flex row) -> wrapper (flex-1) -> .cm-editor (flex-1, capped).
+   pane body (flex row) -> wrapper (flex-1) -> .cm-editor (fills its capped pane).
 */
 
+.kitland-cm.cm-editor,
 .kitland-cm .cm-editor {
   position: relative !important;
   box-sizing: border-box;
@@ -27,7 +28,8 @@
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  max-height: calc(100vh - 274px);
+  height: 100%;
+  max-height: none;
   background: transparent !important;
   color: var(--on-surface) !important;
   font-family: var(--font-mono, "JetBrains Mono Variable", monospace);
@@ -65,6 +67,14 @@
   padding: 14px 16px;
   outline: none;
   caret-color: var(--primary);
+}
+
+.kitland-cm--indent-2 .cm-content {
+  tab-size: 2;
+}
+
+.kitland-cm--indent-4 .cm-content {
+  tab-size: 4;
 }
 
 .kitland-cm .cm-content[contenteditable="true"] {
@@ -183,7 +193,7 @@
 }
 
 .kitland-cm .cm-activeLine {
-  background-color: rgba(128, 128, 128, 0.05) !important;
+  background-color: transparent !important;
 }
 
 .kitland-cm .cm-activeLineGutter {

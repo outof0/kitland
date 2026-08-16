@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { getRegistryReleaseReadiness } from "./registry";
 
 describe("production complete-suite release gate", () => {
-  it("allows release only when the entire 64-tool registry is ready", () => {
+  it("allows release only when the entire 65-tool registry is ready", () => {
     const readiness = getRegistryReleaseReadiness();
     // The full structured issue list remains available to callers. Keep CI
-    // output actionable at 64-tool scale instead of printing hundreds of
+    // output actionable at 65-tool scale instead of printing hundreds of
     // repeated per-platform messages.
     const counts = new Map<string, number>();
     for (const issue of readiness.issues) {

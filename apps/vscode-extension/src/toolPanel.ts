@@ -15,10 +15,6 @@ export class ToolPanel implements vscode.Disposable {
     initialInput?: string,
     collapseSidebar = false,
   ): void {
-    if (collapseSidebar) {
-      void vscode.commands.executeCommand("workbench.action.closeSidebar");
-    }
-
     if (ToolPanel.current) {
       ToolPanel.current.panel.reveal(vscode.ViewColumn.Active, false);
       ToolPanel.current.selectTool(adapter, initialInput, true, collapseSidebar);

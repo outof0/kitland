@@ -2,14 +2,12 @@ import { CodeEditorContext, type CodeEditorContextValue, type InjectedEditor } f
 import type { ReactNode } from "react";
 
 /**
- * Web-only host adapter: injects the CodeMirror editor into the shared
+ * Web host adapter: injects the shared CodeMirror editor into the
  * @kitland/ui TextTransformEditor panes. The loader is lazy so the
- * ToolWorkspace island chunk stays small; CodeMirror lands in an unbudgeted
- * per-tool/shared chunk. Extension and VS Code hosts render no editor here
- * (textarea fallback) because their bundles are budget-capped.
+ * ToolWorkspace island chunk stays small.
  */
 const loadEditor = (): Promise<{ default: InjectedEditor }> =>
-  import("@/components/ui/CodeEditor").then((module) => ({
+  import("@kitland/ui/code-editor").then((module) => ({
     default: module.CodeEditor as unknown as InjectedEditor,
   }));
 

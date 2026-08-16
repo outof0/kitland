@@ -11,13 +11,14 @@ export type CanonicalToolInventoryEntry = {
 };
 
 /**
- * Product inventory approved in `design/design.pen`.
+ * Product inventory targeted for the coordinated release.
  *
- * Each entry corresponds to one 1440×900 tool artboard in that Pencil file.
  * It is intentionally identity-only: names, descriptions, family, patterns,
  * and platform contracts are defined once in the matching ToolDefinition.
- * Adding an artboard is not enough to add a product tool: the matching
- * definition, adapters, core behaviour, and release evidence are required.
+ * Each release-ready identity must also resolve to its own 1440×900 Pencil
+ * artboard. Adding an artboard is not enough to add a product tool: the
+ * matching definition, adapters, core behaviour, and release evidence are
+ * required.
  */
 export const CANONICAL_TOOL_INVENTORY = [
   { id: "beautify-minify", slug: "beautify-minify" },
@@ -84,4 +85,5 @@ export const CANONICAL_TOOL_INVENTORY = [
   { id: "html-to-jsx", slug: "html-to-jsx" },
   { id: "json-escape", slug: "json-escape" },
   { id: "split-to-newlines", slug: "split-to-newlines" },
+  { id: "join-lines", slug: "join-lines" },
 ] as const satisfies readonly CanonicalToolInventoryEntry[];

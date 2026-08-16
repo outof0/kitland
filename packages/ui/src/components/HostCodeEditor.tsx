@@ -23,8 +23,8 @@ export type HostCodeEditorProps = {
 };
 
 /**
- * Host-aware editor pane. Web injects CodeMirror through CodeEditorContext;
- * extension and VS Code keep the textarea + gutter fallback.
+ * Host-aware editor pane. Web and browser-extension inject CodeMirror through
+ * CodeEditorContext; hosts that provide no editor retain the textarea fallback.
  */
 export const HostCodeEditor = forwardRef<InjectedEditorRef, HostCodeEditorProps>(
   function HostCodeEditor(
@@ -94,7 +94,7 @@ export const HostCodeEditor = forwardRef<InjectedEditorRef, HostCodeEditorProps>
     }
 
     return (
-      <div className="flex min-h-0 min-w-0 flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
         <div
           ref={gutterRef}
           className="flex w-[44px] shrink-0 flex-col items-end overflow-hidden border-r border-outline bg-surface-low py-[14px] pr-[8px] select-none"
@@ -130,7 +130,7 @@ export const HostCodeEditor = forwardRef<InjectedEditorRef, HostCodeEditorProps>
           readOnly={readOnly}
           aria-invalid={ariaInvalid ? true : undefined}
           aria-describedby={ariaDescribedBy}
-          className="min-h-0 min-w-0 flex-1 resize-none overflow-auto border-0 bg-transparent p-[14px_16px] font-mono text-[13px] leading-[20px] text-on-surface shadow-none outline-none placeholder:text-on-muted/60 focus:border-0 focus:ring-0 focus:outline-none focus-visible:border-0 focus-visible:ring-0 focus-visible:outline-none"
+          className="h-full min-h-0 min-w-0 flex-1 resize-none overflow-auto border-0 bg-transparent p-[14px_16px] font-mono text-[13px] leading-[20px] text-on-surface shadow-none outline-none placeholder:text-on-muted/60 focus:border-0 focus:ring-0 focus:outline-none focus-visible:border-0 focus-visible:ring-0 focus-visible:outline-none"
         />
       </div>
     );

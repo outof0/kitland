@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { listWebAvailableTools } from "@/lib/release-scope";
 import { describe, expect, it } from "vitest";
 
 const source = readFileSync(fileURLToPath(new URL("./registry.tsx", import.meta.url)), "utf8");
@@ -14,5 +15,19 @@ describe("web tool registry regex entry", () => {
     expect(source).toContain("@/hooks/useRegexTester");
     expect(source).not.toContain("useInspectHooks");
     expect(source).not.toContain("@kitland/ui/hooks/useInspectHooks");
+  });
+});
+
+describe("web tool renderer registry", () => {
+  it("declares a lazy renderer entry for every web-available slug", () => {
+    for (const { slug } of listWebAvailableTools()) {
+      const escapedSlug = slug.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+      expect(source).toMatch(
+        new RegExp(
+          `(?:["']${escapedSlug}["']|${escapedSlug}):\\s*(?:async|fromNamed|fromEncoding)`,
+          "u",
+        ),
+      );
+    }
   });
 });

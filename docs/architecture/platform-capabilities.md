@@ -57,18 +57,19 @@ security review.
 
 `getRegistryReleaseReadiness()` and `evaluateRegistryReleaseReadiness()` implement
 the first-production-release policy. The gate requires the registry to match the
-committed canonical inventory at exactly 64 identities, every tool at
-`release-ready`, every tool available on web, unique ids and slugs, and no
-remaining `planned` platform decision. A platform may be explicitly
+committed canonical inventory at exactly 65 identities, every tool at
+`release-ready`, every tool available on web, unique ids and slugs, no
+remaining `planned` platform decision, and resolved Pencil design evidence. A
+platform may be explicitly
 `unsupported`; the gate requires a resolved decision, not permission inflation.
-The inventory stores the reviewed id/slug pairs extracted from the 64
-artboards in `design/design.pen`; each matching `ToolDefinition` is the sole
-source for names, families, UI patterns, host status, and capabilities. The
-release gate still requires every tool to be implemented and release-ready, so
-the inventory cannot unlock deployment by itself.
+The inventory stores the reviewed id/slug pairs for the 65-tool product scope;
+each matching `ToolDefinition` is the sole source for names, families, UI
+patterns, host status, and capabilities. The release gate still requires every
+tool to be implemented, release-ready, and design-approved, so the inventory
+cannot unlock deployment by itself.
 
 Normal CI remains green during development. The complete-suite production
 deploy job runs the separate `release:verify` command, which intentionally
-fails until all 64 tools are ready. A different `release:verify:rollout` gate
+fails until all 65 tools are ready. A different `release:verify:rollout` gate
 evaluates the declared targets for one platform (web by default) and is paired
 with a full-registry artifact verifier before a certified web rollout can deploy.

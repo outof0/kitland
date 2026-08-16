@@ -1,5 +1,6 @@
 import { isWebAvailableToolSlug, listWebAvailableTools } from "@/lib/release-scope";
 import { capabilitiesForWebTool } from "@/lib/tool-capabilities";
+import { dispatchToolModeNavigation } from "@/lib/tool-mode-navigation";
 import type { AvailableToolSlug } from "@kitland/tools";
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 
@@ -14,13 +15,22 @@ function fromNamed<T extends Record<string, unknown>, K extends keyof T & string
 ): ToolRendererLoader {
   return async () => {
     const module = await loadModule();
-    const Tool = module[exportName] as ComponentType<{ capabilities?: unknown }>;
+    const Tool = module[exportName] as ComponentType<{
+      capabilities?: unknown;
+      onModeNavigate?: (nextSlug: string) => void;
+    }>;
     if (typeof Tool !== "function") {
       throw new Error(`Shared tool export "${exportName}" is not a component.`);
     }
     return {
       default: (props: Record<string, unknown>) => (
-        <Tool capabilities={capabilitiesForWebTool(slug)} {...props} />
+        <Tool
+          capabilities={capabilitiesForWebTool(slug)}
+          onModeNavigate={(nextSlug: string) => {
+            dispatchToolModeNavigation(nextSlug);
+          }}
+          {...props}
+        />
       ),
     };
   };
@@ -72,7 +82,9 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
       ),
     };
   },
-  "json-to-yaml": async () => ({ default: (await import("./JsonToYamlTool")).JsonToYamlTool }),
+  "json-to-yaml": async () => ({
+    default: (await import("./JsonToYamlTool")).JsonToYamlTool,
+  }),
   "yaml-to-json": fromNamed(
     "yaml-to-json",
     () => import("@kitland/ui/tools/YamlToJsonTool"),
@@ -286,6 +298,11 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
     () => import("@kitland/ui/tools/SplitToNewlinesTool"),
     "SplitToNewlinesTool",
   ),
+  "join-lines": fromNamed(
+    "join-lines",
+    () => import("@kitland/ui/tools/JoinLinesTool"),
+    "JoinLinesTool",
+  ),
   "json-to-typescript": fromNamed(
     "json-to-typescript",
     () => import("@kitland/ui/tools/JsonToTypescriptTool"),
@@ -362,13 +379,17 @@ export function hasToolRenderer(slug: string): boolean {
   return isRegisteredToolSlug(slug);
 }
 
+export function listRegisteredToolRendererSlugs(): readonly AvailableToolSlug[] {
+  return Object.keys(TOOL_RENDERER_LOADERS).filter(isWebAvailableToolSlug);
+}
+
 export function isRegisteredToolSlug(slug: string): slug is AvailableToolSlug {
   return isWebAvailableToolSlug(slug) && Object.hasOwn(TOOL_RENDERER_LOADERS, slug);
 }
 
 function assertRendererRegistryComplete(): void {
   const availableSlugs = listWebAvailableTools().map((tool) => tool.slug);
-  const registeredSlugs = Object.keys(TOOL_RENDERER_LOADERS).filter(isWebAvailableToolSlug);
+  const registeredSlugs = listRegisteredToolRendererSlugs();
   const complete =
     availableSlugs.length === registeredSlugs.length &&
     availableSlugs.every((slug) => registeredSlugs.includes(slug));

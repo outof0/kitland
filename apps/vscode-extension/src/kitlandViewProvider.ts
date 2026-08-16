@@ -102,6 +102,9 @@ export class KitlandViewProvider implements vscode.WebviewViewProvider {
       tools: this.registryEntries(),
       activeToolId: this.adapter.descriptor.id,
       initialInput: this.initialInput,
+      // This webview already lives in VS Code's Activity Bar sidebar. Avoid
+      // rendering a second desktop registry beside the active tool.
+      collapseSidebar: true,
     });
   }
 

@@ -190,7 +190,8 @@ export function BcryptHashTool({
           </div>
 
           <p className="m-0 text-[11px] leading-relaxed text-on-faint">
-            Adaptive hash; cost factor {rounds} ≈ {rounds >= 12 ? "400ms+" : "100ms"} — hashes automatically as you type (debounced {DEBOUNCE_MS}ms).
+            Adaptive hash; cost factor {rounds} ≈ {rounds >= 12 ? "400ms+" : "100ms"} — hashes
+            automatically as you type (debounced {DEBOUNCE_MS}ms).
           </p>
         </FormPanel>
 

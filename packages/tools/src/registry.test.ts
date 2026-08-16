@@ -96,6 +96,7 @@ describe("tool registry", () => {
       "html-to-jsx",
       "json-escape",
       "split-to-newlines",
+      "join-lines",
     ]);
     expect(listToolsByFamily("encoding-text").some((t) => t.slug === "base64")).toBe(true);
   });
@@ -148,7 +149,14 @@ describe("tool registry", () => {
     expect(jsonFormatter?.platforms).toEqual({
       web: {
         status: "available",
-        capabilities: ["transform-text", "inspect-text", "clipboard-write", "share-link"],
+        capabilities: [
+          "transform-text",
+          "inspect-text",
+          "clipboard-write",
+          "file-import",
+          "file-export",
+          "share-link",
+        ],
       },
       "browser-extension": {
         status: "available",
@@ -243,26 +251,37 @@ describe("tool registry", () => {
     ).toThrow(/must not contain duplicates/);
   });
 
-  it("passes the complete-suite release gate on the assembled registry", () => {
+  it("verifies the complete-suite release is ready and blocks if any tool has unresolved design evidence", () => {
     const readiness = getRegistryReleaseReadiness();
     expect(readiness.ready).toBe(true);
-    expect(readiness.targetToolCount).toBe(64);
-    expect(readiness.currentToolCount).toBe(64);
-    expect(readiness.canonicalInventoryCount).toBe(64);
-    expect(readiness.releaseReadyToolCount).toBe(64);
-    // Every host contract is resolved and every tool declares its release platforms.
+    expect(readiness.targetToolCount).toBe(65);
+    expect(readiness.currentToolCount).toBe(65);
+    expect(readiness.canonicalInventoryCount).toBe(65);
+    expect(readiness.releaseReadyToolCount).toBe(65);
     expect(readiness.issues).toEqual([]);
+
+    const joinLines = getToolBySlug("join-lines")!;
+    const pendingTool = { ...joinLines, designFrame: "Join Lines (pending Pencil artboard)" };
+    const withPending = listTools().map((t) => (t.slug === "join-lines" ? pendingTool : t));
+    const pendingReadiness = evaluateRegistryReleaseReadiness(withPending);
+    expect(pendingReadiness.ready).toBe(false);
+    expect(pendingReadiness.issues).toEqual([
+      expect.objectContaining({
+        code: "DESIGN_EVIDENCE_UNRESOLVED",
+        toolSlug: "join-lines",
+      }),
+    ]);
   });
 
   it("matches every Pencil tool artboard with one declared delivery stage", () => {
     const tools = listTools();
-    expect(tools).toHaveLength(64);
-    expect(CANONICAL_TOOL_INVENTORY).toHaveLength(64);
+    expect(tools).toHaveLength(65);
+    expect(CANONICAL_TOOL_INVENTORY).toHaveLength(65);
     expect(tools.map(({ id, slug }) => ({ id, slug }))).toEqual(CANONICAL_TOOL_INVENTORY);
     expect(tools.every((tool) => tool.designFrame)).toBe(true);
     expect(tools.filter((tool) => tool.releaseStage === "planned")).toHaveLength(0);
     expect(tools.filter((tool) => tool.releaseStage === "implemented")).toHaveLength(0);
-    expect(tools.filter((tool) => tool.releaseStage === "release-ready")).toHaveLength(64);
+    expect(tools.filter((tool) => tool.releaseStage === "release-ready")).toHaveLength(65);
   });
 
   it("passes only when the complete registry is release-ready with resolved platforms", () => {
@@ -284,7 +303,7 @@ describe("tool registry", () => {
 
     expect(evaluateRegistryReleaseReadiness(tools, null)).toMatchObject({
       ready: false,
-      currentToolCount: 64,
+      currentToolCount: 65,
       canonicalInventoryCount: null,
     });
     expect(
@@ -293,14 +312,14 @@ describe("tool registry", () => {
 
     expect(evaluateRegistryReleaseReadiness(tools, inventory)).toMatchObject({
       ready: true,
-      currentToolCount: 64,
-      canonicalInventoryCount: 64,
-      releaseReadyToolCount: 64,
+      currentToolCount: 65,
+      canonicalInventoryCount: 65,
+      releaseReadyToolCount: 65,
       issues: [],
     });
   });
 
-  it("rejects registrys above the exact 64-tool product boundary", () => {
+  it("rejects registrys above the exact 65-tool product boundary", () => {
     const tools: ToolDefinition[] = Array.from(
       { length: REGISTRY_RELEASE_POLICY.targetToolCount + 1 },
       (_, index) => ({
@@ -319,8 +338,8 @@ describe("tool registry", () => {
 
     expect(evaluateRegistryReleaseReadiness(tools, inventory)).toMatchObject({
       ready: false,
-      currentToolCount: 65,
-      canonicalInventoryCount: 65,
+      currentToolCount: 66,
+      canonicalInventoryCount: 66,
     });
     expect(
       evaluateRegistryReleaseReadiness(tools, inventory).issues.map((issue) => issue.code),

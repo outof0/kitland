@@ -13,13 +13,13 @@ tagged release, changes remain under **Unreleased**.
 - Core/tool-registry package boundaries and release foundations.
 - Explicit per-platform capability contracts, a complete-suite production gate,
   and a separately verified phased web rollout for `release-ready` tools.
-- The complete 64-tool registry with bounded core contracts and deterministic
-  tests; every tool is certified `release-ready` on web, browser extension, and
-  VS Code, and the full-suite release gate now passes.
+- The complete 65-tool registry with bounded core contracts and deterministic
+  tests. The full-suite release gate also requires resolved Pencil design
+  evidence for each canonical tool.
 - Shared `@kitland/ui` design system: single light/dark token source, Tailwind
   theme entry, and shared primitives (tool chrome, workspace shells, editor,
   result rail, sidebar) used by all three hosts.
-- Web workbench with 64 static tool pages, lazy renderer registry, SEO
+- Web workbench with 65 static tool pages, lazy renderer registry, SEO
   prerender, and fragment-only share links (Base64, JSON Formatter).
 - Permission-free browser extension with the same WorkspaceShell + lazy
   `@kitland/ui` React registry as web (no second mount API or generic fallback).
@@ -27,7 +27,7 @@ tagged release, changes remain under **Unreleased**.
   selection commands (Base64, cURL), and a structured JSON inspection surface.
 - VS Code webview now mounts the shared `@kitland/ui` WorkspaceShell so the
   registry chrome matches web and the browser extension.
-- All 64 tool UIs live in `@kitland/ui` and are mounted by web, the browser
+- All 65 tool UIs live in `@kitland/ui` and are mounted by web, the browser
   extension, and VS Code so layout and chrome stay aligned.
 - Per-surface rollout gates for web, browser-extension, and vscode-extension
   independent of the coordinated suite gate.

@@ -28,6 +28,8 @@ export function ToolArea({
   outputEditorId,
   output,
   onOutputChange,
+  onOutputFocus,
+  onOutputBlur,
   outputTools,
   onValidate,
   onBeautify,
@@ -64,6 +66,8 @@ export function ToolArea({
   outputEditorId: string;
   output: string;
   onOutputChange: (next: string) => void;
+  onOutputFocus: () => void;
+  onOutputBlur: () => void;
   outputTools: ComponentProps<typeof OutputTools>;
   onValidate: () => void;
   onBeautify: () => void;
@@ -73,14 +77,14 @@ export function ToolArea({
   onAutoFormatChange?: (auto: boolean) => void;
 }) {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 gap-3.5 max-lg:flex-col max-lg:overflow-y-auto">
+    <div className="tool-editor-stage grid min-h-0 min-w-0 flex-1 overflow-hidden grid-cols-1 grid-rows-[minmax(0,16rem)_auto_minmax(0,16rem)] max-lg:overflow-y-auto lg:grid-cols-[minmax(0,1fr)_14px_68px_14px_minmax(0,1fr)] lg:grid-rows-[minmax(16rem,1fr)]">
       <section
         ref={inputCardRef}
-        className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] border ${
+        className={`flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] border lg:col-start-1 ${
           error ? "border-danger/40" : "border-outline"
         } bg-surface focus-within:${
           error ? "border-danger ring-danger/30" : "border-primary ring-primary/30"
-        } focus-within:ring-1 transition-all duration-150 max-lg:min-h-72 max-lg:flex-none`}
+        } focus-within:ring-1 transition-all duration-150`}
       >
         <div className="flex min-h-[45.5px] shrink-0 items-center justify-between gap-2 border-b border-outline bg-surface-low px-3.5 flex-wrap">
           <div className="flex flex-wrap items-center gap-2.5">
@@ -145,7 +149,7 @@ export function ToolArea({
       </section>
 
       {/* Center Action Rail with Auto Toggle */}
-      <div className="flex w-[68px] shrink-0 flex-col items-center justify-center gap-2 py-2 select-none self-center max-lg:w-full max-lg:flex-row max-lg:flex-wrap max-lg:gap-3 max-lg:my-2">
+      <div className="flex w-[68px] shrink-0 flex-col items-center justify-center gap-2 py-2 select-none self-center lg:col-start-3 max-lg:w-full max-lg:flex-row max-lg:flex-wrap max-lg:gap-3 max-lg:my-2">
         <div className="flex flex-col items-center gap-1">
           <button
             type="button"
@@ -215,7 +219,7 @@ export function ToolArea({
 
       <section
         ref={outputCardRef}
-        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] border border-outline bg-surface focus-within:border-success focus-within:ring-1 focus-within:ring-success/30 transition-all duration-150 max-lg:min-h-72 max-lg:flex-none"
+        className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] border border-outline bg-surface focus-within:border-success focus-within:ring-1 focus-within:ring-success/30 transition-all duration-150 lg:col-start-5"
       >
         <div className="flex min-h-[45.5px] shrink-0 items-center justify-between gap-2 border-b border-outline bg-surface-low px-3.5 flex-wrap">
           <div className="flex flex-wrap items-center gap-2.5">
@@ -246,6 +250,8 @@ export function ToolArea({
             label="Formatted JSON"
             placeholder="Formatted JSON appears here…"
             onChange={onOutputChange}
+            onFocus={onOutputFocus}
+            onBlur={onOutputBlur}
           />
         ) : outcome.parsedValue ? (
           <TreePane

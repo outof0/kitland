@@ -7,7 +7,7 @@ const FAMILY_LABEL: Record<ToolFamilyId, string> = {
   "json-markup": "Format & Validate",
   "encoding-text": "Encode / Decode",
   "hash-crypto": "Crypto & Security",
-  "text-regex": "Text tools",
+  "text-regex": "Text",
   generators: "Generate",
   "time-network": "Time & Network",
 };

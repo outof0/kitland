@@ -41,11 +41,15 @@ export function createMcpServer(options: CreateMcpServerOptions = {}): Server {
     if (pageSize !== undefined && pageSize > 0) {
       let startIndex = 0;
       const cursor = request.params?.cursor;
-      if (cursor) {
-        const parsed = parseInt(cursor, 10);
-        if (!isNaN(parsed) && parsed >= 0) {
-          startIndex = parsed;
+      if (cursor !== undefined) {
+        if (!/^(?:0|[1-9]\d*)$/.test(cursor)) {
+          throw new McpError(ErrorCode.InvalidParams, "Invalid tools/list cursor.");
         }
+        const parsed = Number(cursor);
+        if (!Number.isSafeInteger(parsed) || parsed >= allTools.length) {
+          throw new McpError(ErrorCode.InvalidParams, "Invalid tools/list cursor.");
+        }
+        startIndex = parsed;
       }
       const pageTools = allTools.slice(startIndex, startIndex + pageSize);
       const nextIndex = startIndex + pageSize;
@@ -68,7 +72,10 @@ export function createMcpServer(options: CreateMcpServerOptions = {}): Server {
     const exposure = registry.get(toolName);
 
     if (!exposure) {
-      throw new McpError(ErrorCode.InvalidParams, `Tool not found: "${toolName}".`);
+      // Tool names are client-provided and may be rendered back into an AI
+      // context by the caller. Keep protocol errors static rather than echoing
+      // an untrusted value as if it were server-authored text.
+      throw new McpError(ErrorCode.InvalidParams, "Tool not found.");
     }
 
     const response = await executeExposure(exposure, request.params.arguments ?? {});

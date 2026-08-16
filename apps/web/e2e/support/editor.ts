@@ -15,27 +15,42 @@ export async function fillPane(locator: Locator, text: string): Promise<void> {
     await locator.fill(text);
     return;
   }
-  const handled = await locator.evaluate((el, content) => {
-    const cmElement = el.closest(".cm-editor") ?? el;
-    const view =
-      (
-        cmElement as unknown as {
-          cmEditorView?: { dispatch: (tr: unknown) => void; state: { doc: { length: number } } };
-        }
-      ).cmEditorView ??
-      (
-        el as unknown as {
-          cmEditorView?: { dispatch: (tr: unknown) => void; state: { doc: { length: number } } };
-        }
-      ).cmEditorView;
-    if (view && typeof view.dispatch === "function") {
-      view.dispatch({
-        changes: { from: 0, to: view.state.doc.length, insert: content },
-      });
-      return true;
-    }
-    return false;
-  }, text);
+  const replaceCodeMirrorDocument = async (): Promise<boolean> =>
+    locator.evaluate((el, content) => {
+      const cmElement = el.closest(".cm-editor") ?? el;
+      const view =
+        (
+          cmElement as unknown as {
+            cmEditorView?: {
+              dispatch: (tr: unknown) => void;
+              state: { doc: { length: number } };
+            };
+          }
+        ).cmEditorView ??
+        (
+          el as unknown as {
+            cmEditorView?: {
+              dispatch: (tr: unknown) => void;
+              state: { doc: { length: number } };
+            };
+          }
+        ).cmEditorView;
+      if (view && typeof view.dispatch === "function") {
+        view.dispatch({
+          changes: { from: 0, to: view.state.doc.length, insert: content },
+        });
+        return true;
+      }
+      return false;
+    }, text);
+
+  // `Locator.fill()` treats a contenteditable editor as keystrokes. That is
+  // the right interaction test, but it also triggers CodeMirror's bracket
+  // completion and does not have textarea's exact-value semantics. Contract
+  // specs use `fillPane` to install an exact document, so replace it with one
+  // editor transaction instead. It also keeps million-character limit tests
+  // bounded rather than replaying every character.
+  const handled = await replaceCodeMirrorDocument();
 
   if (handled) return;
 
@@ -55,10 +70,16 @@ export async function paneText(locator: Locator): Promise<string> {
     if (el instanceof HTMLTextAreaElement) return el.value;
     const cmElement = el.closest(".cm-editor") ?? el;
     const view =
-      (cmElement as unknown as { cmEditorView?: { state?: { doc?: { toString: () => string } } } })
-        .cmEditorView ??
-      (el as unknown as { cmEditorView?: { state?: { doc?: { toString: () => string } } } })
-        .cmEditorView;
+      (
+        cmElement as unknown as {
+          cmEditorView?: { state?: { doc?: { toString: () => string } } };
+        }
+      ).cmEditorView ??
+      (
+        el as unknown as {
+          cmEditorView?: { state?: { doc?: { toString: () => string } } };
+        }
+      ).cmEditorView;
     if (view?.state?.doc) {
       return view.state.doc.toString();
     }

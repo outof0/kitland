@@ -61,6 +61,8 @@ export const SVG_ICONS: Record<string, string> = {
     '<svg class="icon-svg" viewBox="0 0 24 24"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>',
   split:
     '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/></svg>',
+  merge:
+    '<svg class="icon-svg" viewBox="0 0 24 24"><path d="m8 6 4-4 4 4"/><path d="M12 2v10.3a4 4 0 0 1-1.172 2.872L4 22"/><path d="m20 22-5-5"/></svg>',
   "case-sensitive":
     '<svg class="icon-svg" viewBox="0 0 24 24"><path d="m3 15 4-8 4 8"/><path d="M4 13h6"/><circle cx="18" cy="12" r="3"/><path d="M21 9v6"/></svg>',
   "arrow-up-down":
@@ -145,7 +147,7 @@ export const TOOL_ICON_MAP: Record<string, string> = {
   "rsa-key-pair": "key",
   "uuid-id": "fingerprint",
 
-  // Text tools (text-regex)
+  // Text (text-regex)
   "text-stats": "sliders-horizontal",
   "text-diff": "split",
   "case-converter": "case-sensitive",
@@ -155,6 +157,7 @@ export const TOOL_ICON_MAP: Record<string, string> = {
   "text-reverser": "arrow-left-right",
   "regex-tester": "regex",
   "split-to-newlines": "split",
+  "join-lines": "merge",
 
   // Generators (generators)
   "password-generator": "key-round",

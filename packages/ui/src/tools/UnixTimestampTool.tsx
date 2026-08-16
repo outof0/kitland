@@ -1,6 +1,6 @@
 import { parseUnixTimestamp } from "@kitland/core";
 import { Check, Clock, Copy, RefreshCw, TriangleAlert } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCopyFeedback } from "../hooks/useCopyFeedback";
 import {
   BigValue,
@@ -13,14 +13,37 @@ import {
   ToolHeader,
 } from "../components/tool-form";
 
-type Reso = "s" | "ms" | "us";
+type Reso = "s" | "ms" | "us" | "ns";
 type Dir = "unix" | "date";
 
-const RESO_LABEL: Record<Reso, string> = { s: "seconds", ms: "ms", us: "µs" };
+const RESO_LABEL: Record<Reso, string> = {
+  s: "seconds",
+  ms: "ms",
+  us: "µs",
+  ns: "ns",
+};
 const RESO_PLACEHOLDER: Record<Reso, string> = {
   s: "e.g. 1786695783",
   ms: "e.g. 1786695783000",
   us: "e.g. 1786695783000000",
+  ns: "e.g. 1786695783000000000",
+};
+
+function valueForResolution(
+  value: Pick<ParsedTimestamp, "seconds" | "milliseconds" | "microseconds" | "nanoseconds">,
+  resolution: Reso,
+) {
+  if (resolution === "ms") return value.milliseconds;
+  if (resolution === "us") return value.microseconds;
+  if (resolution === "ns") return value.nanoseconds;
+  return value.seconds;
+}
+
+type ParsedTimestamp = {
+  readonly seconds: string;
+  readonly milliseconds: string;
+  readonly microseconds: string;
+  readonly nanoseconds: string;
 };
 
 export function UnixTimestampTool() {
@@ -42,24 +65,51 @@ export function UnixTimestampTool() {
     if (!trimmed) return { ok: false as const, error: { message: "Enter a value." } };
     // Auto-detect: numeric → unix, otherwise try date. Dir is a hint, not a strict gate.
     const isNumeric = /^-?\d+$/.test(trimmed);
-    if (dir === "date" || (!isNumeric && trimmed.includes("-")) || trimmed.includes("T") || trimmed.includes("/")) {
+    if (
+      dir === "date" ||
+      (!isNumeric && (trimmed.includes("-") || trimmed.includes("T") || trimmed.includes("/")))
+    ) {
       const ms = Date.parse(trimmed);
       if (!Number.isNaN(ms)) {
         return {
           ok: true as const,
-          value: { seconds: String(Math.floor(ms / 1000)), milliseconds: String(ms) },
+          value: {
+            seconds: String(Math.floor(ms / 1000)),
+            milliseconds: String(ms),
+          },
         };
       }
-      if (dir === "date") return { ok: false as const, error: { message: "Invalid date. Try YYYY-MM-DD or ISO 8601." } };
+      if (isNumeric) {
+        const unixRes = parseUnixTimestamp(trimmed, { unit: reso });
+        if (unixRes.ok) return unixRes;
+      }
+      if (dir === "date")
+        return {
+          ok: false as const,
+          error: { message: "Invalid date. Try YYYY-MM-DD or ISO 8601." },
+        };
     }
-    const unixRes = parseUnixTimestamp(trimmed);
+    const unixRes = parseUnixTimestamp(trimmed, { unit: reso });
     if (unixRes.ok) return unixRes;
+    const dateMs = Date.parse(trimmed);
+    if (!Number.isNaN(dateMs)) {
+      return {
+        ok: true as const,
+        value: {
+          seconds: String(Math.floor(dateMs / 1000)),
+          milliseconds: String(dateMs),
+        },
+      };
+    }
     // If numeric parse failed but input looks like a date, suggest switching
     if (/[a-zA-Z]/.test(trimmed) || trimmed.includes("-") || trimmed.includes("/")) {
-      return { ok: false as const, error: { message: "Invalid timestamp. Try switching to Date → Unix." } };
+      return {
+        ok: false as const,
+        error: { message: "Invalid timestamp. Try switching to Date → Unix." },
+      };
     }
     return unixRes;
-  }, [dir, value]);
+  }, [dir, reso, value]);
 
   const parsed = useMemo(() => {
     if (!result.ok) return null;
@@ -77,7 +127,10 @@ export function UnixTimestampTool() {
     return {
       iso: d.toISOString(),
       utc: d.toUTCString(),
-      localDate: d.toLocaleString(undefined, { dateStyle: "full", timeStyle: "long" }),
+      localDate: d.toLocaleString(undefined, {
+        dateStyle: "full",
+        timeStyle: "long",
+      }),
       human: d.toLocaleString("en", {
         month: "long",
         day: "numeric",
@@ -89,6 +142,7 @@ export function UnixTimestampTool() {
       seconds: result.value.seconds,
       milliseconds: result.value.milliseconds,
       microseconds: (BigInt(result.value.milliseconds) * 1000n).toString(),
+      nanoseconds: (BigInt(result.value.milliseconds) * 1_000_000n).toString(),
       relative: getRelativeTimeString(d),
       week: isoWeek(d),
       dayOfYear: Math.floor(
@@ -101,6 +155,50 @@ export function UnixTimestampTool() {
       tzNote: `GMT${timezoneOffset(local)} (your local timezone)`,
     };
   }, [result]);
+
+  const handleDirChange = useCallback(
+    (nextDir: Dir) => {
+      if (nextDir === dir) return;
+      if (parsed) {
+        if (nextDir === "date") {
+          setValue(parsed.iso);
+        } else {
+          setValue(valueForResolution(parsed, reso));
+        }
+      }
+      setDir(nextDir);
+    },
+    [dir, parsed, reso],
+  );
+
+  const handleResoChange = useCallback(
+    (nextReso: Reso) => {
+      if (nextReso === reso) return;
+      if (parsed && dir === "unix") {
+        setValue(valueForResolution(parsed, nextReso));
+      }
+      setReso(nextReso);
+    },
+    [dir, parsed, reso],
+  );
+
+  const handleUseNow = useCallback(() => {
+    const now = Math.floor(Date.now() / 1000);
+    setCurrentTimeSec(now);
+    if (dir === "date") {
+      setValue(new Date(now * 1000).toISOString());
+    } else {
+      setValue(
+        reso === "ms"
+          ? String(now * 1000)
+          : reso === "us"
+            ? String(now * 1_000_000)
+            : reso === "ns"
+              ? String(BigInt(now) * 1_000_000_000n)
+              : String(now),
+      );
+    }
+  }, [dir, reso]);
 
   const errorMessage = result.ok ? null : result.error.message;
 
@@ -125,15 +223,11 @@ export function UnixTimestampTool() {
       <ToolHeader
         icon={Clock}
         title="Unix Timestamp Converter"
-        subtitle="Convert Unix timestamps (seconds & milliseconds) to human-readable dates locally."
+        subtitle="Convert Unix timestamps (seconds, milliseconds, microseconds, or nanoseconds) to human-readable dates locally."
         actions={
           <button
             type="button"
-            onClick={() => {
-              const now = Math.floor(Date.now() / 1000);
-              setValue(String(now));
-              setCurrentTimeSec(now);
-            }}
+            onClick={handleUseNow}
             className="flex h-[34px] cursor-pointer items-center gap-[7px] rounded-[8px] border border-outline bg-surface-low px-[12px] text-[13px] font-semibold text-on-surface transition-colors hover:bg-surface"
           >
             <Clock className="size-[15px] text-on-muted" />
@@ -177,7 +271,7 @@ export function UnixTimestampTool() {
             size="md"
             boxed
             value={dir}
-            onChange={(v) => setDir(v as Dir)}
+            onChange={(v) => handleDirChange(v as Dir)}
             options={[
               { value: "unix", label: "Unix → Date" },
               { value: "date", label: "Date → Unix" },
@@ -189,7 +283,7 @@ export function UnixTimestampTool() {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               aria-label={dir === "date" ? "ISO date string" : "Timestamp value"}
-              placeholder={RESO_PLACEHOLDER[reso]}
+              placeholder={dir === "date" ? "e.g. 2026-08-21T00:00:00Z" : RESO_PLACEHOLDER[reso]}
               spellCheck={false}
               className="w-full min-w-0 bg-transparent font-mono text-[16px] font-semibold text-on-surface outline-none placeholder:text-on-muted/60"
             />
@@ -202,7 +296,7 @@ export function UnixTimestampTool() {
               size="sm"
               boxed
               value={reso}
-              onChange={(v) => setReso(v as Reso)}
+              onChange={(v) => handleResoChange(v as Reso)}
               options={[
                 { value: "s", label: "seconds" },
                 { value: "ms", label: "ms" },
@@ -282,8 +376,8 @@ export function UnixTimestampTool() {
               <div className="flex items-start gap-2.5 rounded-[10px] border border-outline bg-surface-high p-3">
                 <TriangleAlert className="size-[14px] shrink-0 text-warning" />
                 <span className="text-[12px] leading-relaxed text-on-surface">
-                  32-bit timestamps overflow on January 19, 2038 (the Y2038 problem). This tool uses
-                  64-bit JavaScript numbers.
+                  32-bit timestamps overflow on January 19, 2038 (the Y2038 problem). Integer input
+                  is normalized with BigInt before conversion to millisecond precision.
                 </span>
               </div>
             </>

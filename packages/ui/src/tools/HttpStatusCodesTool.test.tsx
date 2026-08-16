@@ -59,4 +59,3 @@ describe("HttpStatusCodesTool", () => {
     expect(screen.getByRole("heading", { name: "Not Found" })).toBeDefined();
   });
 });
-

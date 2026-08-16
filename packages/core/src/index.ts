@@ -235,7 +235,12 @@ export {
   type MockDataRandomBytes,
   type MockDataRecord,
 } from "./tools/mock-data";
-export { parseUnixTimestamp, type UnixTimestamp } from "./tools/unix-timestamp";
+export {
+  parseUnixTimestamp,
+  type ParseUnixTimestampOptions,
+  type UnixTimestamp,
+  type UnixTimestampUnit,
+} from "./tools/unix-timestamp";
 export {
   CASE_CONVERTER_MAX_INPUT_CHARS,
   convertCase,
@@ -370,6 +375,13 @@ export {
   type SplitDelimiter,
   type SplitToNewlinesOptions,
 } from "./tools/split-to-newlines";
+export {
+  JOIN_LINES_MAX_INPUT_CHARS,
+  joinLines,
+  type JoinDelimiter,
+  type JoinDelimiter as JoinLinesDelimiter,
+  type JoinLinesOptions,
+} from "./tools/join-lines";
 export {
   NUMBER_BASE_MAX_INPUT_CHARS,
   convertNumberBase,

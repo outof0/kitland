@@ -437,7 +437,7 @@ export function JsonDiffTool({ capabilities = LOCAL_ONLY_CAPABILITIES }: JsonDif
       {/* Main Mode View */}
       {mode === "editor" ? (
         /* Edit Mode: 3-Column Split with Center Compare & Swap Rail */
-        <div className="flex min-h-0 min-w-0 flex-1 gap-3.5 max-lg:flex-col max-lg:overflow-y-auto">
+        <div className="tool-editor-stage flex min-h-0 min-w-0 flex-1 gap-3.5 overflow-hidden max-lg:flex-col max-lg:overflow-y-auto">
           {/* Left Card: Before JSON */}
           <JsonEditorCard
             label="Before JSON"
@@ -522,7 +522,7 @@ export function JsonDiffTool({ capabilities = LOCAL_ONLY_CAPABILITIES }: JsonDif
         </div>
       ) : (
         /* Compare View */
-        <div className="flex flex-col gap-3 flex-1 min-h-[440px]">
+        <div className="tool-editor-stage flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
           {/* Compare Toolbar */}
           <div className="h-[38px] flex items-center justify-between px-1 shrink-0">
             <div className="flex items-center gap-2.5 font-mono text-[11.5px]">

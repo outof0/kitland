@@ -6,7 +6,13 @@ const appRoot = fileURLToPath(new URL(".", import.meta.url));
 const coreSrc = fileURLToPath(new URL("../../packages/core/src", import.meta.url));
 const registryEntry = fileURLToPath(new URL("../../packages/tools/src/index.ts", import.meta.url));
 const toolUiEntry = fileURLToPath(new URL("../../packages/ui/src/index.ts", import.meta.url));
+const toolUiCodeEditor = fileURLToPath(
+  new URL("../../packages/ui/src/components/CodeEditor.tsx", import.meta.url),
+);
 const toolUiStyles = fileURLToPath(new URL("../../packages/ui/src/styles.css", import.meta.url));
+const toolUiCodeEditorStyles = fileURLToPath(
+  new URL("../../packages/ui/code-editor.css", import.meta.url),
+);
 const toolUiTheme = fileURLToPath(new URL("../../packages/ui/theme.css", import.meta.url));
 const toolUiWorkspace = fileURLToPath(new URL("../../packages/ui/workspace.css", import.meta.url));
 const toolUiTokens = fileURLToPath(new URL("../../packages/ui/tokens.css", import.meta.url));
@@ -55,12 +61,14 @@ export default defineConfig({
       { find: "@kitland/ui/tokens.css", replacement: toolUiTokens },
       { find: "@kitland/ui/sources.css", replacement: toolUiSources },
       { find: "@kitland/ui/styles.css", replacement: toolUiStyles },
+      { find: "@kitland/ui/code-editor.css", replacement: toolUiCodeEditorStyles },
       {
         find: "@kitland/ui/registry",
         replacement: fileURLToPath(
           new URL("../../packages/ui/src/tools/shared-registry-tools.tsx", import.meta.url),
         ),
       },
+      { find: "@kitland/ui/code-editor", replacement: toolUiCodeEditor },
       {
         find: /^@kitland\/ui\/tools\/(.*)$/,
         replacement: fileURLToPath(new URL("../../packages/ui/src/tools/$1", import.meta.url)),
@@ -87,6 +95,21 @@ export default defineConfig({
         chunkFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash][extname]",
         manualChunks(id) {
+          if (id.includes("@uiw/react-codemirror")) {
+            return "codemirror-react";
+          }
+          if (id.includes("@codemirror/lang-")) {
+            return "codemirror-languages";
+          }
+          if (id.includes("@codemirror/view")) return "codemirror-view";
+          if (id.includes("@codemirror/state")) return "codemirror-state";
+          if (id.includes("@codemirror/language")) return "codemirror-language";
+          if (id.includes("@codemirror/search")) return "codemirror-search";
+          if (id.includes("@codemirror/commands")) return "codemirror-commands";
+          if (id.includes("@codemirror/autocomplete")) return "codemirror-autocomplete";
+          if (id.includes("@codemirror/lint")) return "codemirror-lint";
+          if (id.includes("@lezer/")) return "codemirror-parser";
+          if (id.includes("@codemirror/")) return "codemirror-utils";
           if (
             id.includes("react-dom") ||
             id.includes("node_modules/react/") ||

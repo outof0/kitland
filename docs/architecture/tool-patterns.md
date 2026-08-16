@@ -1,6 +1,6 @@
 # Tool interaction pattern contracts
 
-**Status:** required product contract for the 64-tool rollout
+**Status:** required product contract for the 65-tool rollout
 **Scope:** web, browser extension, and VS Code host adaptations
 **Related:** [Tool UI design-system contract](./tool-ui-contract.md)
 
@@ -113,13 +113,13 @@ labels (Encode/Decode/Beautify) are never disguised Copy actions.
 
 ## Host adaptation
 
-| Concern           | Web                                                   | Browser extension                                            | VS Code                                                          |
-| ----------------- | ----------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Concern           | Web                                                    | Browser extension                                             | VS Code                                                          |
+| ----------------- | ------------------------------------------------------ | ------------------------------------------------------------- | ---------------------------------------------------------------- |
 | Discovery         | Static `/explore` registry and route per runnable tool | Searchable extension registry; lazy renderer per exposed tool | Quick Pick plus contributed commands where justified             |
-| Input             | Paste/upload inside the workspace                     | Paste/upload inside the popup; no page access by default     | Panel input or explicit editor selection                         |
-| Output            | Copy/download and reviewed fragment sharing           | Copy/download; no implicit tab/page access                   | Copy or one atomic editor edit with an undo stop                 |
-| Navigation        | URL route                                             | Hash route inside extension pages                            | Command id/tool id; panel lifecycle                              |
-| Security boundary | Strict static CSP and no payload persistence          | Explicit manifest capabilities; no remote code               | Nonced webview CSP, validated messages, bounded editor mutations |
+| Input             | Paste/upload inside the workspace                      | Paste/upload inside the popup; no page access by default      | Panel input or explicit editor selection                         |
+| Output            | Copy/download and reviewed fragment sharing            | Copy/download; no implicit tab/page access                    | Copy or one atomic editor edit with an undo stop                 |
+| Navigation        | URL route                                              | Hash route inside extension pages                             | Command id/tool id; panel lifecycle                              |
+| Security boundary | Strict static CSP and no payload persistence           | Explicit manifest capabilities; no remote code                | Nonced webview CSP, validated messages, bounded editor mutations |
 
 An unavailable host is declared `unsupported`; a missing renderer must never be
 inferred from availability on another host. A tool becomes `release-ready` only

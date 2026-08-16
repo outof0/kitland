@@ -171,6 +171,7 @@ const TOOL_RENDERER_LOADERS = {
     () => import("@kitland/ui/tools/SplitToNewlinesTool"),
     "SplitToNewlinesTool",
   ),
+  "join-lines": fromNamed(() => import("@kitland/ui/tools/JoinLinesTool"), "JoinLinesTool"),
   "json-to-typescript": fromNamed(
     () => import("@kitland/ui/tools/JsonToTypescriptTool"),
     "JsonToTypescriptTool",

@@ -353,6 +353,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "Split to Newlines",
     "Split comma, semicolon, whitespace, or custom-delimited text into one value per line.",
   ),
+  "join-lines": localTransformSeo(
+    "Join Lines",
+    "Join newline-separated lines into delimited text using comma, semicolon, space, pipe, or custom delimiters.",
+  ),
   "json-to-typescript": localTransformSeo(
     "JSON to TypeScript",
     "Infer a TypeScript type declaration from a JSON sample locally.",

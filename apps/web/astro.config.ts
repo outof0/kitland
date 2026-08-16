@@ -1,11 +1,8 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
-
-const rootDir = path.dirname(fileURLToPath(import.meta.url));
+import { workspaceAliases, workspacePackageNames } from "./workspace-aliases";
 
 /**
  * Static-first site shell: every public route is emitted as real HTML while
@@ -38,7 +35,6 @@ export default defineConfig({
         "connect-src 'self'",
         "font-src 'self' data:",
         "form-action 'self'",
-        "frame-ancestors 'none'",
         "frame-src 'none'",
         "img-src 'self' data:",
         "object-src 'none'",
@@ -49,22 +45,11 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
+      exclude: [...workspacePackageNames],
       include: [
         "qrcode",
         "lucide-react",
         "bcryptjs",
-        "@uiw/react-codemirror",
-        "@codemirror/lang-javascript",
-        "@codemirror/lang-json",
-        "@codemirror/lang-markdown",
-        "@codemirror/lang-sql",
-        "@codemirror/lang-xml",
-        "@codemirror/lang-yaml",
-        "@codemirror/language",
-        "@codemirror/search",
-        "@codemirror/state",
-        "@codemirror/view",
-        "@lezer/highlight",
         "class-variance-authority",
         "clsx",
         "tailwind-merge",
@@ -72,20 +57,21 @@ export default defineConfig({
       ],
     },
     resolve: {
-      alias: {
-        "@": path.resolve(rootDir, "src"),
-      },
+      alias: workspaceAliases,
     },
     server: {
       watch: {
-        ignored: ["**/node_modules/**", "**/dist/**", "**/.astro/**", "**/artifacts/**", "**/.hermes/**"],
+        ignored: [
+          "**/node_modules/**",
+          "**/dist/**",
+          "**/.astro/**",
+          "**/artifacts/**",
+          "**/.hermes/**",
+        ],
       },
       hmr: {
         overlay: true,
       },
     },
-  },
-  server: {
-    port: 5173,
   },
 });

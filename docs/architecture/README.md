@@ -26,4 +26,4 @@ Do not treat an implementation convenience as an ADR substitute.
 
 - [ADR 0001: Astro static delivery with React islands and Shadcn](../adr/0001-astro-react-islands-and-shadcn.md)
 - [ADR 0002: Keep MCP local-only and defer a hosted service](../adr/0002-local-mcp-boundary-and-hosted-deferral.md)
-- [ADR 0003: Release the complete 64-tool suite](../adr/0003-release-the-complete-tool-suite.md)
+- [ADR 0003: Release the complete 65-tool suite](../adr/0003-release-the-complete-tool-suite.md)

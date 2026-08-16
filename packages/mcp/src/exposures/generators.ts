@@ -23,6 +23,7 @@ import {
   buildAdvertisedOutputSchema,
   DEFAULT_MCP_LIMITS,
   DEFAULT_MCP_SAFETY,
+  NONDETERMINISTIC_MCP_SAFETY,
   type McpExposure,
 } from "../contracts.ts";
 import { createMcpError, type McpErrorPayload } from "../errors.ts";
@@ -91,7 +92,7 @@ export const kitlandUuidGenerateExposure: McpExposure<UuidGenerateInput, UuidGen
   outputSchema: buildAdvertisedOutputSchema(UUID_GENERATE_SUCCESS_SCHEMA),
   successSchema: UUID_GENERATE_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: (args: UuidGenerateInput): ToolResult<UuidGenerateOutput> => {
     const res = generateUuidV4(getRandomBytes);
     if (!res.ok) return res;
@@ -146,7 +147,7 @@ export const kitlandNanoidGenerateExposure: McpExposure<NanoidGenerateInput, Nan
     outputSchema: buildAdvertisedOutputSchema(NANOID_GENERATE_SUCCESS_SCHEMA),
     successSchema: NANOID_GENERATE_SUCCESS_SCHEMA,
     limits: DEFAULT_MCP_LIMITS,
-    safety: DEFAULT_MCP_SAFETY,
+    safety: NONDETERMINISTIC_MCP_SAFETY,
     invoke: (args: NanoidGenerateInput): ToolResult<NanoidGenerateOutput> => {
       const length = args.length ?? 21;
       const alphabet = args.alphabet ?? NANOID_DEFAULT_ALPHABET;
@@ -205,7 +206,7 @@ export const kitlandUlidGenerateExposure: McpExposure<UlidGenerateInput, UlidGen
   outputSchema: buildAdvertisedOutputSchema(ULID_GENERATE_SUCCESS_SCHEMA),
   successSchema: ULID_GENERATE_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: (args: UlidGenerateInput): ToolResult<UlidGenerateOutput> => {
     const timestamp = args.timestamp ?? Date.now();
     const res = generateUlid(timestamp, getRandomBytes);
@@ -267,7 +268,7 @@ export const kitlandObjectIdGenerateExposure: McpExposure<
   outputSchema: buildAdvertisedOutputSchema(OBJECTID_GENERATE_SUCCESS_SCHEMA),
   successSchema: OBJECTID_GENERATE_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: (args: ObjectIdGenerateInput): ToolResult<ObjectIdGenerateOutput> => {
     const ts = args.timestampSeconds ?? Math.floor(Date.now() / 1000);
     const counter = getRandomUint32() & 0xffffff;
@@ -343,7 +344,7 @@ export const kitlandMockDataGenerateExposure: McpExposure<
   outputSchema: buildAdvertisedOutputSchema(MOCK_DATA_GENERATE_SUCCESS_SCHEMA),
   successSchema: MOCK_DATA_GENERATE_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: (args: MockDataGenerateInput): ToolResult<MockDataGenerateOutput> => {
     const count = args.count ?? 5;
     const res = generateMockData(
@@ -538,7 +539,7 @@ export const kitlandRandomPortGenerateExposure: McpExposure<RandomPortInput, Ran
   outputSchema: buildAdvertisedOutputSchema(RANDOM_PORT_SUCCESS_SCHEMA),
   successSchema: RANDOM_PORT_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: (args: RandomPortInput): ToolResult<RandomPortResult> => {
     const range: PortRange = args.range ?? "dynamic";
     const protocol: PortProtocol = args.protocol ?? "tcp";
@@ -613,7 +614,7 @@ export const kitlandRandomNumberGenerateExposure: McpExposure<
   outputSchema: buildAdvertisedOutputSchema(RANDOM_NUMBER_SUCCESS_SCHEMA),
   successSchema: RANDOM_NUMBER_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
-  safety: DEFAULT_MCP_SAFETY,
+  safety: NONDETERMINISTIC_MCP_SAFETY,
   invoke: (args: RandomNumberInput): ToolResult<RandomNumberResult> => {
     return generateRandomNumbers(
       {

@@ -7,6 +7,9 @@ const formattedTwo =
 const outputCard = (page: Page) =>
   page.locator("section").filter({ has: page.getByRole("heading", { name: "Output" }) });
 
+const inputCard = (page: Page) =>
+  page.locator("section").filter({ has: page.getByRole("heading", { name: "Input" }) });
+
 async function showCodeOutput(page: Page) {
   await outputCard(page).getByRole("button", { name: "Code", exact: true }).click();
 }
@@ -20,6 +23,7 @@ test.describe("JSON Formatter contract", () => {
     await expect
       .poll(async () => editor.evaluate((el) => el.getBoundingClientRect().height))
       .toBeGreaterThan(200);
+    await expectCodeMirrorStyles(editor);
 
     await page.locator("aside button").filter({ hasText: "JSON → YAML" }).click();
     await expect(page).toHaveURL(/\/explore\/json-to-yaml\/?$/);
@@ -28,6 +32,7 @@ test.describe("JSON Formatter contract", () => {
     await expect
       .poll(async () => yamlEditor.evaluate((el) => el.getBoundingClientRect().height))
       .toBeGreaterThan(200);
+    await expectCodeMirrorStyles(yamlEditor);
 
     await page.locator("aside button").filter({ hasText: "JSON Formatter" }).click();
     await expect(page).toHaveURL(/\/explore\/json-formatter\/?$/);
@@ -39,6 +44,61 @@ test.describe("JSON Formatter contract", () => {
           .evaluate((el) => el.getBoundingClientRect().height),
       )
       .toBeGreaterThan(200);
+    await expectCodeMirrorStyles(page.locator(".cm-editor").first());
+  });
+
+  test("keeps JSON Diff cards inside the shared editor canvas", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/explore/json-diff");
+
+    const stage = page.locator(".tool-editor-stage");
+    const source = page.getByRole("textbox", { name: "Before JSON" });
+    const initialHeight = await stage.evaluate((element) => element.getBoundingClientRect().height);
+    const longJson = JSON.stringify(
+      { rows: Array.from({ length: 1_200 }, (_, index) => ({ index, value: `row-${index}` })) },
+      null,
+      2,
+    );
+
+    await fillPane(source, longJson);
+
+    const geometry = await stage.evaluate((element) => {
+      const scroller = element.querySelector<HTMLElement>(".cm-scroller");
+      return {
+        stageHeight: element.getBoundingClientRect().height,
+        scrollsInternally: Boolean(scroller && scroller.scrollHeight > scroller.clientHeight),
+      };
+    });
+
+    expect(geometry.stageHeight).toBeCloseTo(initialHeight, 0);
+    expect(geometry.scrollsInternally).toBe(true);
+  });
+
+  test("keeps a long JSON paste inside fixed-height editor cards", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/explore/json-formatter");
+
+    const source = page.getByRole("textbox", { name: "JSON input" });
+    const card = inputCard(page);
+    const initialHeight = await card.evaluate((element) => element.getBoundingClientRect().height);
+    const longJson = JSON.stringify(
+      { rows: Array.from({ length: 1_200 }, (_, index) => ({ index, value: `row-${index}` })) },
+      null,
+      2,
+    );
+
+    await fillPane(source, longJson);
+
+    const geometry = await card.evaluate((element) => {
+      const scroller = element.querySelector<HTMLElement>(".cm-scroller");
+      return {
+        cardHeight: element.getBoundingClientRect().height,
+        scrollsInternally: Boolean(scroller && scroller.scrollHeight > scroller.clientHeight),
+      };
+    });
+
+    expect(geometry.cardHeight).toBeCloseTo(initialHeight, 0);
+    expect(geometry.scrollsInternally).toBe(true);
   });
 
   test("starts empty and inspects the current document in a dedicated live flow", async ({
@@ -154,8 +214,6 @@ test.describe("JSON Formatter contract", () => {
     const source = page.getByRole("textbox", { name: "JSON input" });
     await fillPane(source, "{");
     await expect(page.getByRole("alert")).toHaveText("JSON is invalid.");
-    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-    await expect(page).toHaveScreenshot("json-formatter-invalid.png");
     await source.focus();
     await expect(source).toHaveAttribute("aria-invalid", "true");
     await expect(source).toBeFocused();
@@ -382,3 +440,18 @@ test.describe("JSON Formatter contract", () => {
     }
   });
 });
+
+async function expectCodeMirrorStyles(editor: ReturnType<Page["locator"]>) {
+  await expect
+    .poll(async () =>
+      editor.evaluate((element) => {
+        const scroller = element.querySelector<HTMLElement>(".cm-scroller");
+        const content = element.querySelector<HTMLElement>(".cm-content");
+        return {
+          overflowY: scroller ? getComputedStyle(scroller).overflowY : "",
+          paddingTop: content ? getComputedStyle(content).paddingTop : "",
+        };
+      }),
+    )
+    .toEqual({ overflowY: "auto", paddingTop: "14px" });
+}

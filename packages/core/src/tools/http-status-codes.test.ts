@@ -72,4 +72,3 @@ describe("HTTP statuses", () => {
     expect(express204).toContain("res.status(204).end()");
   });
 });
-

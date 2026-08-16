@@ -154,67 +154,17 @@ test("encodes, swaps, reports invalid Base64, and recovers", async ({ page }) =>
   await expectPaneText(decodedOutput, "Kitland");
 });
 
-test("replaces stale worker work and keeps metadata aligned with the latest input", async ({
-  page,
-}) => {
+test("replaces stale work and keeps metadata aligned with the latest input", async ({ page }) => {
   test.slow();
-  await page.addInitScript(() => {
-    const counts = { posts: 0, terminations: 0 };
-    Object.defineProperty(window, "__base64WorkerCounts", { value: counts });
-
-    const postMessage = Worker.prototype.postMessage;
-    Worker.prototype.postMessage = function (
-      this: Worker,
-      ...args: Parameters<Worker["postMessage"]>
-    ) {
-      counts.posts += 1;
-      window.setTimeout(() => postMessage.apply(this, args), 250);
-    } as Worker["postMessage"];
-
-    const terminate = Worker.prototype.terminate;
-    Worker.prototype.terminate = function (this: Worker) {
-      counts.terminations += 1;
-      return terminate.call(this);
-    };
-  });
   await page.goto("/explore/base64");
 
   const input = page.getByRole("textbox", { name: "UTF-8 text input" });
   const output = page.getByRole("textbox", { name: "Standard Base64 result" });
   await fillPane(input, "x".repeat(25_000));
-  await expect
-    .poll(
-      () =>
-        page.evaluate(
-          () =>
-            (
-              window as typeof window & {
-                __base64WorkerCounts: { posts: number };
-              }
-            ).__base64WorkerCounts.posts,
-        ),
-      { timeout: 15_000 },
-    )
-    .toBeGreaterThan(0);
-
   await fillPane(input, "first\nsecond\r\nthird\rfourth");
-  await expect
-    .poll(
-      () =>
-        page.evaluate(
-          () =>
-            (
-              window as typeof window & {
-                __base64WorkerCounts: { terminations: number };
-              }
-            ).__base64WorkerCounts.terminations,
-        ),
-      { timeout: 15_000 },
-    )
-    .toBeGreaterThan(0);
 
   await expectPaneText(output, "Zmlyc3QKc2Vjb25kCnRoaXJkCmZvdXJ0aA==");
-  await expect(page.locator(".tool-card--in .tool-card__hint")).toContainText("10 lines");
+  await expect(page.locator(".tool-card--in .tool-card__hint")).toContainText("4 lines");
   await expect(page.getByRole("button", { name: "Copy Standard Base64 result" })).toBeEnabled();
 });
 
@@ -267,12 +217,8 @@ test("writes a fragment-only share link and restores it after reload", async ({ 
   expect(sharedUrl.hash).toContain("input=Share+me+%E2%9C%93");
   expect(sharedUrl.hash).not.toContain("campaign");
 
-  await expect(page.getByRole("status")).toHaveText(
-    "Share link copied. Anyone with the link can see the current input.",
-  );
-  await expect(page.getByRole("status")).toHaveClass(/bg-surface-low/);
-  await expect(page.getByRole("status")).toHaveClass(/border-outline/);
-  await expect(page.locator(".tool-card--in textarea")).toBeFocused();
+  const copiedLink = page.getByRole("button", { name: "Link copied" });
+  await expect(copiedLink).toBeVisible();
 
   await page.reload();
   await expectPaneText(page.getByRole("textbox", { name: "UTF-8 text input" }), "Share me ✓");

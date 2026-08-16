@@ -106,7 +106,10 @@ async function openTool(extensionUri: vscode.Uri, requestedToolId?: unknown): Pr
     }
   }
 
-  ToolPanel.show(extensionUri, adapter, initialInput, true);
+  // Command/menu entry points open the editor-area workbench with its full
+  // in-app navigation. The Activity Bar view already supplies VS Code's own
+  // navigation and requests a compact shell through its view provider.
+  ToolPanel.show(extensionUri, adapter, initialInput, false);
 }
 
 async function chooseAdapter(requestedToolId?: unknown): Promise<ToolAdapter | undefined> {
