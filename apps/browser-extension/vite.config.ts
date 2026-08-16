@@ -36,6 +36,14 @@ export default defineConfig({
   base: "./",
   publicDir: fileURLToPath(new URL("./public", import.meta.url)),
   plugins: [tailwindcss()],
+  server: {
+    watch: {
+      ignored: ["**/node_modules/**", "**/dist/**", "**/artifacts/**", "**/.hermes/**"],
+    },
+    hmr: {
+      overlay: true,
+    },
+  },
   resolve: {
     alias: [
       // Deep imports first so workers can pull focused core modules.
@@ -62,6 +70,9 @@ export default defineConfig({
       { find: "@fontsource-variable/manrope", replacement: manropeDir },
       { find: "@fontsource-variable/jetbrains-mono", replacement: jetbrainsDir },
     ],
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "qrcode", "bcryptjs", "lucide-react"],
   },
   build: {
     outDir: fileURLToPath(new URL("./dist", import.meta.url)),

@@ -79,5 +79,11 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    watch: {
+      ignored: ["**/node_modules/**", "**/dist/**", "**/.astro/**", "**/artifacts/**", "**/.hermes/**"],
+    },
+    hmr: {
+      overlay: true,
+    },
   },
 });
