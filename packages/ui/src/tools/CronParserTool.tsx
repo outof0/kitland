@@ -58,7 +58,7 @@ export function CronParserTool() {
       )}
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-        <FormPanel width={280}>
+        <FormPanel width={340}>
           <FieldLabel>Cron Expression</FieldLabel>
           <div className="flex h-[44px] items-center gap-2 rounded-[8px] bg-surface px-[14px]">
             <ValueInput
@@ -130,10 +130,6 @@ export function CronParserTool() {
                 copied={isCopied("cron")}
                 copyLabel="Schedule Description"
               />
-              <div className="flex items-center gap-1.5 rounded-full bg-success-soft px-3 py-1.5">
-                <span className="size-[7px] rounded-full bg-success" />
-                <span className="text-[12px] font-semibold text-success">Valid</span>
-              </div>
               <div className="flex items-start gap-2.5 rounded-[10px] bg-bg-elevated p-[14px]">
                 <span aria-hidden className="text-[15px] leading-none text-primary">
                   •
