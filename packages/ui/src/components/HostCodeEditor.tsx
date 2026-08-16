@@ -14,7 +14,7 @@ export type HostCodeEditorProps = {
   readonly ariaLabel?: string | undefined;
   readonly ariaDescribedBy?: string | undefined;
   readonly ariaInvalid?: boolean | undefined;
-  readonly indentSize?: 2 | 4 | undefined;
+  readonly indentSize?: 2 | 4 | "tab" | undefined;
   readonly onSubmit?: (() => void) | undefined;
   readonly onFocus?: (() => void) | undefined;
   readonly onBlur?: (() => void) | undefined;

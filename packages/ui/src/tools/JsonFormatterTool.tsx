@@ -34,9 +34,9 @@ export type JsonFormatterToolProps = {
   readonly initialInput?: string;
 };
 
-function tryFormatJson(source: string, indent: 2 | 4): string | null {
+function tryFormatJson(source: string, indent: 2 | 4 | "tab"): string | null {
   try {
-    return JSON.stringify(JSON.parse(source), null, indent);
+    return JSON.stringify(JSON.parse(source), null, indent === "tab" ? "\t" : indent);
   } catch {
     return null;
   }
@@ -66,7 +66,7 @@ export function JsonFormatterTool({
   const outputEditorFocusedRef = useRef(false);
   const feedbackTimer = useRef<number | undefined>(undefined);
   const [mode, setMode] = useState<JsonFormatMode>("beautify");
-  const [indent, setIndent] = useState<2 | 4>(2);
+  const [indent, setIndent] = useState<2 | 4 | "tab">(2);
   const [inputView, setInputView] = useState<"code" | "tree">("code");
   const [outputView, setOutputView] = useState<"code" | "tree">("code");
   const [feedback, setFeedback] = useState<Feedback>(null);
@@ -399,7 +399,7 @@ export function JsonFormatterTool({
   );
 
   const changeIndent = useCallback(
-    (next: 2 | 4) => {
+    (next: 2 | 4 | "tab") => {
       beginChange();
       setIndent(next);
     },

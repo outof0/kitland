@@ -14,7 +14,7 @@ Everyday developer tools, in one place — local-first, open source, no account.
 | ----------- | --------------------------------- |
 | **Author**  | OutOf0 \<hello.outof0@gmail.com\> |
 | **License** | MIT                               |
-| **Version** | 0.1.0                             |
+| **Version** | 0.1.1                             |
 
 ## Layout
 

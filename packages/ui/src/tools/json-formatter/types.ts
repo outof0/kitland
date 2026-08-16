@@ -19,6 +19,6 @@ export type JsonFormatterState =
 
 export type JsonFormatterHook = (
   source: string,
-  indent: 2 | 4,
+  indent: 2 | 4 | "tab",
   mode?: JsonFormatMode,
 ) => JsonFormatterState;

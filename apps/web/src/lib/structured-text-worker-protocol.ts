@@ -22,17 +22,17 @@ export type StructuredTextTransform =
   | {
       readonly tool: "beautify-minify";
       readonly mode: BeautifyMinifyMode;
-      readonly indent: 2 | 4;
+      readonly indent: 2 | 4 | "tab";
       readonly language?: BeautifyMinifyLanguage;
     }
   | { readonly tool: "json-to-yaml"; readonly indent: 2 | 4 }
-  | { readonly tool: "yaml-to-json"; readonly indent: 2 | 4 }
+  | { readonly tool: "yaml-to-json"; readonly indent: 2 | 4 | "tab" }
   | { readonly tool: "json-to-csv"; readonly escapeFormulae: boolean }
   | { readonly tool: "json-to-toml" }
-  | { readonly tool: "xml-formatter"; readonly indent: 2 | 4 }
+  | { readonly tool: "xml-formatter"; readonly indent: 2 | 4 | "tab" }
   | {
       readonly tool: "sql-formatter";
-      readonly indent: 2 | 4;
+      readonly indent: 2 | 4 | "tab";
       readonly keywordCase: "upper" | "lower";
     };
 
@@ -77,17 +77,21 @@ export function parseStructuredTextTransformKey(
   const [tool, first, second, third, ...rest] = value.split(":");
   if (rest.length > 0) return undefined;
   const firstIndent = parseIndent(first);
+  const firstSpaceIndent = parseSpaceIndent(first);
   const secondIndent = parseIndent(second);
   if (tool === "beautify-minify" && isJsonFormatMode(first) && secondIndent !== undefined) {
     const lang = (third as BeautifyMinifyLanguage) || "auto";
     return { tool, mode: first, indent: secondIndent, language: lang };
   }
   if (
-    (tool === "json-to-yaml" || tool === "yaml-to-json" || tool === "xml-formatter") &&
+    (tool === "yaml-to-json" || tool === "xml-formatter") &&
     firstIndent !== undefined &&
     second === undefined
   ) {
     return { tool, indent: firstIndent };
+  }
+  if (tool === "json-to-yaml" && firstSpaceIndent !== undefined && second === undefined) {
+    return { tool, indent: firstSpaceIndent };
   }
   if (tool === "json-to-csv" && (first === "true" || first === "false") && second === undefined) {
     return { tool, escapeFormulae: first === "true" };
@@ -159,7 +163,7 @@ export function isStructuredTextWorkerRequest(
       return (
         isExactRecord(value, ["type", "id", "tool", "source", "indent"]) &&
         isBoundedString(value.source, JSON_TO_YAML_MAX_INPUT_CHARS) &&
-        isIndent(value.indent)
+        isSpaceIndent(value.indent)
       );
     case "yaml-to-json":
       return (
@@ -245,14 +249,24 @@ function isBoundedString(value: unknown, maximum: number, allowEmpty = true): va
   return typeof value === "string" && value.length <= maximum && (allowEmpty || value.length > 0);
 }
 
-function isIndent(value: unknown): value is 2 | 4 {
+function isIndent(value: unknown): value is 2 | 4 | "tab" {
+  return value === 2 || value === 4 || value === "tab";
+}
+
+function isSpaceIndent(value: unknown): value is 2 | 4 {
   return value === 2 || value === 4;
 }
 
-function parseIndent(value: string | undefined): 2 | 4 | undefined {
+function parseIndent(value: string | undefined): 2 | 4 | "tab" | undefined {
   if (value === "2") return 2;
   if (value === "4") return 4;
+  if (value === "tab") return "tab";
   return undefined;
+}
+
+function parseSpaceIndent(value: string | undefined): 2 | 4 | undefined {
+  const indent = parseIndent(value);
+  return indent === 2 || indent === 4 ? indent : undefined;
 }
 
 function isJsonFormatMode(value: unknown): value is JsonFormatMode {

@@ -20,6 +20,13 @@ describe("jsonToTypescript", () => {
     expect(result.value).toContain("    user: {");
     expect(result.value).toContain("        id: number;");
   });
+  it("honors tab indent", () => {
+    const result = jsonToTypescript('{"user":{"id":1}}', "Root", "tab");
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain("\tuser: {");
+    expect(result.value).toContain("\t\tid: number;");
+  });
   it("rejects an invalid indent", () => {
     const result = jsonToTypescript("{}", "Root", 3 as 2 | 4);
     expect(result).toMatchObject({ ok: false, error: { code: "INVALID_INDENT" } });

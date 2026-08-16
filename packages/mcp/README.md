@@ -19,7 +19,7 @@ To configure Kitland MCP in your AI client, pin the exact version:
   "mcpServers": {
     "kitland": {
       "command": "npx",
-      "args": ["-y", "@kitland/mcp@0.1.0"]
+      "args": ["-y", "@kitland/mcp@0.1.1"]
     }
   }
 }
@@ -34,7 +34,7 @@ To configure Kitland MCP in your AI client, pin the exact version:
 
 ## Exposed operations
 
-At v0.1.0, `tools/list` exposes 80 bounded local operations for the canonical
+At v0.1.1, `tools/list` exposes 80 bounded local operations for the canonical
 65-tool Kitland registry. Most operations are deterministic transforms; UUID,
 token, password, key, random-value, and time-relative operations explicitly
 produce fresh values. Operations are discovered from the running server so

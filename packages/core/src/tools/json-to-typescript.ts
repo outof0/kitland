@@ -6,14 +6,15 @@ export const JSON_TO_TYPESCRIPT_MAX_DEPTH = 32;
 export function jsonToTypescript(
   source: string,
   typeName = "Root",
-  indent: 2 | 4 = 2,
+  indent: 2 | 4 | "tab" = 2,
 ): ToolResult<string> {
   if (source.length > JSON_TO_TYPESCRIPT_MAX_INPUT_CHARS)
     return err("INPUT_TOO_LARGE", "JSON input exceeds the size limit.");
   if (!source.trim()) return err("EMPTY_INPUT", "Enter a JSON value.");
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(typeName))
     return err("INVALID_TYPE_NAME", "Type name must be a simple identifier.");
-  if (indent !== 2 && indent !== 4) return err("INVALID_INDENT", "Indent must be 2 or 4 spaces.");
+  if (indent !== 2 && indent !== 4 && indent !== "tab")
+    return err("INVALID_INDENT", "Indent must be 2 or 4 spaces, or tab.");
   let value: unknown;
   try {
     value = JSON.parse(source);
@@ -29,7 +30,7 @@ export function jsonToTypescript(
   }
 }
 
-function emitType(value: unknown, depth: number, indent: 2 | 4): string {
+function emitType(value: unknown, depth: number, indent: 2 | 4 | "tab"): string {
   if (depth > JSON_TO_TYPESCRIPT_MAX_DEPTH)
     throw new Error("Nesting exceeds the TypeScript depth limit.");
   if (value === null) return "null";
@@ -44,12 +45,13 @@ function emitType(value: unknown, depth: number, indent: 2 | 4): string {
   if (typeof value === "object") {
     const entries = Object.entries(value as Record<string, unknown>);
     if (entries.length === 0) return "Record<string, never>";
-    const pad = " ".repeat((depth + 1) * indent);
+    const indentStr = indent === "tab" ? "\t" : " ".repeat(indent);
+    const pad = indentStr.repeat(depth + 1);
     const lines = entries.map(([k, v]) => {
       const key = /^[A-Za-z_][A-Za-z0-9_]*$/.test(k) ? k : JSON.stringify(k);
       return `${pad}${key}: ${emitType(v, depth + 1, indent)};`;
     });
-    return `{\n${lines.join("\n")}\n${" ".repeat(depth * indent)}}`;
+    return `{\n${lines.join("\n")}\n${indentStr.repeat(depth)}}`;
   }
   throw new Error("Unsupported JSON value.");
 }

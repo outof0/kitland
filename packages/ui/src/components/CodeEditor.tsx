@@ -58,7 +58,7 @@ export type CodeEditorProps = {
   placeholder?: string | undefined;
   className?: string | undefined;
   indentWithTab?: boolean | undefined;
-  indentSize?: 2 | 4 | undefined;
+  indentSize?: 2 | 4 | "tab" | undefined;
   lineNumbers?: boolean | undefined;
   foldGutter?: boolean | undefined;
   onFocus?: (() => void) | undefined;

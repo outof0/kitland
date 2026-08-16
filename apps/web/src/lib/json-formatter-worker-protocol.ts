@@ -15,7 +15,7 @@ export type JsonFormatterWorkerRequest = {
   type: "inspect";
   id: number;
   source: string;
-  indent: 2 | 4;
+  indent: 2 | 4 | "tab";
   mode: JsonFormatMode;
 };
 
@@ -32,7 +32,7 @@ export function isJsonFormatterWorkerRequest(value: unknown): value is JsonForma
     record.type === "inspect" &&
     isRequestId(record.id) &&
     isBoundedString(record.source, JSON_FORMATTER_MAX_INPUT_CHARS) &&
-    (record.indent === 2 || record.indent === 4) &&
+    (record.indent === 2 || record.indent === 4 || record.indent === "tab") &&
     (record.mode === "beautify" || record.mode === "minify"),
   );
 }

@@ -36,7 +36,7 @@ export type CodeEditorProps = {
   placeholder?: string | undefined;
   className?: string | undefined;
   indentWithTab?: boolean | undefined;
-  indentSize?: 2 | 4 | undefined;
+  indentSize?: 2 | 4 | "tab" | undefined;
   lineNumbers?: boolean | undefined;
   foldGutter?: boolean | undefined;
   onFocus?: (() => void) | undefined;
@@ -177,7 +177,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       syntaxHighlighting(kitlandHighlight),
       scrollableRegionFocusable,
       attachViewToDOM,
-      EditorState.tabSize.of(indentSize),
+      EditorState.tabSize.of(indentSize === "tab" ? 4 : indentSize),
       search({
         top: true,
         createPanel: createKitlandSearchPanel,

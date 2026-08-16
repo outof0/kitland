@@ -14,6 +14,12 @@ describe("jsonToJsConst", () => {
       value: 'const value = {\n    "a": {\n        "b": 2\n    }\n};\n',
     });
   });
+  it("honors a tab indent", () => {
+    expect(jsonToJsConst('{"a":{"b":2}}', "value", "tab")).toEqual({
+      ok: true,
+      value: 'const value = {\n\t"a": {\n\t\t"b": 2\n\t}\n};\n',
+    });
+  });
   it("rejects an invalid indent", () => {
     const result = jsonToJsConst("{}", "value", 3 as 2 | 4);
     expect(result).toMatchObject({ ok: false, error: { code: "INVALID_INDENT" } });

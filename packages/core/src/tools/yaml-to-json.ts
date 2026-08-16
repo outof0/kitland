@@ -7,10 +7,10 @@ export {
 };
 
 /** Convert a safe YAML subset document to readable JSON. */
-export function yamlToJson(source: string, indent: 2 | 4 = 2): ToolResult<string> {
+export function yamlToJson(source: string, indent: 2 | 4 | "tab" = 2): ToolResult<string> {
   const parsed = parseYaml(source);
   if (!parsed.ok) return parsed;
-  const output = JSON.stringify(parsed.value, null, indent);
+  const output = JSON.stringify(parsed.value, null, indent === "tab" ? "\t" : indent);
   if (output.length > YAML_CODEC_MAX_OUTPUT_CHARS) {
     return err(
       "OUTPUT_TOO_LARGE",

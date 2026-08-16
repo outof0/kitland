@@ -77,7 +77,7 @@ store surfaces. It mirrors:
 ```bash
 # Local: bump version in all manifests, commit, tag, push
 # package.json, packages/mcp/package.json, apps/browser-extension/package.json, apps/vscode-extension/package.json share one version
-git tag v0.1.0 && git push origin v0.1.0
+git tag v0.1.1 && git push origin v0.1.1
 # or manual dispatch from GitHub Actions with skip toggles
 ```
 

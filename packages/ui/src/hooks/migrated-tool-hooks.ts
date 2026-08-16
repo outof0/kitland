@@ -59,7 +59,7 @@ export function useJsonEscape(input: string, mode: JsonEscapeMode): DeferredText
 
 export function useSqlFormatter(
   source: string,
-  indent: 2 | 4,
+  indent: 2 | 4 | "tab",
   keywordCase: "upper" | "lower",
 ): DeferredTextTransformState {
   const transform = useCallback(
@@ -69,7 +69,7 @@ export function useSqlFormatter(
   return useDeferredTextTransform(source, `${indent}:${keywordCase}`, transform);
 }
 
-export function useXmlFormatter(source: string, indent: 2 | 4): DeferredTextTransformState {
+export function useXmlFormatter(source: string, indent: 2 | 4 | "tab"): DeferredTextTransformState {
   const transform = useCallback(
     (value: string) => {
       const result = formatXml(value, indent);
@@ -85,7 +85,7 @@ export function useJsonToYaml(source: string, indent: 2 | 4): DeferredTextTransf
   return useDeferredTextTransform(source, String(indent), transform);
 }
 
-export function useYamlToJson(source: string, indent: 2 | 4): DeferredTextTransformState {
+export function useYamlToJson(source: string, indent: 2 | 4 | "tab"): DeferredTextTransformState {
   const transform = useCallback((value: string) => yamlToJson(value, indent), [indent]);
   return useDeferredTextTransform(source, String(indent), transform);
 }

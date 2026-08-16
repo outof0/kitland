@@ -13,7 +13,7 @@ export class ToolPanel implements vscode.Disposable {
     extensionUri: vscode.Uri,
     adapter: ToolAdapter,
     initialInput?: string,
-    collapseSidebar = false,
+    collapseSidebar = true,
   ): void {
     if (ToolPanel.current) {
       ToolPanel.current.panel.reveal(vscode.ViewColumn.Active, false);
@@ -57,7 +57,7 @@ export class ToolPanel implements vscode.Disposable {
     extensionUri: vscode.Uri,
     adapter: ToolAdapter,
     initialInput: string,
-    collapseSidebar = false,
+    collapseSidebar = true,
   ) {
     this.adapter = adapter;
     this.initialInput = initialInput;

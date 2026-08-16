@@ -2,7 +2,7 @@ import { isWebAvailableToolSlug, listWebAvailableTools } from "@/lib/release-sco
 import { capabilitiesForWebTool } from "@/lib/tool-capabilities";
 import { dispatchToolModeNavigation } from "@/lib/tool-mode-navigation";
 import type { AvailableToolSlug } from "@kitland/tools";
-import { lazy, type ComponentType, type LazyExoticComponent } from "react";
+import { lazy, useMemo, type ComponentType, type LazyExoticComponent } from "react";
 
 type ToolRendererModule = { readonly default: ComponentType };
 type ToolRendererLoader = () => Promise<ToolRendererModule>;
@@ -71,13 +71,23 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
       import("@kitland/ui/tools/BeautifyMinifyTool"),
       import("@/hooks/useStructuredTextTransform"),
     ]);
+    const useWebBeautifyMinify = (
+      source: string,
+      mode: "beautify" | "minify",
+      indent: 2 | 4 | "tab",
+      language: "auto" | "json" | "html" | "css" | "javascript" | "sql" | "xml",
+    ) => {
+      const transform = useMemo(
+        () => ({ tool: "beautify-minify" as const, mode, indent, language }),
+        [mode, indent, language],
+      );
+      return useStructuredTextTransform(transform, source);
+    };
     return {
       default: () => (
         <BeautifyMinifyTool
           capabilities={capabilitiesForWebTool("beautify-minify")}
-          useTransform={(source, mode, indent, language) =>
-            useStructuredTextTransform({ tool: "beautify-minify", mode, indent, language }, source)
-          }
+          useTransform={useWebBeautifyMinify}
         />
       ),
     };

@@ -70,7 +70,7 @@ const TEXT_ONLY_SUCCESS_SCHEMA = {
 type BeautifyCodeInput = {
   readonly input: string;
   readonly language?: "auto" | "json" | "javascript" | "html" | "xml" | "css" | "sql";
-  readonly indent?: 2 | 4;
+  readonly indent?: 2 | 4 | "tab";
 };
 
 type MinifyCodeInput = {
@@ -95,9 +95,9 @@ const BEAUTIFY_CODE_INPUT_SCHEMA = {
       description: "Code language (default 'auto').",
     },
     indent: {
-      type: "integer",
-      enum: [2, 4],
-      description: "Indentation spaces (2 or 4, default 2).",
+      type: ["integer", "string"],
+      enum: [2, 4, "tab"],
+      description: "Indentation spaces (2 or 4) or 'tab' (default 2).",
     },
   },
 } as const;
@@ -245,7 +245,7 @@ export const kitlandJsonDiffExposure: McpExposure<JsonDiffInput, JsonDiffResult>
 
 type JsonInspectInput = {
   readonly input: string;
-  readonly indent?: 2 | 4;
+  readonly indent?: 2 | 4 | "tab";
   readonly mode?: "beautify" | "minify";
 };
 
@@ -255,7 +255,11 @@ const JSON_INSPECT_INPUT_SCHEMA = {
   required: ["input"],
   properties: {
     input: { type: "string", description: "JSON string to inspect." },
-    indent: { type: "integer", enum: [2, 4], description: "Indent spaces (default 2)." },
+    indent: {
+      type: ["integer", "string"],
+      enum: [2, 4, "tab"],
+      description: "Indent spaces (2 or 4) or 'tab' (default 2).",
+    },
     mode: { type: "string", enum: ["beautify", "minify"], description: "Formatting mode." },
   },
 } as const;
@@ -305,7 +309,7 @@ export const kitlandJsonInspectExposure: McpExposure<JsonInspectInput, JsonInspe
   limits: DEFAULT_MCP_LIMITS,
   safety: DEFAULT_MCP_SAFETY,
   invoke: (args: JsonInspectInput): ToolResult<JsonInspection> => {
-    const indent: 2 | 4 = args.indent ?? 2;
+    const indent: 2 | 4 | "tab" = args.indent ?? 2;
     const mode: JsonFormatMode = args.mode ?? "beautify";
     return inspectJson(args.input, indent, mode);
   },
@@ -379,7 +383,7 @@ export const kitlandJsonToYamlExposure: McpExposure<TextOnlyInput, TextOnlyOutpu
 
 type YamlToJsonInput = {
   readonly input: string;
-  readonly indent?: 2 | 4;
+  readonly indent?: 2 | 4 | "tab";
 };
 
 const YAML_TO_JSON_INPUT_SCHEMA = {
@@ -388,7 +392,11 @@ const YAML_TO_JSON_INPUT_SCHEMA = {
   required: ["input"],
   properties: {
     input: { type: "string", description: "YAML text to convert to JSON." },
-    indent: { type: "integer", enum: [2, 4], description: "JSON indentation spaces." },
+    indent: {
+      type: ["integer", "string"],
+      enum: [2, 4, "tab"],
+      description: "JSON indentation spaces (2 or 4) or 'tab' (default 2).",
+    },
   },
 } as const;
 
@@ -405,7 +413,7 @@ export const kitlandYamlToJsonExposure: McpExposure<YamlToJsonInput, TextOnlyOut
   limits: DEFAULT_MCP_LIMITS,
   safety: DEFAULT_MCP_SAFETY,
   invoke: (args: YamlToJsonInput): ToolResult<TextOnlyOutput> => {
-    const indent: 2 | 4 = args.indent ?? 2;
+    const indent: 2 | 4 | "tab" = args.indent ?? 2;
     const res = yamlToJson(args.input, indent);
     if (!res.ok) return res;
     return ok({ output: res.value });
@@ -485,7 +493,7 @@ export const kitlandJsonToTomlExposure: McpExposure<TextOnlyInput, TextOnlyOutpu
 
 type XmlFormatInput = {
   readonly input: string;
-  readonly indent?: 2 | 4;
+  readonly indent?: 2 | 4 | "tab";
 };
 
 const XML_FORMAT_INPUT_SCHEMA = {
@@ -494,7 +502,11 @@ const XML_FORMAT_INPUT_SCHEMA = {
   required: ["input"],
   properties: {
     input: { type: "string", description: "XML string to format." },
-    indent: { type: "integer", enum: [2, 4], description: "Indent spaces (default 2)." },
+    indent: {
+      type: ["integer", "string"],
+      enum: [2, 4, "tab"],
+      description: "Indent spaces (2 or 4) or 'tab' (default 2).",
+    },
   },
 } as const;
 
@@ -522,7 +534,7 @@ export const kitlandXmlFormatExposure: McpExposure<XmlFormatInput, XmlFormatResu
   limits: DEFAULT_MCP_LIMITS,
   safety: DEFAULT_MCP_SAFETY,
   invoke: (args: XmlFormatInput): ToolResult<XmlFormatResult> => {
-    const indent: 2 | 4 = args.indent ?? 2;
+    const indent: 2 | 4 | "tab" = args.indent ?? 2;
     return formatXml(args.input, indent);
   },
   mapCoreError: mapError,
@@ -534,7 +546,7 @@ export const kitlandXmlFormatExposure: McpExposure<XmlFormatInput, XmlFormatResu
 
 type SqlFormatInput = {
   readonly input: string;
-  readonly indent?: 2 | 4;
+  readonly indent?: 2 | 4 | "tab";
   readonly keywordCase?: "upper" | "lower";
 };
 
@@ -544,7 +556,11 @@ const SQL_FORMAT_INPUT_SCHEMA = {
   required: ["input"],
   properties: {
     input: { type: "string", description: "SQL query to format." },
-    indent: { type: "integer", enum: [2, 4], description: "Indent spaces (default 2)." },
+    indent: {
+      type: ["integer", "string"],
+      enum: [2, 4, "tab"],
+      description: "Indent spaces (2 or 4) or 'tab' (default 2).",
+    },
     keywordCase: {
       type: "string",
       enum: ["upper", "lower"],
@@ -617,7 +633,7 @@ export const kitlandMarkdownRenderExposure: McpExposure<TextOnlyInput, MarkdownP
 type JsonToTypescriptInput = {
   readonly input: string;
   readonly typeName?: string;
-  readonly indent?: 2 | 4;
+  readonly indent?: 2 | 4 | "tab";
 };
 
 const JSON_TO_TYPESCRIPT_INPUT_SCHEMA = {
@@ -627,7 +643,11 @@ const JSON_TO_TYPESCRIPT_INPUT_SCHEMA = {
   properties: {
     input: { type: "string", description: "JSON string to generate TypeScript types from." },
     typeName: { type: "string", description: "Root type identifier (default 'Root')." },
-    indent: { type: "integer", enum: [2, 4], description: "Indent spaces (default 2)." },
+    indent: {
+      type: ["integer", "string"],
+      enum: [2, 4, "tab"],
+      description: "Indent spaces (2 or 4) or 'tab' (default 2).",
+    },
   },
 } as const;
 
@@ -658,7 +678,7 @@ export const kitlandJsonToTypescriptExposure: McpExposure<JsonToTypescriptInput,
 type JsonToJsConstInput = {
   readonly input: string;
   readonly name?: string;
-  readonly indent?: 2 | 4;
+  readonly indent?: 2 | 4 | "tab";
 };
 
 const JSON_TO_JS_CONST_INPUT_SCHEMA = {
@@ -668,7 +688,11 @@ const JSON_TO_JS_CONST_INPUT_SCHEMA = {
   properties: {
     input: { type: "string", description: "JSON string to convert to JavaScript const." },
     name: { type: "string", description: "Constant identifier name (default 'value')." },
-    indent: { type: "integer", enum: [2, 4], description: "Indent spaces (default 2)." },
+    indent: {
+      type: ["integer", "string"],
+      enum: [2, 4, "tab"],
+      description: "Indent spaces (2 or 4) or 'tab' (default 2).",
+    },
   },
 } as const;
 

@@ -10,8 +10,8 @@ export function IndentMenu({
   compact = false,
   triggerLabel,
 }: {
-  value: 2 | 4;
-  onChange: (next: 2 | 4) => void;
+  value: 2 | 4 | "tab";
+  onChange: (next: 2 | 4 | "tab") => void;
   disabled?: boolean;
   compact?: boolean;
   triggerLabel: string;
@@ -62,6 +62,8 @@ export function IndentMenu({
     setOpen(true);
   };
 
+  const displayTrigger = value === "tab" ? "Tab" : compact ? `${value}sp` : value;
+
   return (
     <>
       <button
@@ -78,7 +80,7 @@ export function IndentMenu({
             : "flex h-[32px] shrink-0 items-center gap-1.5 rounded-[8px] border border-outline bg-surface-low px-[10px] text-[12px] font-semibold text-on-surface hover:bg-surface hover:border-outline-strong transition-colors cursor-pointer [&_svg]:size-3.5 [&_svg]:text-on-faint"
         }
       >
-        {compact ? `${value}sp` : value}
+        {displayTrigger}
         <ChevronDown aria-hidden="true" />
       </button>
       {open && position
@@ -89,19 +91,19 @@ export function IndentMenu({
               className="absolute z-50 rounded-lg border border-outline bg-surface p-1 shadow-xl"
               style={{ top: position.top, left: position.left, minWidth: position.minWidth }}
             >
-              {[2, 4].map((spaces) => (
+              {([2, 4, "tab"] as const).map((spaces) => (
                 <button
                   key={spaces}
                   type="button"
                   disabled={disabled}
                   aria-pressed={value === spaces}
                   onClick={() => {
-                    onChange(spaces as 2 | 4);
+                    onChange(spaces);
                     setOpen(false);
                   }}
                   className="flex h-8 w-full items-center justify-between gap-2 rounded-md px-2.5 text-xs font-semibold whitespace-nowrap text-on-surface hover:bg-surface-low disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-primary-soft aria-pressed:text-primary-strong"
                 >
-                  {spaces} spaces
+                  {spaces === "tab" ? "Tab" : `${spaces} spaces`}
                   {value === spaces ? <Check className="size-3.5" aria-hidden="true" /> : null}
                 </button>
               ))}

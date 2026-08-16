@@ -21,6 +21,10 @@ describe("yamlToJson", () => {
       ok: true,
       value: '{\n  "name": "Widget"\n}',
     });
+    expect(yamlToJson('---\nname: "Widget"\n...\n\n', "tab")).toEqual({
+      ok: true,
+      value: '{\n\t"name": "Widget"\n}',
+    });
   });
 
   it("accepts common inline mappings within a sequence", () => {

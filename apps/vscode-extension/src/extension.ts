@@ -106,18 +106,16 @@ async function openTool(extensionUri: vscode.Uri, requestedToolId?: unknown): Pr
     }
   }
 
-  // Command/menu entry points open the editor-area workbench with its full
-  // in-app navigation. The Activity Bar view already supplies VS Code's own
-  // navigation and requests a compact shell through its view provider.
-  ToolPanel.show(extensionUri, adapter, initialInput, false);
+  // Editor-area panels behave like files: they use the full editor width and
+  // rely on VS Code's own navigation instead of rendering a second registry.
+  ToolPanel.show(extensionUri, adapter, initialInput, true);
 }
 
 async function chooseAdapter(requestedToolId?: unknown): Promise<ToolAdapter | undefined> {
-  if (requestedToolId !== undefined) {
-    if (typeof requestedToolId !== "string") {
-      await vscode.window.showErrorMessage("Kitland tool identifiers must be strings.");
-      return undefined;
-    }
+  // VS Code contributes the clicked view/editor context as an object for some
+  // menu and status-bar invocation paths. Only a string is a requested tool;
+  // other command context must fall through to the regular picker.
+  if (typeof requestedToolId === "string") {
     const requested = getToolAdapter(requestedToolId);
     if (!requested) {
       await vscode.window.showErrorMessage("The requested Kitland tool is not available.");

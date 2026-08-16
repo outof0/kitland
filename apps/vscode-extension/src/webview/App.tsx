@@ -4,11 +4,7 @@ import type { RegistryToolEntry } from "../protocol";
 import { parseHostMessage } from "../protocol";
 import { resolveToolRegistration, type ToolComponentProps } from "./toolRegistry";
 import { CodeEditorProvider } from "./CodeEditorProvider";
-
-type VsCodeApi = { postMessage(message: Record<string, unknown>): void };
-declare function acquireVsCodeApi(): VsCodeApi;
-
-const vscode = acquireVsCodeApi();
+import { vscode } from "./vscodeApi";
 
 /** Detect VS Code theme kind from the body class or data attribute. */
 function detectVscodeTheme(): "dark" | "light" {
@@ -65,8 +61,12 @@ export function App() {
         setToolComponent(() => module.default);
         setLoading(false);
       }
-    } catch {
+    } catch (error) {
+      // Keep the original error in the webview console for diagnostics rather
+      // than misreporting a registered tool as unavailable.
+      console.error(`Could not load Kitland tool "${entry.slug}".`, error);
       if (generation === loadGenerationRef.current) {
+        toolComponentRef.current = null;
         setToolComponent(null);
         setLoading(false);
       }

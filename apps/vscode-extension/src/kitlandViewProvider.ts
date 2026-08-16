@@ -4,6 +4,7 @@ import { runRegexIsolated } from "./regexWorker";
 import { parseWebviewMessage, type RegistryToolEntry, type HostMessage } from "./protocol";
 import { getToolAdapter, listToolAdapters } from "./toolRegistry";
 import type { ToolAdapter } from "./toolAdapter";
+import { ToolPanel } from "./toolPanel";
 import { renderWebviewHtml } from "./webviewHtml";
 
 export class KitlandViewProvider implements vscode.WebviewViewProvider {
@@ -63,6 +64,14 @@ export class KitlandViewProvider implements vscode.WebviewViewProvider {
         kind: theme.kind === vscode.ColorThemeKind.Light ? "light" : "dark",
       });
     });
+
+    // An Activity Bar view is constrained to the VS Code sidebar. Treat it
+    // as a launcher and move the real workbench to an editor tab so the tool
+    // receives the full editor width and behaves like an opened file.
+    this.openInEditor();
+    webviewView.onDidChangeVisibility(() => {
+      if (webviewView.visible) this.openInEditor();
+    });
   }
 
   public selectTool(adapter: ToolAdapter, initialInput?: string): void {
@@ -75,10 +84,19 @@ export class KitlandViewProvider implements vscode.WebviewViewProvider {
     if (this.ready) {
       this.postToolsList();
     }
+    this.openInEditor();
   }
 
   public getActiveAdapter(): ToolAdapter {
     return this.adapter;
+  }
+
+  private openInEditor(): void {
+    ToolPanel.show(this.extensionUri, this.adapter, this.initialInput, true);
+    // The Activity Bar view only launches the editor workbench. Closing the
+    // primary sidebar afterwards gives the tool the same full-width canvas as
+    // an editor file; a later click on the Kitland icon opens it again.
+    void vscode.commands.executeCommand("workbench.action.closeSidebar");
   }
 
   private post(message: HostMessage): void {

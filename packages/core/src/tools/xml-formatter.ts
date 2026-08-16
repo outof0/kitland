@@ -29,7 +29,7 @@ type XmlToken =
   | { readonly type: "misc"; readonly raw: string };
 
 /** Validate and pretty-print XML without resolving external entities or DTDs. */
-export function formatXml(source: string, indent: 2 | 4 = 2): ToolResult<XmlFormatResult> {
+export function formatXml(source: string, indent: 2 | 4 | "tab" = 2): ToolResult<XmlFormatResult> {
   if (source.length > XML_FORMATTER_MAX_INPUT_CHARS) {
     return err(
       "INPUT_TOO_LARGE",
@@ -210,12 +210,13 @@ function parseStartTag(
   return ok({ name, selfClosing });
 }
 
-function renderXml(tokens: readonly XmlToken[], indentSize: 2 | 4): ToolResult<string> {
+function renderXml(tokens: readonly XmlToken[], indent: 2 | 4 | "tab"): ToolResult<string> {
   let output = "";
   const open: number[] = [];
+  const indentStr = indent === "tab" ? "\t" : " ".repeat(indent);
   const writeLine = (depth: number, value: string) => {
     if (output && !output.endsWith("\n")) output += "\n";
-    output += `${" ".repeat(depth * indentSize)}${value}\n`;
+    output += `${indentStr.repeat(depth)}${value}\n`;
   };
   const writeInline = (value: string) => {
     output += value;
@@ -230,7 +231,7 @@ function renderXml(tokens: readonly XmlToken[], indentSize: 2 | 4): ToolResult<s
         writeInline(token.raw);
       } else if (token.directText) {
         if (output && !output.endsWith("\n")) output += "\n";
-        output += `${" ".repeat(open.length * indentSize)}${token.raw}`;
+        output += `${indentStr.repeat(open.length)}${token.raw}`;
       } else writeLine(open.length, token.raw);
       if (!token.selfClosing) open.push(index);
     } else if (token.type === "end") {

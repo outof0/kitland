@@ -610,9 +610,9 @@
           "description": "Code language (default 'auto')."
         },
         "indent": {
-          "type": "integer",
-          "enum": [2, 4],
-          "description": "Indentation spaces (2 or 4, default 2)."
+          "type": ["integer", "string"],
+          "enum": [2, 4, "tab"],
+          "description": "Indentation spaces (2 or 4) or 'tab' (default 2)."
         }
       }
     },
@@ -2275,9 +2275,9 @@
           "description": "JSON string to inspect."
         },
         "indent": {
-          "type": "integer",
-          "enum": [2, 4],
-          "description": "Indent spaces (default 2)."
+          "type": ["integer", "string"],
+          "enum": [2, 4, "tab"],
+          "description": "Indent spaces (2 or 4) or 'tab' (default 2)."
         },
         "mode": {
           "type": "string",
@@ -2512,9 +2512,9 @@
           "description": "Constant identifier name (default 'value')."
         },
         "indent": {
-          "type": "integer",
-          "enum": [2, 4],
-          "description": "Indent spaces (default 2)."
+          "type": ["integer", "string"],
+          "enum": [2, 4, "tab"],
+          "description": "Indent spaces (2 or 4) or 'tab' (default 2)."
         }
       }
     },
@@ -2639,9 +2639,9 @@
           "description": "Root type identifier (default 'Root')."
         },
         "indent": {
-          "type": "integer",
-          "enum": [2, 4],
-          "description": "Indent spaces (default 2)."
+          "type": ["integer", "string"],
+          "enum": [2, 4, "tab"],
+          "description": "Indent spaces (2 or 4) or 'tab' (default 2)."
         }
       }
     },
@@ -4411,9 +4411,9 @@
           "description": "SQL query to format."
         },
         "indent": {
-          "type": "integer",
-          "enum": [2, 4],
-          "description": "Indent spaces (default 2)."
+          "type": ["integer", "string"],
+          "enum": [2, 4, "tab"],
+          "description": "Indent spaces (2 or 4) or 'tab' (default 2)."
         },
         "keywordCase": {
           "type": "string",
@@ -5613,9 +5613,9 @@
           "description": "XML string to format."
         },
         "indent": {
-          "type": "integer",
-          "enum": [2, 4],
-          "description": "Indent spaces (default 2)."
+          "type": ["integer", "string"],
+          "enum": [2, 4, "tab"],
+          "description": "Indent spaces (2 or 4) or 'tab' (default 2)."
         }
       }
     },
@@ -5683,9 +5683,9 @@
           "description": "YAML text to convert to JSON."
         },
         "indent": {
-          "type": "integer",
-          "enum": [2, 4],
-          "description": "JSON indentation spaces."
+          "type": ["integer", "string"],
+          "enum": [2, 4, "tab"],
+          "description": "JSON indentation spaces (2 or 4) or 'tab' (default 2)."
         }
       }
     },

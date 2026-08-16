@@ -57,4 +57,15 @@ describe("formatXml", () => {
       error: { code: "INPUT_TOO_LARGE" },
     });
   });
+
+  it("supports tab indentation", () => {
+    expect(formatXml("<root><item/></root>", "tab")).toEqual({
+      ok: true,
+      value: {
+        output: "<root>\n\t<item/>\n</root>\n",
+        elementCount: 2,
+        maxDepth: 1,
+      },
+    });
+  });
 });

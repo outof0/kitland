@@ -31,7 +31,7 @@ export function XmlFormatterTool({
     }
   }, [initialInput]);
 
-  const [indent, setIndent] = useState<2 | 4>(2);
+  const [indent, setIndent] = useState<2 | 4 | "tab">(2);
   const state = useXmlFormatter(source, indent);
 
   return (
@@ -56,21 +56,27 @@ export function XmlFormatterTool({
       actionIcon={UnfoldVertical}
       outputExtension="xml"
       outputMimeType="application/xml"
-      indentLabel={`${indent} spaces indent`}
+      indentLabel={indent === "tab" ? "tab indent" : `${indent} spaces indent`}
       validLabel="XML"
       options={
         <label className="h-[32px] relative flex items-center gap-1.5 px-3 bg-surface-low border border-outline rounded-[8px] text-[12px] text-on-surface cursor-pointer hover:border-outline-strong transition-colors">
           <span className="text-on-muted text-[12px]">Indent</span>
-          <span className="font-semibold text-on-surface">{indent}</span>
+          <span className="font-semibold text-on-surface">
+            {indent === "tab" ? "Tab" : `${indent} spaces`}
+          </span>
           <ChevronDown className="size-3 text-on-faint" />
           <select
             value={indent}
-            onChange={(event) => setIndent(Number(event.target.value) as 2 | 4)}
+            onChange={(event) => {
+              const val = event.target.value;
+              setIndent(val === "tab" ? "tab" : (Number(val) as 2 | 4));
+            }}
             aria-label="XML indent size"
             className="absolute inset-0 opacity-0 cursor-pointer"
           >
             <option value={2}>2 spaces</option>
             <option value={4}>4 spaces</option>
+            <option value="tab">Tab</option>
           </select>
         </label>
       }

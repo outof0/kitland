@@ -128,10 +128,10 @@ export function ModeOptionsBar({
   onIndentChange,
 }: {
   mode: JsonFormatMode;
-  indent: 2 | 4;
+  indent: 2 | 4 | "tab";
   disabled: boolean;
   onModeChange: (next: JsonFormatMode) => void;
-  onIndentChange: (next: 2 | 4) => void;
+  onIndentChange: (next: 2 | 4 | "tab") => void;
 }) {
   return (
     <div className="flex items-center justify-between flex-wrap gap-2 min-h-[40px] px-1">

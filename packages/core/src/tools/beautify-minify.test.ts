@@ -16,6 +16,12 @@ describe("formatJson", () => {
       ok: true,
       value: '{\n    "name": "café 🍵",\n    "items": [\n        true,\n        2\n    ]\n}',
     });
+    expect(
+      formatJson('{"name":"café 🍵","items":[true,2]}', "beautify", { indent: "tab" }),
+    ).toEqual({
+      ok: true,
+      value: '{\n\t"name": "café 🍵",\n\t"items": [\n\t\ttrue,\n\t\t2\n\t]\n}',
+    });
   });
 
   it("minifies a valid JSON document without changing its structure", () => {
@@ -64,6 +70,10 @@ describe("formatCode multi-language support", () => {
     expect((beautified as { value: string }).value).toContain("body {");
     expect((beautified as { value: string }).value).toContain("  color: red;");
 
+    const tabBeautified = formatCss(css, "beautify", { indent: "tab" });
+    expect(tabBeautified).toEqual(expect.objectContaining({ ok: true }));
+    expect((tabBeautified as { value: string }).value).toContain("\tcolor: red;");
+
     const minified = formatCss("body {\n  color: red;\n  background: blue;\n}", "minify");
     expect(minified).toEqual(
       expect.objectContaining({ ok: true, value: "body{color:red;background:blue}" }),
@@ -74,6 +84,10 @@ describe("formatCode multi-language support", () => {
     const html = "<div><p>Hello</p></div>";
     const beautified = formatHtml(html, "beautify", { indent: 2 });
     expect(beautified.ok).toBe(true);
+
+    const tabBeautified = formatHtml(html, "beautify", { indent: "tab" });
+    expect(tabBeautified.ok).toBe(true);
+    expect((tabBeautified as { value: string }).value).toContain("\t<p>");
 
     const minified = formatHtml("<div>\n  <p>\n    Hello\n  </p>\n</div>", "minify");
     expect(minified).toEqual(
@@ -88,6 +102,11 @@ describe("formatCode multi-language support", () => {
 
     const minified = formatJs("function hello() {\n  console.log('hi');\n}", "minify");
     expect(minified.ok).toBe(true);
+
+    const multilineJs = "function hello() {\nconsole.log('hi');\n}";
+    const tabBeautified = formatJs(multilineJs, "beautify", { indent: "tab" });
+    expect(tabBeautified.ok).toBe(true);
+    expect((tabBeautified as { value: string }).value).toContain("\tconsole.log('hi');");
   });
 
   it("handles formatCode with auto-detection", () => {

@@ -100,6 +100,7 @@ const HOST_CORE_TRANSFORM_SPECS: readonly HostTransformSpec[] = [
     options: [
       { id: "2", label: "2 spaces" },
       { id: "4", label: "4 spaces" },
+      { id: "tab", label: "Tab" },
     ],
     optionLabel: "Indent",
     defaultOperationId: "beautify",
@@ -109,7 +110,7 @@ const HOST_CORE_TRANSFORM_SPECS: readonly HostTransformSpec[] = [
       if (mode !== "beautify" && mode !== "minify") {
         return err("INVALID_OPERATION", "Choose Beautify or Minify.");
       }
-      const indent = request.optionId === "4" ? 4 : 2;
+      const indent = request.optionId === "tab" ? "tab" : request.optionId === "4" ? 4 : 2;
       return formatJson(request.input, mode, { indent });
     },
   },

@@ -83,7 +83,10 @@ export function useStructuredTextTransform(
 
   useEffect(() => {
     if (!enabled || query.input.length === 0) {
-      setCompleted({ ...query, result: EMPTY_RESULT });
+      setCompleted((prev) => {
+        if (sameQuery(prev, query) && prev.result === EMPTY_RESULT) return prev;
+        return { ...query, result: EMPTY_RESULT };
+      });
       return;
     }
 
@@ -132,7 +135,8 @@ export function useStructuredTextTransform(
           fail(WORKER_FAILURES.protocol);
           return;
         }
-        if (event.data.id !== id) {
+        const response = event.data;
+        if (response.id !== id) {
           fail(WORKER_FAILURES.protocol);
           return;
         }
@@ -140,7 +144,10 @@ export function useStructuredTextTransform(
         if (watchdog !== undefined) window.clearTimeout(watchdog);
         watchdog = undefined;
         worker?.terminate();
-        setCompleted({ ...query, result: event.data.result });
+        setCompleted((prev) => {
+          if (sameQuery(prev, query) && prev.result === response.result) return prev;
+          return { ...query, result: response.result };
+        });
       });
       worker.addEventListener("error", () => fail(WORKER_FAILURES.runtime));
       worker.addEventListener("messageerror", () => fail(WORKER_FAILURES.message));
@@ -174,6 +181,7 @@ export function useStructuredTextTransform(
 
 function sameQuery(left: TransformQuery, right: TransformQuery): boolean {
   return (
-    left.input === right.input && JSON.stringify(left.transform) === JSON.stringify(right.transform)
+    left.input === right.input &&
+    structuredTextTransformKey(left.transform) === structuredTextTransformKey(right.transform)
   );
 }

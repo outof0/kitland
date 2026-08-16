@@ -10,7 +10,7 @@ import {
 function expectError(
   source: string,
   code: string,
-  indent: 2 | 4 = 2,
+  indent: 2 | 4 | "tab" = 2,
   mode: "beautify" | "minify" = "beautify",
 ) {
   expect(inspectJson(source, indent, mode)).toMatchObject({ ok: false, error: { code } });
@@ -61,6 +61,11 @@ describe("inspectJson", () => {
       });
       expect(inspectJson(source, indent)).toEqual(inspectJson(source, indent));
     }
+    const tabExpected = JSON.stringify(JSON.parse(source), null, "\t");
+    expect(inspectJson(source, "tab")).toMatchObject({
+      ok: true,
+      value: { formatted: tabExpected },
+    });
   });
 
   it("minifies with native parsed-value semantics while preserving inspection statistics", () => {
@@ -105,7 +110,7 @@ describe("inspectJson", () => {
     expectError(" \n", "EMPTY_INPUT");
     expect(inspectJson("{}", 3 as 2)).toEqual({
       ok: false,
-      error: { code: "INVALID_INDENT", message: "JSON indentation must be 2 or 4 spaces." },
+      error: { code: "INVALID_INDENT", message: "JSON indentation must be 2 or 4 spaces, or tab." },
     });
     expect(inspectJson("{}", 2, "compact" as never)).toEqual({
       ok: false,

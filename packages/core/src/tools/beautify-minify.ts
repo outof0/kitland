@@ -15,14 +15,14 @@ export type BeautifyMinifyLanguage =
   | "xml";
 
 export type BeautifyMinifyOptions = {
-  /** Spaces used by Beautify mode. Defaults to 2; 4 is also supported. */
-  readonly indent?: 2 | 4;
+  /** Spaces or tab used by Beautify mode. Defaults to 2; 4 and "tab" are also supported. */
+  readonly indent?: 2 | 4 | "tab";
   readonly language?: BeautifyMinifyLanguage;
   readonly keywordCase?: "upper" | "lower";
 };
 
 export type JsonFormatOptions = {
-  readonly indent?: 2 | 4;
+  readonly indent?: 2 | 4 | "tab";
 };
 
 export const BEAUTIFY_MINIFY_MAX_INPUT_CHARS = 1_000_000;
@@ -54,28 +54,23 @@ export function detectCodeLanguage(
   }
 
   // SQL
-  const upper = trimmed.toUpperCase();
   if (
     /^\s*(SELECT|INSERT\s+INTO|UPDATE|DELETE\s+FROM|CREATE\s+TABLE|ALTER\s+TABLE|DROP\s+TABLE|WITH|BEGIN|DECLARE)\b/i.test(
       trimmed,
-    ) ||
-    (upper.includes("SELECT ") && upper.includes(" FROM ")) ||
-    (upper.includes("INSERT INTO ") && upper.includes(" VALUES"))
+    )
   ) {
     return "sql";
   }
 
-  // CSS / SCSS
+  // CSS
   if (
-    /^\s*(@media|@import|@keyframes|@font-face|:root|[.#a-zA-Z0-9_\-\s,>+~:]+)\s*\{/i.test(
-      trimmed,
-    ) &&
-    /:\s*[^;]+;/i.test(trimmed)
+    /([a-zA-Z0-9_\-#.:>\s]+)\s*\{[^}]*\}/.test(trimmed) &&
+    !/\b(function|class|interface|var|let|const|if|for|while)\b/.test(trimmed)
   ) {
     return "css";
   }
 
-  // JavaScript / TypeScript
+  // JavaScript / TypeScript hints
   if (
     /\b(const|let|var|function|return|import|export|class|interface|async|await|console\.log|=>)\b/.test(
       trimmed,
@@ -117,7 +112,7 @@ export function formatJson(
   const output = JSON.stringify(
     value,
     null,
-    mode === "beautify" ? (options.indent ?? 2) : undefined,
+    mode === "beautify" ? (options.indent === "tab" ? "\t" : (options.indent ?? 2)) : undefined,
   );
   if (output.length > BEAUTIFY_MINIFY_MAX_OUTPUT_CHARS) {
     return err(
@@ -152,7 +147,7 @@ export function formatCss(
     return ok(minified);
   }
 
-  const indentStr = " ".repeat(options.indent ?? 2);
+  const indentStr = options.indent === "tab" ? "\t" : " ".repeat(options.indent ?? 2);
   let result = "";
   let indentLevel = 0;
   const clean = source
@@ -228,7 +223,7 @@ export function formatHtml(
   if (xmlRes.ok) return ok(xmlRes.value.output);
 
   // Fallback resilient HTML tag hierarchy indenter
-  const indentStr = " ".repeat(options.indent ?? 2);
+  const indentStr = options.indent === "tab" ? "\t" : " ".repeat(options.indent ?? 2);
   const selfClosing = new Set([
     "area",
     "base",
@@ -301,7 +296,7 @@ export function formatJs(
     return ok(minified);
   }
 
-  const indentStr = " ".repeat(options.indent ?? 2);
+  const indentStr = options.indent === "tab" ? "\t" : " ".repeat(options.indent ?? 2);
   let indentLevel = 0;
   const rawLines = source.split("\n");
   const formattedLines: string[] = [];

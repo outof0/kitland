@@ -66,7 +66,7 @@ export type TextTransformEditorProps = {
   /** When true the result pane is editable in place (defaults to the host context). */
   readonly editableOutput?: boolean;
   /** Tab indentation for the injected editor panes. Defaults to 2. */
-  readonly indentSize?: 2 | 4;
+  readonly indentSize?: 2 | 4 | "tab";
   readonly onManualRun?: () => void;
   readonly onOutputChange?: (value: string) => void;
   readonly showShare?: boolean;
@@ -119,7 +119,7 @@ type PaneProps = {
   readonly onMinify: () => void;
   readonly inputRef: React.RefObject<InjectedEditorRef | null>;
   readonly language: InjectedEditorLanguage | null;
-  readonly indentSize?: 2 | 4;
+  readonly indentSize?: 2 | 4 | "tab";
   readonly onSubmit?: (() => void) | undefined;
 };
 
@@ -135,7 +135,7 @@ type PaneBodyProps = {
   readonly maxChars?: number | undefined;
   readonly language: InjectedEditorLanguage | null;
   readonly editorRef?: React.Ref<InjectedEditorRef> | undefined;
-  readonly indentSize?: 2 | 4 | undefined;
+  readonly indentSize?: 2 | 4 | "tab" | undefined;
   readonly onSubmit?: (() => void) | undefined;
 };
 
@@ -331,7 +331,7 @@ type OutputPaneProps = {
   readonly copyLabel: string;
   readonly saveLabel: string;
   readonly language: InjectedEditorLanguage | null;
-  readonly indentSize?: 2 | 4;
+  readonly indentSize?: 2 | 4 | "tab";
   readonly onCopy: () => void;
   readonly onDownload: () => void;
   readonly onBeautify: () => void;

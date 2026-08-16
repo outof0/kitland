@@ -3,7 +3,11 @@ import { formatJson, formatSql, formatXml, repairJson } from "@kitland/core";
 /**
  * In-place code beautifier/formatter supporting JSON, XML, SQL, and generic structured text.
  */
-export function beautifyCode(code: string, language?: string, indent: 2 | 4 = 2): string | null {
+export function beautifyCode(
+  code: string,
+  language?: string,
+  indent: 2 | 4 | "tab" = 2,
+): string | null {
   const trimmed = code.trim();
   if (!trimmed) return null;
 
@@ -40,7 +44,7 @@ export function beautifyCode(code: string, language?: string, indent: 2 | 4 = 2)
   // Default fallback: attempt JSON formatting
   try {
     const parsed = JSON.parse(code);
-    return JSON.stringify(parsed, null, indent);
+    return JSON.stringify(parsed, null, indent === "tab" ? "\t" : indent);
   } catch {
     return null;
   }

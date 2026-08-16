@@ -1,9 +1,5 @@
 import { createWebCryptoHostRuntime, type HostRuntime, type ToolResult } from "@kitland/core";
-
-type VsCodeApi = { postMessage(message: Record<string, unknown>): void };
-declare function acquireVsCodeApi(): VsCodeApi;
-
-const vscode = acquireVsCodeApi();
+import { vscode } from "./vscodeApi";
 
 let sequence = 0;
 function nextRequestId(): number {

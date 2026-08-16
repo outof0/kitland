@@ -16,7 +16,7 @@ export type JsonFormatterState =
   | { status: "success"; inspection: JsonInspection }
   | { status: "error"; kind: "error" | "limit" | "unavailable"; error: ToolError };
 
-type Query = { source: string; indent: 2 | 4; mode: JsonFormatMode };
+type Query = { source: string; indent: 2 | 4 | "tab"; mode: JsonFormatMode };
 type Completed = Query & { state: JsonFormatterState };
 
 const INSPECT_DEBOUNCE_MS = 120;
@@ -27,20 +27,30 @@ const UNAVAILABLE = {
 
 export function useJsonFormatter(
   source: string,
-  indent: 2 | 4,
+  indent: 2 | 4 | "tab",
   mode: JsonFormatMode = "beautify",
 ): JsonFormatterState {
   const query = useMemo<Query>(() => ({ source, indent, mode }), [indent, mode, source]);
   const requestId = useRef(0);
-  const [completed, setCompleted] = useState<Completed>({
+  const [completed, setCompleted] = useState<Completed>(() => ({
     ...query,
     state: immediateState(source),
-  });
+  }));
 
   useEffect(() => {
     const immediate = immediateState(query.source);
     if (immediate.status !== "processing") {
-      setCompleted({ ...query, state: immediate });
+      setCompleted((prev) => {
+        if (
+          prev.source === query.source &&
+          prev.indent === query.indent &&
+          prev.mode === query.mode &&
+          prev.state.status === immediate.status
+        ) {
+          return prev;
+        }
+        return { ...query, state: immediate };
+      });
       return;
     }
 

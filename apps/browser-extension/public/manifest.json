@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Kitland Tools",
   "short_name": "Kitland",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A local-first developer tool suite with no uploads, accounts, website access, or extension permissions.",
   "author": "OutOf0 <hello.outof0@gmail.com>",
   "homepage_url": "https://kitland.dev",

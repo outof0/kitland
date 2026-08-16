@@ -28,7 +28,7 @@ export const JSON_FORMATTER_MAX_OUTPUT_CHARS = 1_000_000;
  */
 export function inspectJson(
   source: string,
-  indent: 2 | 4 = 2,
+  indent: 2 | 4 | "tab" = 2,
   mode: JsonFormatMode = "beautify",
 ): ToolResult<JsonInspection> {
   if (source.length > JSON_FORMATTER_MAX_INPUT_CHARS) {
@@ -37,8 +37,8 @@ export function inspectJson(
       `JSON input exceeds the ${JSON_FORMATTER_MAX_INPUT_CHARS.toLocaleString()} UTF-16 code unit limit.`,
     );
   }
-  if (indent !== 2 && indent !== 4) {
-    return err("INVALID_INDENT", "JSON indentation must be 2 or 4 spaces.");
+  if (indent !== 2 && indent !== 4 && indent !== "tab") {
+    return err("INVALID_INDENT", "JSON indentation must be 2 or 4 spaces, or tab.");
   }
   if (mode !== "beautify" && mode !== "minify") {
     return err("INVALID_MODE", "JSON output mode must be beautify or minify.");
@@ -160,12 +160,12 @@ function outputError(): ToolResult<never> {
 
 function formatJsonBounded(
   value: JsonValue,
-  indent: 2 | 4,
+  indent: 2 | 4 | "tab",
   mode: JsonFormatMode,
 ): ToolResult<string> {
   const chunks: string[] = [];
   let length = 0;
-  const indentation = " ".repeat(indent);
+  const indentation = indent === "tab" ? "\t" : " ".repeat(indent);
   const tasks: FormatTask[] = [{ type: "value", value, depth: 0 }];
 
   const append = (chunk: string): boolean => {

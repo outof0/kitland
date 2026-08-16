@@ -39,7 +39,8 @@ export function JsonToYamlTool({
 }: JsonToYamlToolProps = {}) {
   const [mode, setMode] = useState<"json-to-yaml" | "yaml-to-json">(initialMode);
   const [source, setSource] = useState(initialInput ?? "");
-  const [indent, setIndent] = useState<2 | 4>(2);
+  const [yamlIndent, setYamlIndent] = useState<2 | 4>(2);
+  const [jsonIndent, setJsonIndent] = useState<2 | 4 | "tab">(2);
 
   const lastInitialInputRef = useRef(initialInput);
   useEffect(() => {
@@ -53,11 +54,12 @@ export function JsonToYamlTool({
     }
   }, [initialInput]);
 
-  const jsonToYamlState = useJsonToYaml(source, indent);
-  const yamlToJsonState = useYamlToJson(source, indent);
+  const jsonToYamlState = useJsonToYaml(source, yamlIndent);
+  const yamlToJsonState = useYamlToJson(source, jsonIndent);
   const state = mode === "json-to-yaml" ? jsonToYamlState : yamlToJsonState;
 
   const isJsonToYaml = mode === "json-to-yaml";
+  const indent = isJsonToYaml ? yamlIndent : jsonIndent;
 
   const onSwap = useCallback(() => {
     const output = state.result.ok ? state.result.value : "";
@@ -112,7 +114,13 @@ export function JsonToYamlTool({
       outputMimeType={isJsonToYaml ? "application/yaml" : "application/json"}
       onSwap={onSwap}
       swapLabel="Swap"
-      indentLabel={isJsonToYaml ? `${indent} spaces indent` : `${indent} spaces`}
+      indentLabel={
+        indent === "tab"
+          ? "tab indent"
+          : isJsonToYaml
+            ? `${indent} spaces indent`
+            : `${indent} spaces`
+      }
       validLabel={isJsonToYaml ? "JSON" : "YAML"}
       options={
         <div className="flex items-center gap-2 flex-wrap">
@@ -138,16 +146,26 @@ export function JsonToYamlTool({
           </div>
 
           <label className="h-[32px] relative flex items-center gap-1.5 px-3 bg-surface-low border border-outline rounded-[8px] text-[12px] text-on-surface cursor-pointer hover:border-outline-strong transition-colors">
-            <span className="font-normal text-on-surface">{indent}</span>
+            <span className="font-normal text-on-surface">
+              {indent === "tab" ? "Tab" : `${indent} spaces`}
+            </span>
             <ChevronDown className="size-3 text-on-faint" />
             <select
               value={indent}
-              onChange={(event) => setIndent(Number(event.target.value) as 2 | 4)}
+              onChange={(event) => {
+                const val = event.target.value;
+                if (isJsonToYaml) {
+                  setYamlIndent(Number(val) as 2 | 4);
+                  return;
+                }
+                setJsonIndent(val === "tab" ? "tab" : (Number(val) as 2 | 4));
+              }}
               aria-label="YAML indent size"
               className="absolute inset-0 opacity-0 cursor-pointer"
             >
               <option value={2}>2 spaces</option>
               <option value={4}>4 spaces</option>
+              {!isJsonToYaml && <option value="tab">Tab</option>}
             </select>
           </label>
         </div>

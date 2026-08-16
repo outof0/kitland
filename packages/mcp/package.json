@@ -1,6 +1,6 @@
 {
   "name": "@kitland/mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local-only Model Context Protocol (MCP) server for Kitland developer tools, with deterministic transforms and explicit generators.",
   "homepage": "https://kitland.dev",
   "bugs": {

@@ -77,6 +77,10 @@
   tab-size: 4;
 }
 
+.kitland-cm--indent-tab .cm-content {
+  tab-size: 4;
+}
+
 .kitland-cm .cm-content[contenteditable="true"] {
   -webkit-user-modify: read-write-plaintext-only;
 }

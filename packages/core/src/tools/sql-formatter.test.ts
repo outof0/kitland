@@ -41,4 +41,10 @@ describe("formatSql", () => {
     expect(result.value).toContain("ORDER BY team");
     expect(result.value).toContain("UNION ALL");
   });
+
+  it("supports tab indentation", () => {
+    const result = formatSql("SELECT a, (SELECT b FROM c) FROM d", { indent: "tab" });
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.value).toContain("\t");
+  });
 });

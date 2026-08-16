@@ -19,7 +19,7 @@ import { IndentMenu } from "./json-formatter/IndentMenu";
 
 export type BeautifyMinifyShareState = {
   mode: BeautifyMinifyMode;
-  indent: 2 | 4;
+  indent: 2 | 4 | "tab";
   language: BeautifyMinifyLanguage;
   input: string;
 };
@@ -27,7 +27,7 @@ export type BeautifyMinifyShareState = {
 export type BeautifyMinifyTransformHook = (
   source: string,
   mode: BeautifyMinifyMode,
-  indent: 2 | 4,
+  indent: 2 | 4 | "tab",
   language: BeautifyMinifyLanguage,
 ) => DeferredTextTransformState;
 
@@ -183,7 +183,7 @@ function LanguageMenu({
 export function useSyncBeautifyMinify(
   source: string,
   mode: BeautifyMinifyMode,
-  indent: 2 | 4,
+  indent: 2 | 4 | "tab",
   language: BeautifyMinifyLanguage,
 ): DeferredTextTransformState {
   const transform = useCallback(
@@ -215,10 +215,19 @@ export function BeautifyMinifyTool({
   capabilities = LOCAL_ONLY_CAPABILITIES,
   initialInput,
 }: BeautifyMinifyToolProps = {}) {
-  const [source, setSource] = useState(initialInput ?? "");
-  const [mode, setMode] = useState<BeautifyMinifyMode>("beautify");
-  const [indent, setIndent] = useState<2 | 4>(2);
-  const [language, setLanguage] = useState<BeautifyMinifyLanguage>("auto");
+  const initialShare = useRef(share?.readState ? share.readState() : null);
+  const [source, setSource] = useState<string>(() => {
+    if (initialInput !== undefined && initialInput !== "") return initialInput;
+    if (initialShare.current?.input) return initialShare.current.input;
+    return "";
+  });
+  const [mode, setMode] = useState<BeautifyMinifyMode>(
+    () => initialShare.current?.mode ?? "beautify",
+  );
+  const [indent, setIndent] = useState<2 | 4 | "tab">(() => initialShare.current?.indent ?? 2);
+  const [language, setLanguage] = useState<BeautifyMinifyLanguage>(
+    () => initialShare.current?.language ?? "auto",
+  );
 
   const lastInitialInputRef = useRef(initialInput);
   useEffect(() => {
@@ -231,17 +240,6 @@ export function BeautifyMinifyTool({
       setSource(initialInput);
     }
   }, [initialInput]);
-
-  useEffect(() => {
-    if (!share?.readState) return;
-    const shared = share.readState();
-    if (shared) {
-      setMode(shared.mode);
-      setIndent(shared.indent);
-      setLanguage(shared.language || "auto");
-      setSource(shared.input);
-    }
-  }, [share]);
 
   const state = useTransform(source, mode, indent, language);
 
@@ -309,7 +307,13 @@ export function BeautifyMinifyTool({
       actionIcon={mode === "beautify" ? UnfoldVertical : FoldVertical}
       outputExtension={effectiveLang === "javascript" ? "js" : effectiveLang}
       outputMimeType="text/plain"
-      indentLabel={mode === "beautify" ? `${indent} spaces indent` : "minified"}
+      indentLabel={
+        mode === "beautify"
+          ? indent === "tab"
+            ? "tab indent"
+            : `${indent} spaces indent`
+          : "minified"
+      }
       validLabel={langDisplayName}
       showUpload={capabilities.fileOpen ?? false}
       showDownload={capabilities.fileSave ?? false}

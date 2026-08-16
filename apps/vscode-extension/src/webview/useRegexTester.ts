@@ -1,12 +1,10 @@
 import { err, ok, type RegexTestResult, type ToolResult } from "@kitland/core";
 import type { RegexTesterHook } from "@kitland/ui/tools/RegexTesterTool";
 import { useEffect, useRef, useState } from "react";
+import { vscode } from "./vscodeApi";
 
 const TEST_DEBOUNCE_MS = 120;
 const HOST_RESPONSE_TIMEOUT_MS = 4000;
-
-declare function acquireVsCodeApi(): { postMessage(message: unknown): void };
-const vscode = acquireVsCodeApi();
 
 type State = { result: ToolResult<RegexTestResult>; isProcessing: boolean };
 const EMPTY_MATCHES: RegexTestResult = { matches: [], truncated: false };

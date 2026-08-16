@@ -11,6 +11,7 @@ describe("JSON Formatter adapter", () => {
       options: [
         { id: "indent-2", label: "2 spaces" },
         { id: "indent-4", label: "4 spaces" },
+        { id: "indent-tab", label: "Tab" },
       ],
       optionLabel: "Indentation",
       defaultOperationId: "beautify",
@@ -40,6 +41,18 @@ describe("JSON Formatter adapter", () => {
         booleanCount: 1,
         nullCount: 1,
         maxDepth: 2,
+      },
+    });
+    expect(
+      jsonFormatterAdapter.inspect({
+        operationId: "beautify",
+        optionId: "indent-tab",
+        input: '{"a":[true,null]}',
+      }),
+    ).toMatchObject({
+      ok: true,
+      value: {
+        formatted: '{\n\t"a": [\n\t\ttrue,\n\t\tnull\n\t]\n}',
       },
     });
     expect(

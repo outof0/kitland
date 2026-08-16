@@ -4,7 +4,7 @@ import type { JsonFormatterState } from "./types";
 
 export function useSyncJsonFormatter(
   source: string,
-  indent: 2 | 4,
+  indent: 2 | 4 | "tab",
   mode: JsonFormatMode = "beautify",
 ): JsonFormatterState {
   return useMemo(() => {

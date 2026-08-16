@@ -20,6 +20,7 @@ export const jsonFormatterAdapter: TextInspectAdapter = {
       options: [
         { id: "indent-2", label: "2 spaces" },
         { id: "indent-4", label: "4 spaces" },
+        { id: "indent-tab", label: "Tab" },
       ],
       optionLabel: "Indentation",
       defaultOperationId: "beautify",
@@ -36,8 +37,15 @@ export const jsonFormatterAdapter: TextInspectAdapter = {
         ? request.operationId
         : undefined;
     if (!mode) return err("INVALID_OPERATION", "Choose Beautify or Minify.");
-    const indent = request.optionId === "indent-2" ? 2 : request.optionId === "indent-4" ? 4 : null;
-    if (!indent) return err("INVALID_OPTION", "Choose 2-space or 4-space indentation.");
+    const indent: 2 | 4 | "tab" | null =
+      request.optionId === "indent-2"
+        ? 2
+        : request.optionId === "indent-4"
+          ? 4
+          : request.optionId === "indent-tab"
+            ? "tab"
+            : null;
+    if (!indent) return err("INVALID_OPTION", "Choose 2-space, 4-space, or tab indentation.");
     if (request.input.length > 100_000) {
       return err("INPUT_TOO_LARGE", "JSON input exceeds the 100,000 UTF-16 code unit limit.");
     }

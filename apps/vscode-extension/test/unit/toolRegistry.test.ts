@@ -89,6 +89,7 @@ describe("tool registry", () => {
       options: [
         { id: "indent-2", label: "2 spaces" },
         { id: "indent-4", label: "4 spaces" },
+        { id: "indent-tab", label: "Tab" },
       ],
     });
     // Selection replace stays limited to hand-reviewed specialty commands.

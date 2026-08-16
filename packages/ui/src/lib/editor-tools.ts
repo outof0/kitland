@@ -3,7 +3,11 @@ import { formatCode, type BeautifyMinifyLanguage } from "@kitland/core";
 /**
  * In-place code beautifier/formatter supporting JSON, XML, HTML, CSS, JavaScript, SQL.
  */
-export function beautifyCode(code: string, language?: string, indent: 2 | 4 = 2): string | null {
+export function beautifyCode(
+  code: string,
+  language?: string,
+  indent: 2 | 4 | "tab" = 2,
+): string | null {
   const trimmed = code.trim();
   if (!trimmed) return null;
 

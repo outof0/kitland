@@ -4,7 +4,7 @@ export const SQL_FORMATTER_MAX_INPUT_CHARS = 500_000;
 export const SQL_FORMATTER_MAX_OUTPUT_CHARS = 1_000_000;
 
 export type SqlFormatOptions = {
-  readonly indent?: 2 | 4;
+  readonly indent?: 2 | 4 | "tab";
   readonly keywordCase?: "upper" | "lower";
 };
 
@@ -63,7 +63,7 @@ export function formatSql(source: string, options: SqlFormatOptions = {}): ToolR
   if (!source.trim()) return err("EMPTY_INPUT", "Enter a SQL query to format.");
 
   const tokens = tokenize(source);
-  const indentSize = options.indent ?? 2;
+  const indentStr = options.indent === "tab" ? "\t" : " ".repeat(options.indent ?? 2);
   const keywordCase = options.keywordCase ?? "upper";
   const lines: string[] = [];
   let current = "";
@@ -72,7 +72,7 @@ export function formatSql(source: string, options: SqlFormatOptions = {}): ToolR
 
   const flush = () => {
     const value = current.trim();
-    if (value) lines.push(`${" ".repeat(Math.max(0, depth) * indentSize)}${value}`);
+    if (value) lines.push(`${indentStr.repeat(Math.max(0, depth))}${value}`);
     current = "";
   };
   const append = (value: string, spaced = true) => {
@@ -88,7 +88,7 @@ export function formatSql(source: string, options: SqlFormatOptions = {}): ToolR
     const upper = token.value.toUpperCase();
     if (token.kind === "comment") {
       flush();
-      lines.push(`${" ".repeat(depth * indentSize)}${token.value.trim()}`);
+      lines.push(`${indentStr.repeat(Math.max(0, depth))}${token.value.trim()}`);
       continue;
     }
     if (token.kind === "word" && KEYWORDS.has(upper)) {

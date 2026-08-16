@@ -5,7 +5,16 @@ All notable user-facing and public API changes are recorded here.
 This project follows semantic versioning for public releases. Until the first
 tagged release, changes remain under **Unreleased**.
 
-## Unreleased
+## 0.1.1 — Unreleased
+
+### Fixed
+
+- Make CodeMirror-backed tools load reliably in the VS Code webview and open
+  the workbench in a full-width editor tab.
+- Keep tab indentation support consistent across editor hosts while preserving
+  space-only indentation for YAML output.
+
+## 0.1.0
 
 ### Added
 

@@ -51,8 +51,8 @@ export function ToolArea({
   onInputBlur: () => void;
   format: {
     mode: "beautify" | "minify";
-    indent: 2 | 4;
-    onIndentChange: (next: 2 | 4) => void;
+    indent: 2 | 4 | "tab";
+    onIndentChange: (next: 2 | 4 | "tab") => void;
   };
   inputTools: ComponentProps<typeof InputTools>;
   outcome: {

@@ -67,11 +67,11 @@ function sortJsonKeys(val: unknown): unknown {
   return res;
 }
 
-function normalizeJson(source: string, indent: 2 | 4, sortKeys: boolean): string {
+function normalizeJson(source: string, indent: 2 | 4 | "tab", sortKeys: boolean): string {
   try {
     const parsed = JSON.parse(source);
     const sorted = sortKeys ? sortJsonKeys(parsed) : parsed;
-    return JSON.stringify(sorted, null, indent);
+    return JSON.stringify(sorted, null, indent === "tab" ? "\t" : indent);
   } catch {
     return source;
   }
@@ -166,7 +166,7 @@ export function JsonDiffTool({ capabilities = LOCAL_ONLY_CAPABILITIES }: JsonDif
   const [workflow, setWorkflow] = useState<JsonDiffWorkflowState>(() =>
     createJsonDiffWorkflow("", ""),
   );
-  const [indent, setIndent] = useState<2 | 4>(2);
+  const [indent, setIndent] = useState<2 | 4 | "tab">(2);
   const [ignoreKeyOrder, setIgnoreKeyOrder] = useState(false);
   const [onlyChanges, setOnlyChanges] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number>(0);

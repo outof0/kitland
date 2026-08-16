@@ -10,7 +10,7 @@ describe("Package Manifest & Artifact Constraints", () => {
     const pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf8"));
 
     expect(pkgJson.name).toBe("@kitland/mcp");
-    expect(pkgJson.version).toBe("0.1.0");
+    expect(pkgJson.version).toBe("0.1.1");
     expect(pkgJson.private).toBeUndefined();
     expect(pkgJson.type).toBe("module");
     expect(pkgJson.bin).toEqual({ "kitland-mcp": "./dist/cli.js" });
