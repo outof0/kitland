@@ -10,7 +10,6 @@ import {
   ResultCard,
   ResultHead,
   ResultPanel,
-  RunButton,
   StatusBar,
   ToolHeader,
 } from "../components/tool-form";
@@ -18,6 +17,7 @@ import {
 const SAMPLE_PASSWORD = "correct horse";
 const DEFAULT_ROUNDS = 10;
 const ROUNDS_OPTIONS = [4, 6, 8, 10, 11, 12] as const;
+const DEBOUNCE_MS = 150;
 
 export type BcryptHashToolProps = {
   readonly initialInput?: string;
@@ -83,9 +83,12 @@ export function BcryptHashTool({
     }
   }, []);
 
-  // Initial and trigger hash
+  // Realtime hash with debounce — no manual button (matches SHA/HMAC pattern)
   useEffect(() => {
-    void doHash(password, rounds);
+    const timer = setTimeout(() => {
+      void doHash(password, rounds);
+    }, DEBOUNCE_MS);
+    return () => clearTimeout(timer);
   }, [password, rounds, doHash]);
 
   // Verification check
@@ -186,13 +189,8 @@ export function BcryptHashTool({
             <span className="font-mono text-[12px] text-on-surface">auto</span>
           </div>
 
-          {/* Run Action */}
-          <RunButton onClick={() => void doHash(password, rounds)} disabled={busy}>
-            {busy ? "Hashing..." : "Hash Password"}
-          </RunButton>
-
           <p className="m-0 text-[11px] leading-relaxed text-on-faint">
-            Adaptive hash; cost factor {rounds} ≈ {rounds >= 12 ? "400ms+" : "100ms"}.
+            Adaptive hash; cost factor {rounds} ≈ {rounds >= 12 ? "400ms+" : "100ms"} — hashes automatically as you type (debounced {DEBOUNCE_MS}ms).
           </p>
         </FormPanel>
 
