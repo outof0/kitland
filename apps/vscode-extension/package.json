@@ -1,5 +1,5 @@
 {
-  "name": "kitland-developer-tools",
+  "name": "kitland-tools",
   "displayName": "Kitland Tools",
   "version": "0.1.0",
   "private": true,
@@ -35,8 +35,8 @@
     "test": "vitest run --config vitest.config.ts",
     "test:integration": "pnpm build && vscode-test",
     "package:smoke": "pnpm build && node ./scripts/package-smoke.mjs && vsce ls --no-dependencies",
-    "package:vsix": "pnpm package:smoke && node ./scripts/prepare-artifacts.mjs && vsce package --no-dependencies --out ./artifacts/kitland-developer-tools.vsix",
-    "package:vsix:versioned": "pnpm package:smoke && node ./scripts/prepare-artifacts.mjs && vsce package --no-dependencies --out ./artifacts/kitland-developer-tools-v$(node -p \"require('./package.json').version\").vsix",
+    "package:vsix": "pnpm package:smoke && node ./scripts/prepare-artifacts.mjs && vsce package --no-dependencies --out ./artifacts/kitland-tools.vsix",
+    "package:vsix:versioned": "pnpm package:smoke && node ./scripts/prepare-artifacts.mjs && vsce package --no-dependencies --out ./artifacts/kitland-tools-v$(node -p \"require('./package.json').version\").vsix",
     "vscode:prepublish": "pnpm build && node ./scripts/package-smoke.mjs"
   },
   "dependencies": {

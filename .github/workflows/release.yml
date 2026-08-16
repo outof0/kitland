@@ -138,7 +138,7 @@ jobs:
 
       # --- VS Code extension ---
       - name: Package VS Code extension (VSIX)
-        run: pnpm --filter kitland-developer-tools package:vsix
+        run: pnpm --filter kitland-tools package:vsix
 
       - name: Verify VSIX exists
         run: ls -lh apps/vscode-extension/artifacts/*.vsix

@@ -87,8 +87,36 @@ const webBundle = productionBundles.find(
 if (!webBundle) throw new Error("Web-extension bundle was not inspected.");
 // Web bundle string literals contain descriptive text (e.g. HTTP status "process the request") –
 // check via AST so we don't flag inert string content, only actual code references.
-for (const nodePrimitive of [/require\(["']node:/u, /\bBuffer\b/u]) {
-  if (nodePrimitive.test(webBundle.source)) {
+{
+  const sourceFile = ts.createSourceFile(
+    "dist/web/extension.js",
+    webBundle.source,
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.JS,
+  );
+  let usesNodePrimitive = false;
+  function visitNodePrimitive(node) {
+    if (usesNodePrimitive) return;
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "require" &&
+      node.arguments.length > 0 &&
+      ts.isStringLiteral(node.arguments[0]) &&
+      node.arguments[0].text.startsWith("node:")
+    ) {
+      usesNodePrimitive = true;
+      return;
+    }
+    if (ts.isIdentifier(node) && node.text === "Buffer") {
+      usesNodePrimitive = true;
+      return;
+    }
+    ts.forEachChild(node, visitNodePrimitive);
+  }
+  visitNodePrimitive(sourceFile);
+  if (usesNodePrimitive) {
     throw new Error("Web-extension bundle contains a Node.js-only primitive.");
   }
 }

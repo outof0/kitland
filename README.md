@@ -62,7 +62,7 @@ defines the public catalog scope.
 ```bash
 pnpm --filter @kitland/web test:e2e
 pnpm --filter @kitland/browser-extension check
-pnpm --filter kitland-developer-tools package:smoke
+pnpm --filter kitland-tools package:smoke
 pnpm test:integration:vscode # downloads the pinned VS Code test host
 ```
 
