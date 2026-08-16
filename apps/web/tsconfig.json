@@ -27,7 +27,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@kitland/ui/tools/*": ["../../packages/ui/src/tools/*"],
-      "@kitland/ui/catalog": ["../../packages/ui/src/tools/shared-catalog-tools.tsx"]
+      "@kitland/ui/registry": ["../../packages/ui/src/tools/shared-registry-tools.tsx"]
     }
   },
   "include": [".astro/types.d.ts", "src", "e2e", "playwright.config.ts"]

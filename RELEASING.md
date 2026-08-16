@@ -6,7 +6,7 @@ versioning or permissions.
 
 The coordinated product launch remains the complete 64-tool suite. It is
 blocked by `pnpm --filter @kitland/tools release:verify` until every
-catalog entry meets that contract. A separate web rollout certifies the tools
+registry entry meets that contract. A separate web rollout certifies the tools
 explicitly declared for the web surface; it is not a complete-suite release and
 does not publish either extension.
 
@@ -18,21 +18,21 @@ does not publish either extension.
    security impact, and rollback notes.
 3. Run `pnpm release:check:rollout`. It first runs the normal quality suite,
    then proves the web rollout targets are canonical, `release-ready`, and
-   available on web. It verifies every catalog-available editor route in the
-   normal full-catalog web artifact, checks bundle and SEO output, and smoke-tests the
-   result. The public landing page, 64-tool catalog, and every available editor
+   available on web. It verifies every registry-available editor route in the
+   normal full-registry web artifact, checks bundle and SEO output, and smoke-tests the
+   result. The public landing page, 64-tool registry, and every available editor
    remain accessible; certification is not a visibility rule.
 4. On `main` or `master`, set `CLOUDFLARE_PAGES_ROLLOUT_ENABLED=true` only
    after the Cloudflare credentials and production environment approval are in
    place. Keep `CLOUDFLARE_PAGES_ENABLED` unset: that variable is reserved for
    a complete-suite launch. CI downloads and re-verifies the normal artifact
    before deploying it.
-5. Smoke the canonical production origin. Confirm every catalog-available
+5. Smoke the canonical production origin. Confirm every registry-available
    editor route remains reachable and the reviewed web rollout target set
-   matches the catalog, then record rollback instructions.
+   matches the registry, then record rollback instructions.
 6. Roll back to the prior verified Pages artifact if production validation
    fails. Do not change rollout certification by editing host contracts outside
-   the catalog release stage.
+   the registry release stage.
 
 This web-only rollout does not create, upload, or publish a browser extension
 ZIP, a VS Code VSIX, or a package registry release.
@@ -46,7 +46,7 @@ ZIP, a VS Code VSIX, or a package registry release.
 3. Run `pnpm quality:check` using the pinned Node and pnpm versions. Review the
    generated route set, extension package checks, and bundle-budget output
    rather than only the exit code.
-4. Run `pnpm release:check`. Its catalog gate must prove that exactly the
+4. Run `pnpm release:check`. Its registry gate must prove that exactly the
    canonical 64 identities are present, `release-ready`, web-available, and
    have no unresolved `planned` platform contracts. The committed manifest
    stores stable id/slug pairs only; matching `ToolDefinition` records remain
@@ -135,5 +135,5 @@ and a strict allowlist (no `src/`, `test/`, `.map`, or `workspace:*` deps).
 Each extension owns its manifest permissions, package artifact, marketplace
 metadata, compatibility range, and rollback path. A web tool being
 `release-ready` and a web rollout certification do not authorize browser or VS
-Code marketplace publication; the catalog platform contract and host permission
+Code marketplace publication; the registry platform contract and host permission
 review must both approve it.

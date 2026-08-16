@@ -31,7 +31,7 @@ tool has a reportable budget via `tool-budgets.ts`.
 ## Parallel ownership
 
 1. One agent owns one **disjoint set of tool ids** (see KIT-0006 plan matrix).
-2. Add core + tests, catalog definition, web renderer, SEO when web-available.
+2. Add core + tests, registry definition, web renderer, SEO when web-available.
 3. Append the renderer to `apps/web/src/tools/registry.tsx` exhaustively.
 4. Do not promote `browser-extension` / `vscode-extension` without host adapters.
 5. Integration owner runs conformance + package gates before merge.
@@ -40,7 +40,7 @@ tool has a reportable budget via `tool-budgets.ts`.
 
 1. Confirm id in inventory (`tool-scaffold-check`).
 2. Implement `packages/core/src/tools/<id>.ts` + tests.
-3. Declare catalog definition (wave file / `defineTool`).
+3. Declare registry definition (wave file / `defineTool`).
 4. Implement web tool + registry entry + SEO.
-5. Run `pnpm --filter @kitland/core test`, catalog tests, web typecheck/build.
+5. Run `pnpm --filter @kitland/core test`, registry tests, web typecheck/build.
 6. Attach evidence on the owning kanban card.

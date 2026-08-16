@@ -96,7 +96,7 @@ export function decodeUrl(input: string, options: UrlTransformOptions = {}): Too
   }
 }
 
-/** A host-neutral entry point for catalog adapters. */
+/** A host-neutral entry point for registry adapters. */
 export function runUrlTransform(
   mode: UrlTransformMode,
   input: string,

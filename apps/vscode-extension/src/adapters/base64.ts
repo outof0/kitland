@@ -6,7 +6,7 @@ const MAX_ENCODE_INPUT_CHARS = 250_000;
 const MAX_DECODE_INPUT_CHARS = 1_000_000;
 
 export const base64Adapter: TextTransformAdapter = {
-  catalogTool: base64Tool,
+  registryTool: base64Tool,
   descriptor: {
     id: base64Tool.id,
     title: base64Tool.shortName,

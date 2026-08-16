@@ -78,7 +78,7 @@ test.describe("cURL converter contract", () => {
     for (const name of ["Convert", "Sample", "Clear input"]) {
       await expect(page.getByRole("button", { name, exact: true })).toHaveCount(1);
     }
-    // Curl Converter's catalog contract declares transform-text and
+    // Curl Converter's registry contract declares transform-text and
     // clipboard-write only, so file import/export controls stay hidden.
     for (const name of ["Upload file", "Save result"]) {
       await expect(page.getByRole("button", { name, exact: true })).toHaveCount(0);

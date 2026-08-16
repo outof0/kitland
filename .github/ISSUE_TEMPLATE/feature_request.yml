@@ -21,7 +21,7 @@ body:
         - Web
         - Browser extension
         - VS Code extension
-        - Shared core or catalog
+        - Shared core or registry
         - Documentation or contributor tooling
     validations:
       required: true

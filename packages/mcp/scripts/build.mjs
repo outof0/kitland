@@ -7,7 +7,7 @@ const outdir = fileURLToPath(new URL("../dist/", import.meta.url));
 const outCli = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
 const metafilePath = fileURLToPath(new URL("../dist/metafile.json", import.meta.url));
 const coreEntry = fileURLToPath(new URL("../../../packages/core/src/index.ts", import.meta.url));
-const catalogEntry = fileURLToPath(
+const registryEntry = fileURLToPath(
   new URL("../../../packages/tools/src/index.ts", import.meta.url),
 );
 
@@ -17,7 +17,7 @@ const result = await build({
   absWorkingDir: packageRoot,
   alias: {
     "@kitland/core": coreEntry,
-    "@kitland/tools": catalogEntry,
+    "@kitland/tools": registryEntry,
   },
   banner: {
     js: "#!/usr/bin/env node\n",

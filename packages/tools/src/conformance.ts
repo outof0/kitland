@@ -11,7 +11,7 @@ export type ConformanceIssue = {
 export type ConformanceReport = {
   readonly ready: boolean;
   readonly inventoryCount: number;
-  readonly catalogCount: number;
+  readonly registryCount: number;
   readonly issues: readonly ConformanceIssue[];
   readonly generatedAt: string;
 };
@@ -22,7 +22,7 @@ export function isInventoryToolId(id: string): boolean {
 }
 
 /**
- * Suite conformance: inventory identity, catalog completeness, available-host
+ * Suite conformance: inventory identity, registry completeness, available-host
  * adapter requirements, and per-tool budget coverage.
  */
 export function evaluateToolConformance(
@@ -40,8 +40,8 @@ export function evaluateToolConformance(
 
   if (tools.length !== CANONICAL_TOOL_INVENTORY.length) {
     issues.push({
-      code: "CATALOG_SIZE_MISMATCH",
-      message: `Catalog has ${tools.length} tools; inventory has ${CANONICAL_TOOL_INVENTORY.length}.`,
+      code: "REGISTRY_SIZE_MISMATCH",
+      message: `Registry has ${tools.length} tools; inventory has ${CANONICAL_TOOL_INVENTORY.length}.`,
     });
   }
 
@@ -70,8 +70,8 @@ export function evaluateToolConformance(
     const tool = byId.get(entry.id);
     if (!tool) {
       issues.push({
-        code: "INVENTORY_MISSING_FROM_CATALOG",
-        message: `Inventory id ${entry.id} has no catalog definition.`,
+        code: "INVENTORY_MISSING_FROM_REGISTRY",
+        message: `Inventory id ${entry.id} has no registry definition.`,
         toolSlug: entry.slug,
       });
       continue;
@@ -79,7 +79,7 @@ export function evaluateToolConformance(
     if (tool.slug !== entry.slug) {
       issues.push({
         code: "INVENTORY_SLUG_MISMATCH",
-        message: `Inventory slug ${entry.slug} does not match catalog slug ${tool.slug}.`,
+        message: `Inventory slug ${entry.slug} does not match registry slug ${tool.slug}.`,
         toolSlug: tool.slug,
       });
     }
@@ -88,8 +88,8 @@ export function evaluateToolConformance(
   for (const tool of tools) {
     if (!isInventoryToolId(tool.id)) {
       issues.push({
-        code: "CATALOG_OUTSIDE_INVENTORY",
-        message: `Catalog tool ${tool.id} is not in the committed inventory.`,
+        code: "REGISTRY_OUTSIDE_INVENTORY",
+        message: `Registry tool ${tool.id} is not in the committed inventory.`,
         toolSlug: tool.slug,
       });
     }
@@ -122,7 +122,7 @@ export function evaluateToolConformance(
   return {
     ready: issues.length === 0,
     inventoryCount: CANONICAL_TOOL_INVENTORY.length,
-    catalogCount: tools.length,
+    registryCount: tools.length,
     issues,
     generatedAt: now(),
   };

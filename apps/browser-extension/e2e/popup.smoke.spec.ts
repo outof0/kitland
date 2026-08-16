@@ -20,10 +20,10 @@ test.beforeEach(async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test("filters the generic catalog and keeps the active renderer mounted", async ({ page }) => {
-  const catalog = page.getByRole("navigation", { name: "Registered tools" });
+test("filters the generic registry and keeps the active renderer mounted", async ({ page }) => {
+  const registry = page.getByRole("navigation", { name: "Registered tools" });
   await expect(
-    catalog.getByRole("button", { name: "Beautify / Minify", exact: true }),
+    registry.getByRole("button", { name: "Beautify / Minify", exact: true }),
   ).toHaveAttribute("aria-current", "page");
   await page.keyboard.press("Control+k");
   const search = page.getByRole("combobox", { name: "Search registered tools" });

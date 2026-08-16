@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
-  getCatalogPhasedReleaseReadiness,
-  getCatalogSurfaceRolloutReadiness,
+  getRegistryPhasedReleaseReadiness,
+  getRegistrySurfaceRolloutReadiness,
   listReleaseReadyTools,
   listSurfaceRolloutCandidates,
   listSurfaceRolloutTools,
   listTools,
-} from "./catalog";
+} from "./registry";
 import { CANONICAL_TOOL_INVENTORY } from "./inventory";
-import { evaluateCatalogPhasedReleaseReadiness } from "./phased-release";
+import { evaluateRegistryPhasedReleaseReadiness } from "./phased-release";
 import {
-  evaluateCatalogSurfaceRolloutReadiness,
+  evaluateRegistrySurfaceRolloutReadiness,
   isToolCertifiedForSurface,
   parseSurfaceRolloutPlatform,
 } from "./surface-rollout";
@@ -36,7 +36,7 @@ describe("surface rollout release gate", () => {
       expect(targets.map((tool) => tool.slug)).toEqual(expect.arrayContaining(certifiedSlugs));
       expect(targets.every((tool) => isToolCertifiedForSurface(tool, "web"))).toBe(true);
     }
-    expect(getCatalogSurfaceRolloutReadiness("web")).toMatchObject({
+    expect(getRegistrySurfaceRolloutReadiness("web")).toMatchObject({
       ready: true,
       platform: "web",
       targetToolCount: 64,
@@ -65,13 +65,13 @@ describe("surface rollout release gate", () => {
     };
     const inventory = [{ id: webOnlyTool.id, slug: webOnlyTool.slug }];
 
-    expect(evaluateCatalogSurfaceRolloutReadiness([webOnlyTool], "web", inventory)).toMatchObject({
+    expect(evaluateRegistrySurfaceRolloutReadiness([webOnlyTool], "web", inventory)).toMatchObject({
       ready: true,
       targetToolSlugs: [webOnlyTool.slug],
       issues: [],
     });
     expect(
-      evaluateCatalogSurfaceRolloutReadiness(
+      evaluateRegistrySurfaceRolloutReadiness(
         [webOnlyTool],
         "browser-extension",
         inventory,
@@ -87,7 +87,7 @@ describe("surface rollout release gate", () => {
 
   it("blocks an empty surface rollout instead of treating it as a successful no-op", () => {
     const tools = listTools().map((tool) => ({ ...tool, releasePlatforms: [] as const }));
-    const readiness = evaluateCatalogSurfaceRolloutReadiness(
+    const readiness = evaluateRegistrySurfaceRolloutReadiness(
       tools,
       "web",
       CANONICAL_TOOL_INVENTORY,
@@ -113,7 +113,7 @@ describe("surface rollout release gate", () => {
         web: { ...readyTool.platforms.web, status: "planned" },
       },
     };
-    const readiness = evaluateCatalogSurfaceRolloutReadiness(
+    const readiness = evaluateRegistrySurfaceRolloutReadiness(
       [malformedTarget],
       "web",
       CANONICAL_TOOL_INVENTORY,
@@ -133,9 +133,9 @@ describe("surface rollout release gate", () => {
     expect(listReleaseReadyTools().map((tool) => tool.slug)).toEqual(
       listSurfaceRolloutTools("web").map((tool) => tool.slug),
     );
-    expect(getCatalogPhasedReleaseReadiness()).toEqual(getCatalogSurfaceRolloutReadiness("web"));
-    expect(evaluateCatalogPhasedReleaseReadiness(listTools())).toEqual(
-      getCatalogSurfaceRolloutReadiness("web"),
+    expect(getRegistryPhasedReleaseReadiness()).toEqual(getRegistrySurfaceRolloutReadiness("web"));
+    expect(evaluateRegistryPhasedReleaseReadiness(listTools())).toEqual(
+      getRegistrySurfaceRolloutReadiness("web"),
     );
   });
 

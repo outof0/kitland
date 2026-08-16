@@ -3,10 +3,10 @@ import { getToolBySlug } from "@kitland/tools";
 import type { TextInspectAdapter } from "../toolAdapter";
 
 const jsonFormatter = getToolBySlug("json-formatter");
-if (!jsonFormatter) throw new Error("Missing JSON Formatter catalog definition.");
+if (!jsonFormatter) throw new Error("Missing JSON Formatter registry definition.");
 
 export const jsonFormatterAdapter: TextInspectAdapter = {
-  catalogTool: jsonFormatter,
+  registryTool: jsonFormatter,
   descriptor: {
     id: jsonFormatter.id,
     title: jsonFormatter.shortName,

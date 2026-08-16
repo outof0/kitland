@@ -59,16 +59,16 @@ apps/web                 Thin workspace shell + pattern UI for the tool
 ```
 
 ```text
-apps/web → tool-catalog → (metadata only)
+apps/web → tool-registry → (metadata only)
 apps/web → core         → pure run*
 ```
 
 Do **not** put platform APIs (`window`, `vscode`, `chrome`) inside `core`.
 
-## How to add each catalog tool
+## How to add each registry tool
 
 1. **Core** — `packages/core/src/tools/<name>.ts` + tests, return `ToolResult<T>`.
-2. **Catalog** — declare the tool with `defineTool()`, including explicit web,
+2. **Registry** — declare the tool with `defineTool()`, including explicit web,
    browser-extension, and vscode-extension capability contracts, then register
    it in `TOOLS`. See [the platform contract](./platform-capabilities.md).
 3. **Design** — identify frame id/name in `design.pen` before UI.
@@ -84,8 +84,8 @@ Do **not** put platform APIs (`window`, `vscode`, `chrome`) inside `core`.
 
 | Path              | Behavior                                 |
 | ----------------- | ---------------------------------------- |
-| `/`               | Suite landing (generic CTAs → catalog)   |
-| `/explore`        | Static catalog and implementation status |
+| `/`               | Suite landing (generic CTAs → registry)   |
+| `/explore`        | Static registry and implementation status |
 | `/explore/base64` | Golden Base64 tool                       |
 
 ## localStorage keys
@@ -105,7 +105,7 @@ that preference, so an older deployment cannot silently downgrade stored data.
 - Installing or migrating shadcn primitives as a side effect of one tool (use a dedicated UI-foundation change)
 - Server routes (tools are browser-local)
 - Copying host-specific VS Code / browser adapter behavior back into the web
-  component; catalog exposure is declared explicitly and is never inferred
+  component; registry exposure is declared explicitly and is never inferred
   from availability on another host
 - Global ⌘K search
 - The other 63 tool implementations; the suite rollout is tracked separately

@@ -8,32 +8,32 @@
 
 Base64 began as the first reference implementation used to stabilize tool
 contracts, workspace behavior, accessibility, and platform adapters. A small
-set of complete vertical slices can be ready before the entire catalog, but
+set of complete vertical slices can be ready before the entire registry, but
 presenting any one of them as the whole product or redirecting `/explore` to it
 would still misrepresent Kitland's intended scope: a coherent suite of roughly
 64 developer tools across web, browser extension, and VS Code.
 
 The repository still needs fast incremental development. “Release everything
 together” must therefore be a product-release rule, not a reason to make every
-branch or CI build red while the catalog is under construction.
+branch or CI build red while the registry is under construction.
 
 ## Decision
 
 1. A tool may enter an explicit rollout on one product surface only when its
-   catalog stage is `release-ready` and that surface is declared in
+   registry stage is `release-ready` and that surface is declared in
    `releasePlatforms`. Certification is per surface: no individual tool or
    rollout makes Kitland product-release-ready as a coordinated 64-tool suite.
-2. `/explore` is a static catalog and implementation-status page. It never
+2. `/explore` is a static registry and implementation-status page. It never
    redirects generic intent to the first implemented tool.
 3. The coordinated product launch remains pre-release until the agreed 64-tool
    inventory is registered and every required tool passes its core, UX,
    accessibility, security, platform, documentation, and packaging gates.
 4. Normal CI remains green for valid incremental work. A distinct
-   complete-suite product release gate checks catalog completeness and blocks
+   complete-suite product release gate checks registry completeness and blocks
    coordinated deployment/publication until the suite is complete. A separate
    web rollout gate certifies selected web targets, then deploys the normal
-   full-catalog web artifact.
-5. Platform shells are catalog-driven. A host may use Base64 to prove its
+   full-registry web artifact.
+5. Platform shells are registry-driven. A host may use Base64 to prove its
    adapter, but the host architecture and product copy must remain generic.
 
 ## Consequences
@@ -43,7 +43,7 @@ branch or CI build red while the catalog is under construction.
 - Marketing and route structure match the actual product strategy while
   finished tools can be certified and deployed through the normal web artifact.
 - Agents can work on independent vertical slices without creating separate
-  one-tool products or host-specific catalogs.
+  one-tool products or host-specific registrys.
 - Release readiness becomes machine-checkable rather than inferred from a
   passing build or one polished reference screen.
 
@@ -66,7 +66,7 @@ branch or CI build red while the catalog is under construction.
 4. Run cross-tool search, navigation, bundle, accessibility, and packaging
    conformance after every wave.
 5. For a web rollout, certify the `release-ready` targets declared for web and
-   verify that the normal artifact retains every catalog-available route,
+   verify that the normal artifact retains every registry-available route,
    sitemap URL, link, and renderer chunk; do not publish extension packages as
    a side effect.
 6. Change product and platform labels from “Foundation” only when the complete

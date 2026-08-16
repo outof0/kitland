@@ -23,7 +23,7 @@
     "baseUrl": ".",
     "paths": {
       "@kitland/core": ["../../packages/core/src/index.ts"],
-      "@kitland/ui/catalog": ["../../packages/ui/src/tools/shared-catalog-tools.tsx"],
+      "@kitland/ui/registry": ["../../packages/ui/src/tools/shared-registry-tools.tsx"],
       "@kitland/ui/tools/*": ["../../packages/ui/src/tools/*"]
     },
     "types": ["node", "mocha", "vscode", "vitest/globals", "react", "react-dom"]

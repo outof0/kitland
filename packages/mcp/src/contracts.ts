@@ -36,7 +36,7 @@ export type McpExposure<Input, Output> = {
   readonly mcpName: string;
   readonly operationId: string;
   readonly contractVersion: number;
-  readonly catalogToolId: string;
+  readonly registryToolId: string;
   readonly title: string;
   readonly description: string;
   readonly inputSchema: JsonSchema;

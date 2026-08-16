@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { PROTOCOL_MAX_DESCRIPTION_CHARS, PROTOCOL_MAX_ID_CHARS } from "./constants";
 import { runRegexIsolated } from "./regexWorker";
-import { parseWebviewMessage, type CatalogToolEntry, type HostMessage } from "./protocol";
-import { getToolAdapter, listToolAdapters } from "./toolCatalog";
+import { parseWebviewMessage, type RegistryToolEntry, type HostMessage } from "./protocol";
+import { getToolAdapter, listToolAdapters } from "./toolRegistry";
 import type { ToolAdapter } from "./toolAdapter";
 import { renderWebviewHtml } from "./webviewHtml";
 
@@ -85,21 +85,21 @@ export class KitlandViewProvider implements vscode.WebviewViewProvider {
     void this.view?.webview.postMessage(message);
   }
 
-  private catalogEntries(): CatalogToolEntry[] {
+  private registryEntries(): RegistryToolEntry[] {
     return listToolAdapters().map((adapter) => ({
-      id: adapter.catalogTool.id,
-      slug: adapter.catalogTool.slug,
-      shortName: adapter.catalogTool.shortName,
-      name: adapter.catalogTool.name,
-      description: adapter.catalogTool.description,
-      family: adapter.catalogTool.family,
+      id: adapter.registryTool.id,
+      slug: adapter.registryTool.slug,
+      shortName: adapter.registryTool.shortName,
+      name: adapter.registryTool.name,
+      description: adapter.registryTool.description,
+      family: adapter.registryTool.family,
     }));
   }
 
   private postToolsList(): void {
     this.post({
       type: "toolsList",
-      tools: this.catalogEntries(),
+      tools: this.registryEntries(),
       activeToolId: this.adapter.descriptor.id,
       initialInput: this.initialInput,
     });

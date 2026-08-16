@@ -7,7 +7,7 @@ Kitland is a privacy-first workbench for developers who handle sensitive text, c
 - **Canonical origin:** https://kitland.dev
 - **Source:** https://github.com/OutOf0/kitland (MIT)
 - **Sitemap:** https://kitland.dev/sitemap-index.xml
-- **Explore catalog:** https://kitland.dev/explore
+- **Explore registry:** https://kitland.dev/explore
 
 ## Why this helps AI
 
@@ -24,7 +24,7 @@ Kitland is a privacy-first workbench for developers who handle sensitive text, c
 - **Text & Regex (05):** Case Converter, Sort Lines, Dedupe Lines, Text Reverser, Text Stats, Text Diff, Regex Tester, Split to Newlines
 - **Time & Network (06):** Unix Timestamp, Date Calculator, Age Calculator, Duration Formatter, Number Base, Color Converter, Temperature, Data Size, Timezone Converter, URL Parser, HTTP Status Codes, MIME Types, User Agent Parser, cURL Converter, Cron Parser, IP Subnet Calculator
 
-Full catalog and live status: https://kitland.dev/explore
+Full registry and live status: https://kitland.dev/explore
 
 ## How to use (for AI assistants)
 

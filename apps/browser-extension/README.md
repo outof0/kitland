@@ -1,20 +1,20 @@
 # Kitland Browser Extension
 
 The permission-free Manifest V3 host for the Kitland developer tool suite.
-Catalog metadata is the authority: only tools declared `available` on
+Registry metadata is the authority: only tools declared `available` on
 `browser-extension` appear in the full-page tab. Web availability never implies an
 extension adapter.
 
 Specialty adapters (Base64, cURL Converter, JSON Formatter) ship dedicated UIs.
-Other catalog-available pure transforms share a lazy generic local transform
+Other registry-available pure transforms share a lazy generic local transform
 mount powered by `@kitland/core` host-transform specs. Generators, diff tools,
-many inspectors, and crypto stay catalog-planned on this host until specialized
+many inspectors, and crypto stay registry-planned on this host until specialized
 adapters exist.
 
 ## Architecture
 
 ```text
-popup.html + main.ts             Generic searchable catalog and tool host (full-page tab)
+popup.html + main.ts             Generic searchable registry and tool host (full-page tab)
 sw.js                            Toolbar launcher: opens the tool page in a tab
 registry.ts                      Explicit metadata + lazy renderer registrations
 tools/<slug>/adapter.ts          One host adapter, mounted only when selected
@@ -26,7 +26,7 @@ tools/<slug>/*.worker.ts         Optional route-local compute worker
 
 Each registration uses a dynamic import, so adding a renderer does not add its
 JavaScript to the initial shell. A renderer receives an isolated root and must
-return cleanup logic for tool switches. Catalog presence alone never exposes a
+return cleanup logic for tool switches. Registry presence alone never exposes a
 tool: extension registration remains an explicit, reviewable decision.
 
 ## Privacy and platform boundary
@@ -74,10 +74,10 @@ pnpm --filter @kitland/browser-extension package
 5. Add adapter unit/smoke tests, maximum-input tests, cleanup tests, and review
    the final permissions/package output.
 
-Build-time validation requires every catalog entry marked browser-extension
+Build-time validation requires every registry entry marked browser-extension
 `available` to have exactly one renderer, and every renderer must point at such
 an entry. The invariant already applies to the reference adapter and remains
-exhaustive as the catalog expands.
+exhaustive as the registry expands.
 
 ## Load the production build
 
@@ -104,7 +104,7 @@ variant without changing runtime capabilities.
 
 Load unpacked `dist/` in clean Chromium and Firefox profiles, then verify:
 
-1. The searchable catalog, selection, deep-link hash, and lazy renderer loading
+1. The searchable registry, selection, deep-link hash, and lazy renderer loading
    work without console or CSP errors.
 2. Each tool's primary workflow, file/clipboard/export capability, failure
    states, maximum input, keyboard path, and cleanup pass its contract.
@@ -116,14 +116,14 @@ Load unpacked `dist/` in clean Chromium and Firefox profiles, then verify:
 ## Release integration remaining
 
 Workspace build, unit, production-page smoke, package verification, CI artifact
-upload, per-entry budgets, and catalog ↔ renderer exhaustiveness are wired. The
+upload, per-entry budgets, and registry ↔ renderer exhaustiveness are wired. The
 remaining release work is deliberately external to the runtime foundation:
 
 1. Add clean-profile unpacked-extension automation and Firefox compatibility CI.
 2. Establish Chrome Web Store and Firefox Add-ons ownership, signing,
    provenance, review accounts, and rollback procedures outside pull-request
    jobs.
-3. Add store listing assets and privacy/support URLs after the complete catalog
+3. Add store listing assets and privacy/support URLs after the complete registry
    copy is approved.
 4. Add a keyboard command palette after a meaningful number of the committed
-   catalog tools have browser adapters.
+   registry tools have browser adapters.

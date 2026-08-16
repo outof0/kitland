@@ -1,10 +1,10 @@
-import { SharedCatalogTool } from "@kitland/ui/catalog";
+import { SharedRegistryTool } from "@kitland/ui/registry";
 import type { ToolComponentProps } from "../toolRegistry";
 import { useVscodeRegexTester } from "../useRegexTester";
 
-export default function SharedCatalogWrapper({ slug, initialInput }: ToolComponentProps) {
+export default function SharedRegistryWrapper({ slug, initialInput }: ToolComponentProps) {
   return (
-    <SharedCatalogTool
+    <SharedRegistryTool
       slug={slug}
       {...(initialInput !== undefined ? { initialInput } : {})}
       capabilities={{ fileOpen: false, fileSave: false }}

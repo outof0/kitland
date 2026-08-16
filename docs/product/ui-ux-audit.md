@@ -20,7 +20,7 @@ delivery mechanism. That was appropriate as a design prototype, not as the scala
 The implemented baseline now uses one semantic responsive tree, renders the landing without a
 client-side application island, presents six tool families and the 64-tool release target,
 distinguishes repository foundations from published extensions, and uses copy that describes
-network and privacy behavior precisely. `/explore` is a real catalog/status surface rather than a
+network and privacy behavior precisely. `/explore` is a real registry/status surface rather than a
 redirect to whichever reference tool happened to be implemented first.
 
 The production landing artifact dropped from roughly 270 KB raw / 52 KB gzip to 47.5 KB raw /
@@ -37,7 +37,7 @@ adding tool renderers does not put all 64 implementations on every tool route.
 | -------------------- | --------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
 | Landing architecture | Desktop, tablet, and mobile trees duplicated content and all shipped in the document.                           | High     | Replace them with one responsive, data-driven tree.                                                    |
 | First interaction    | The entire landing hydrated on `client:load` for motion and a hamburger menu.                                   | High     | Render static HTML and use native `<details>` for the mobile disclosure. Motion is CSS-only.           |
-| Information scent    | The primary and secondary hero CTAs both opened Base64.                                                         | High     | Route the primary action to the suite catalog; make the secondary action explain local-first behavior. |
+| Information scent    | The primary and secondary hero CTAs both opened Base64.                                                         | High     | Route the primary action to the suite registry; make the secondary action explain local-first behavior. |
 | False affordance     | Four “popular tool” links used different labels but the same Base64 destination.                                | Medium   | Present supported workflows as non-interactive capability labels.                                      |
 | Product truth        | “Offline-capable” was not guaranteed by the current static asset delivery.                                      | High     | Replace it with verifiable local-processing and shared-core claims.                                    |
 | Product scope        | The first implementation was visually positioned as if Base64 were the product.                                 | High     | Present six families and 64 tools; label Base64 only as a reference implementation.                    |
@@ -52,19 +52,19 @@ adding tool renderers does not put all 64 implementations on every tool route.
 The landing follows a deliberate question sequence:
 
 1. **What is it?** A 64-tool, local-first developer workbench.
-2. **What exists now?** The primary action opens the catalog/status page, not a single tool.
+2. **What exists now?** The primary action opens the registry/status page, not a single tool.
 3. **Why trust it?** The hero and proof band state no network uploads, no account, and MIT licensing.
 4. **What is actually ready?** Base64 is explicitly a reference slice; every product surface remains
-   a repository foundation until the full catalog ships.
+   a repository foundation until the full registry ships.
 5. **Will the product scale coherently?** The shared-core section explains which behavior remains
    common and which UI adapts to its host.
 
 The page communicates target breadth through non-interactive family examples. A tool becomes an
-interactive catalog entry only when its workflow meets the acceptance contract below.
+interactive registry entry only when its workflow meets the acceptance contract below.
 
 ## Suite-wide tool UX
 
-The suite must not scale by cloning one dual-pane converter 64 times. Catalog
+The suite must not scale by cloning one dual-pane converter 64 times. Registry
 metadata assigns each tool one reviewed interaction pattern: `transform`,
 `generate`, `diff`, or `inspect`. The shared shell owns discovery, navigation,
 theme, favorites, responsive behavior, focus return, and host privacy language;
@@ -100,7 +100,7 @@ copy URL-fragment behavior unless the host provides an equally clear, safe shari
 ### Product and content
 
 - One primary job and one primary result.
-- Catalog metadata names supported platforms and capabilities.
+- Registry metadata names supported platforms and capabilities.
 - “Available” means the renderer, tests, documentation, and packaging gate all pass.
 - Security and privacy claims describe observable behavior, not roadmap intent.
 

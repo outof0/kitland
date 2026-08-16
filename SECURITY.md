@@ -28,7 +28,7 @@ snapshot unless a future release note establishes another supported line.
 ## Scope
 
 Reports are welcome for the web application, browser extension, VS Code
-extension, `@kitland/core`, tool catalog, build/deployment workflow, and
+extension, `@kitland/core`, tool registry, build/deployment workflow, and
 first-party dependencies. Third-party hosted services should also be reported
 when the issue is caused by Kitland's configuration or integration.
 

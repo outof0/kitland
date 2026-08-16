@@ -5,7 +5,7 @@
 **Decision:** [ADR 0002](../adr/0002-local-mcp-boundary-and-hosted-deferral.md).
 
 This document makes a local stdio adapter implementable without accidentally
-turning the browser catalog into a remote data service. It follows MCP's
+turning the browser registry into a remote data service. It follows MCP's
 tools model for discovery, JSON-Schema arguments, and structured results; the
 future package must pin the exact MCP SDK/protocol version it supports and test
 that version rather than relying on this document alone.
@@ -72,7 +72,7 @@ type McpExposure<Input, Output> = {
   operationId: string;
   /** Starts at 1; changes only for a breaking operation contract. */
   contractVersion: number;
-  catalogToolId: string;
+  registryToolId: string;
   title: string;
   description: string;
   inputSchema: JsonSchema;
@@ -103,7 +103,7 @@ Rules for every declaration:
 - An MCP operation maps to one unambiguous behavior. Prefer separate
   `kitland_base64_encode` and `kitland_base64_decode` operations over a
   mode-switching command whose semantic meaning can drift.
-- `catalogToolId` is traceability only. The UI route may change independently;
+- `registryToolId` is traceability only. The UI route may change independently;
   it is not the protocol contract.
 - `inputSchema` has an object root, rejects unknown properties, documents each
   optional field, and never accepts a free-form configuration object. Runtime

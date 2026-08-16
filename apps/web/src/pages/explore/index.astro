@@ -1,6 +1,6 @@
 ---
 import { Logo } from "@/components/Logo";
-import { CATALOG_FAMILIES } from "@/data/catalog";
+import { REGISTRY_FAMILIES } from "@/data/registry";
 import { listWebTools } from "@/lib/release-scope";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
@@ -10,7 +10,7 @@ const plannedToolCount = tools.length - availableToolCount;
 const description =
   "Explore Kitland's 64 local-first developer tools. Open every available tool or browse the committed roadmap.";
 const normalizedSearchValue = (value: string) => value.toLocaleLowerCase();
-const familyGroups = CATALOG_FAMILIES.map((family) => ({
+const familyGroups = REGISTRY_FAMILIES.map((family) => ({
   ...family,
   tools: tools.filter((tool) => tool.family === family.id),
 })).filter((family) => family.tools.length > 0);
@@ -23,7 +23,7 @@ const familyGroups = CATALOG_FAMILIES.map((family) => ({
   structuredData={{
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Kitland developer tool catalog",
+    name: "Kitland developer tool registry",
     url: "https://kitland.dev/explore",
     description,
   }}
@@ -33,7 +33,7 @@ const familyGroups = CATALOG_FAMILIES.map((family) => ({
       href="#explore-main"
       class="sr-only fixed left-4 top-4 z-50 min-h-11 rounded-md bg-marketing-primary px-4 py-3 text-sm font-semibold text-white focus:not-sr-only"
     >
-      Skip to tool catalog
+      Skip to tool registry
     </a>
 
     <header class="border-b border-marketing-border bg-marketing-canvas">
@@ -50,7 +50,7 @@ const familyGroups = CATALOG_FAMILIES.map((family) => ({
             class="relative flex min-h-11 items-center rounded-sm px-2 text-sm font-medium text-marketing-text-secondary transition-colors hover:text-marketing-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-marketing-primary-light after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-marketing-primary after:transition-transform motion-safe:hover:after:scale-x-100"
           >Home</a>
           <a
-            href="#tool-catalog"
+            href="#tool-registry"
             class="inline-flex h-10 min-h-11 items-center justify-center gap-2 rounded-md border border-marketing-border-strong bg-marketing-surface px-3 text-sm font-semibold text-marketing-foreground transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out hover:border-marketing-border-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marketing-primary-light motion-safe:hover:-translate-y-px motion-safe:active:scale-[0.985] sm:px-4"
           >
             Browse tools
@@ -76,11 +76,11 @@ const familyGroups = CATALOG_FAMILIES.map((family) => ({
             </h1>
             <p class="mt-6 max-w-2xl text-base leading-7 text-marketing-text-secondary sm:text-lg">
               Find a focused utility, see its delivery status, and open every tool available in
-              this deployment. The catalog is the calm front door to all 64 Kitland workflows.
+              this deployment. The registry is the calm front door to all 64 Kitland workflows.
             </p>
           </div>
 
-          <aside class="grid min-w-0 grid-cols-3 gap-px overflow-hidden rounded-xl border border-marketing-border bg-marketing-border shadow-marketing-preview" aria-label="Catalog summary">
+          <aside class="grid min-w-0 grid-cols-3 gap-px overflow-hidden rounded-xl border border-marketing-border bg-marketing-border shadow-marketing-preview" aria-label="Registry summary">
             <div class="min-w-0 bg-marketing-raised p-4 sm:p-5">
               <p class="font-display text-4xl font-extrabold text-white">{tools.length}</p>
               <p class="mt-1 font-mono text-[10px] tracking-wide text-marketing-text-muted">TOOLS</p>
@@ -97,11 +97,11 @@ const familyGroups = CATALOG_FAMILIES.map((family) => ({
         </div>
       </section>
 
-      <section id="tool-catalog" class="px-4 py-12 sm:px-8 lg:py-16" aria-labelledby="catalog-heading">
+      <section id="tool-registry" class="px-4 py-12 sm:px-8 lg:py-16" aria-labelledby="registry-heading">
         <div class="mx-auto w-full max-w-[1248px]">
           <div class="max-w-3xl">
             <p class="font-mono text-xs font-semibold tracking-[0.18em] text-marketing-accent">ALL TOOLS</p>
-            <h2 id="catalog-heading" class="mt-4 font-display text-4xl font-extrabold tracking-[-0.04em] text-white sm:text-5xl">
+            <h2 id="registry-heading" class="mt-4 font-display text-4xl font-extrabold tracking-[-0.04em] text-white sm:text-5xl">
               Pick the smallest tool that gets the job done.
             </h2>
             <p class="mt-4 text-base leading-7 text-marketing-text-secondary">
@@ -115,11 +115,11 @@ const familyGroups = CATALOG_FAMILIES.map((family) => ({
             <fieldset class="grid min-w-0 gap-4 border-0 p-0 sm:grid-cols-2">
               <legend class="sr-only">Find tools</legend>
               <div class="min-w-0">
-                <label for="catalog-search" class="font-mono text-[11px] font-semibold tracking-wide text-marketing-text-cool">
+                <label for="registry-search" class="font-mono text-[11px] font-semibold tracking-wide text-marketing-text-cool">
                   SEARCH ALL TOOLS
                 </label>
                 <input
-                  id="catalog-search"
+                  id="registry-search"
                   data-explore-search
                   type="search"
                   autocomplete="off"
@@ -128,11 +128,11 @@ const familyGroups = CATALOG_FAMILIES.map((family) => ({
                 />
               </div>
               <div class="min-w-0">
-                <label for="catalog-family" class="font-mono text-[11px] font-semibold tracking-wide text-marketing-text-cool">
+                <label for="registry-family" class="font-mono text-[11px] font-semibold tracking-wide text-marketing-text-cool">
                   TOOL FAMILY
                 </label>
                 <select
-                  id="catalog-family"
+                  id="registry-family"
                   data-explore-family
                   class="mt-2 block min-h-11 w-full min-w-0 rounded-md border border-marketing-border-card bg-marketing-recessed px-3 text-sm text-marketing-foreground"
                 >
@@ -191,7 +191,7 @@ const familyGroups = CATALOG_FAMILIES.map((family) => ({
           <section class="mt-8 rounded-xl border border-marketing-border bg-marketing-panel-deep p-6 text-center" data-explore-empty hidden aria-labelledby="empty-tools-heading">
             <p class="font-mono text-xs font-semibold tracking-[0.18em] text-marketing-primary-light">NO MATCHES</p>
             <h3 id="empty-tools-heading" class="mt-3 font-display text-2xl font-extrabold text-white">No tools match those filters.</h3>
-            <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-marketing-text-secondary">Try a broader search, choose another family, or reset the catalog.</p>
+            <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-marketing-text-secondary">Try a broader search, choose another family, or reset the registry.</p>
             <button
               type="button"
               data-explore-empty-clear
@@ -286,5 +286,5 @@ const familyGroups = CATALOG_FAMILIES.map((family) => ({
     </footer>
   </div>
 
-  <script src="../../scripts/explore-catalog.ts"></script>
+  <script src="../../scripts/explore-registry.ts"></script>
 </BaseLayout>

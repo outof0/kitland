@@ -2,7 +2,7 @@
   "name": "@kitland/tools",
   "version": "0.1.0",
   "private": true,
-  "description": "Tool definitions, schemas, and catalog metadata for Kitland",
+  "description": "Tool definitions, schemas, and registry metadata for Kitland",
   "files": [
     "src"
   ],

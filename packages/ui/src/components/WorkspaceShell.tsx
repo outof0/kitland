@@ -1,4 +1,4 @@
-import { listToolsByPlatform, type CatalogTool, type ToolFamilyId } from "@kitland/tools";
+import { listToolsByPlatform, type RegistryTool, type ToolFamilyId } from "@kitland/tools";
 import {
   Moon,
   Search,
@@ -31,10 +31,10 @@ export type WorkspaceShellProps = {
   readonly platform?: "web" | "browser-extension" | "vscode-extension";
   /**
    * Narrows which platform-available tools the shell lists. The web host uses
-   * this to hide catalog entries without a navigable route; every entry in the
+   * this to hide registry entries without a navigable route; every entry in the
    * list must be safe to pass to onSelectTool.
    */
-  readonly filterTools?: (tools: readonly CatalogTool[]) => readonly CatalogTool[];
+  readonly filterTools?: (tools: readonly RegistryTool[]) => readonly RegistryTool[];
   readonly initialSidebarCollapsed?: boolean;
 };
 
@@ -225,7 +225,7 @@ export function WorkspaceShell({
   );
 
   const toolsByCategory = useMemo(() => {
-    const map = new Map<ToolFamilyId, CatalogTool[]>();
+    const map = new Map<ToolFamilyId, RegistryTool[]>();
     for (const tool of allTools) {
       const list = map.get(tool.family) ?? [];
       list.push(tool);
@@ -285,7 +285,7 @@ export function WorkspaceShell({
               ? "sticky top-0 w-[240px] max-sm:w-[200px]"
               : "hidden"
         }`}
-        aria-label="Developer tool catalog"
+        aria-label="Developer tool registry"
         aria-hidden={
           isCompactMedia ? (!drawerOpen ? true : undefined) : !desktopSidebarOpen ? true : undefined
         }
@@ -316,8 +316,8 @@ export function WorkspaceShell({
         </div>
 
         <nav
-          id="tool-catalog-nav"
-          className="catalog-nav min-h-0 flex-1 overflow-y-auto px-2.5 pb-2"
+          id="tool-registry-nav"
+          className="registry-nav min-h-0 flex-1 overflow-y-auto px-2.5 pb-2"
           aria-label="Registered tools"
           tabIndex={-1}
         >
@@ -425,7 +425,7 @@ export function WorkspaceShell({
                 className="flex size-9 shrink-0 items-center justify-center rounded-[9px] border border-outline bg-surface-low text-on-muted hover:bg-surface hover:text-on-surface hover:border-outline-strong cursor-pointer sm:size-10 lg:hidden"
                 aria-label={drawerOpen ? "Close tools navigation" : "Open tools navigation"}
                 aria-expanded={drawerOpen}
-                aria-controls="tool-catalog-nav"
+                aria-controls="tool-registry-nav"
                 title={drawerOpen ? "Close navigation" : "Open navigation"}
               >
                 <Menu className="size-4.5 sm:size-5" />
@@ -570,7 +570,7 @@ function ToolSidebarItem({
   onSelect,
   onToggleFavorite,
 }: {
-  readonly tool: CatalogTool;
+  readonly tool: RegistryTool;
   readonly isActive: boolean;
   readonly isFavorite?: boolean;
   readonly onSelect: () => void;

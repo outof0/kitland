@@ -1,7 +1,7 @@
-import { SHARED_CATALOG_TOOL_SLUGS } from "@kitland/ui/catalog";
+import { SHARED_REGISTRY_TOOL_SLUGS } from "@kitland/ui/registry";
 import type { ToolCapabilities } from "@kitland/ui";
 import type { ComponentType } from "react";
-import type { CatalogToolEntry } from "../protocol";
+import type { RegistryToolEntry } from "../protocol";
 
 /**
  * Props that all tool components in the registry accept.
@@ -27,7 +27,7 @@ const specialtyLoaders: Record<
   () => Promise<{ default: ComponentType<ToolComponentProps> }>
 > = {
   ...Object.fromEntries(
-    SHARED_CATALOG_TOOL_SLUGS.map((slug) => [slug, () => import("./tools/SharedCatalogWrapper")]),
+    SHARED_REGISTRY_TOOL_SLUGS.map((slug) => [slug, () => import("./tools/SharedRegistryWrapper")]),
   ),
   base64: () => import("./tools/Base64Wrapper"),
   "html-entities": () => import("./tools/EncodingWrapper"),
@@ -40,10 +40,10 @@ const specialtyLoaders: Record<
 };
 
 /**
- * Resolve a tool registration for a given catalog entry.
+ * Resolve a tool registration for a given registry entry.
  * Every available VS Code slug must have a shared @kitland/ui renderer.
  */
-export function resolveToolRegistration(entry: CatalogToolEntry): ToolRegistration | null {
+export function resolveToolRegistration(entry: RegistryToolEntry): ToolRegistration | null {
   const load = specialtyLoaders[entry.slug];
   if (!load) return null;
   return { slug: entry.slug, load };

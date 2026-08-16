@@ -5,7 +5,7 @@ import {
   marketingLink,
   marketingNavLink,
 } from "@/components/marketing/variants";
-import { CATALOG_FAMILIES, PRINCIPLES } from "@/data/catalog";
+import { REGISTRY_FAMILIES, PRINCIPLES } from "@/data/registry";
 import type { ToolFamilyId } from "@kitland/tools";
 import { listWebAvailableTools, listWebTools } from "@/lib/release-scope";
 import {
@@ -25,7 +25,7 @@ import {
 const NAV_LINKS = [
   { href: "#surfaces", label: "Apps & MCP" },
   { href: "#available", label: "Available now" },
-  { href: "#catalog", label: "Catalog" },
+  { href: "#registry", label: "Registry" },
   { href: "#local-first", label: "Local-first" },
 ] as const;
 
@@ -34,7 +34,7 @@ const SURFACES = [
     name: "Web",
     status: "Available",
     description:
-      "The full catalog as isolated, browser-based workspaces. Open a tool and work — no install, no account.",
+      "The full registry as isolated, browser-based workspaces. Open a tool and work — no install, no account.",
     icon: Globe2,
     install: "kitland.dev",
     href: "/explore",
@@ -44,7 +44,7 @@ const SURFACES = [
     name: "Browser extension",
     status: "Available",
     description:
-      "Chrome, Edge, and Firefox popup workspaces driven by the same catalog and core. No payload network requests, ever.",
+      "Chrome, Edge, and Firefox popup workspaces driven by the same registry and core. No payload network requests, ever.",
     icon: Puzzle,
     install: "Chrome · Edge · Firefox",
     href: "https://github.com/outof0/kitland/tree/HEAD/apps/browser-extension",
@@ -76,7 +76,7 @@ const PRINCIPLE_ICONS = [Code2, Zap, Clipboard] as const;
 const availableTools = listWebAvailableTools();
 const featuredTools = availableTools.slice(0, 6);
 const allTools = listWebTools();
-const displayedFamilies = CATALOG_FAMILIES.map((family) => ({
+const displayedFamilies = REGISTRY_FAMILIES.map((family) => ({
   ...family,
   tools: allTools.filter((tool) => tool.family === family.id),
 }));
@@ -445,7 +445,7 @@ export function LandingPage() {
                 href="/explore"
                 className={`${marketingLink} group mt-7 inline-flex items-center gap-2 font-semibold text-marketing-primary-light`}
               >
-                Browse the full catalog
+                Browse the full registry
                 <ArrowRight
                   className="marketing-action-arrow size-4 transition-transform duration-150"
                   aria-hidden="true"
@@ -488,18 +488,18 @@ export function LandingPage() {
         </section>
 
         <section
-          id="catalog"
+          id="registry"
           className="scroll-mt-20 border-y border-marketing-border bg-marketing-canvas px-5 py-20 sm:px-8 lg:px-12 lg:py-28"
-          aria-labelledby="catalog-heading"
+          aria-labelledby="registry-heading"
         >
           <div className="mx-auto w-full max-w-[1248px]">
             <div className="marketing-reveal grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
               <div>
                 <p className="font-mono text-xs font-semibold tracking-[0.18em] text-marketing-primary-light">
-                  THE CATALOG · RELEASE ROADMAP
+                  THE REGISTRY · RELEASE ROADMAP
                 </p>
                 <h2
-                  id="catalog-heading"
+                  id="registry-heading"
                   className="mt-4 font-display text-4xl font-extrabold tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl"
                 >
                   One workbench. Six focused families.
@@ -693,7 +693,7 @@ export function LandingPage() {
             title="Product"
             links={[
               { href: "#available", label: "Available tools" },
-              { href: "/explore", label: "Full catalog" },
+              { href: "/explore", label: "Full registry" },
               { href: "#surfaces", label: "Web · Extension · VS Code · MCP" },
               { href: "#local-first", label: "Local-first" },
             ]}
@@ -720,7 +720,7 @@ export function LandingPage() {
 }
 
 function familyName(familyId: ToolFamilyId): string {
-  return CATALOG_FAMILIES.find((family) => family.id === familyId)?.name ?? familyId;
+  return REGISTRY_FAMILIES.find((family) => family.id === familyId)?.name ?? familyId;
 }
 
 function FooterLinks({

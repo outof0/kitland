@@ -1,11 +1,11 @@
 import { type CanonicalToolInventoryEntry } from "./inventory";
 import {
-  evaluateCatalogSurfaceRolloutReadiness,
+  evaluateRegistrySurfaceRolloutReadiness,
   selectSurfaceRolloutTools,
   SURFACE_ROLLOUT_POLICY,
-  type CatalogSurfaceRolloutIssue,
-  type CatalogSurfaceRolloutIssueCode,
-  type CatalogSurfaceRolloutReadiness,
+  type RegistrySurfaceRolloutIssue,
+  type RegistrySurfaceRolloutIssueCode,
+  type RegistrySurfaceRolloutReadiness,
 } from "./surface-rollout";
 import type { ToolDefinition } from "./types";
 
@@ -19,12 +19,12 @@ export const PHASED_RELEASE_POLICY = Object.freeze({
   requiredReleaseStage: SURFACE_ROLLOUT_POLICY.requiredReleaseStage,
 });
 
-/** @deprecated Use CatalogSurfaceRolloutIssueCode. */
-export type CatalogPhasedReleaseIssueCode = CatalogSurfaceRolloutIssueCode;
-/** @deprecated Use CatalogSurfaceRolloutIssue. */
-export type CatalogPhasedReleaseIssue = CatalogSurfaceRolloutIssue;
-/** @deprecated Use CatalogSurfaceRolloutReadiness. */
-export type CatalogPhasedReleaseReadiness = CatalogSurfaceRolloutReadiness;
+/** @deprecated Use RegistrySurfaceRolloutIssueCode. */
+export type RegistryPhasedReleaseIssueCode = RegistrySurfaceRolloutIssueCode;
+/** @deprecated Use RegistrySurfaceRolloutIssue. */
+export type RegistryPhasedReleaseIssue = RegistrySurfaceRolloutIssue;
+/** @deprecated Use RegistrySurfaceRolloutReadiness. */
+export type RegistryPhasedReleaseReadiness = RegistrySurfaceRolloutReadiness;
 
 /** @deprecated Use selectSurfaceRolloutTools(tools, "web"). */
 export function selectPhasedReleaseTools(
@@ -33,12 +33,12 @@ export function selectPhasedReleaseTools(
   return selectSurfaceRolloutTools(tools, "web");
 }
 
-/** @deprecated Use evaluateCatalogSurfaceRolloutReadiness(tools, "web"). */
-export function evaluateCatalogPhasedReleaseReadiness(
+/** @deprecated Use evaluateRegistrySurfaceRolloutReadiness(tools, "web"). */
+export function evaluateRegistryPhasedReleaseReadiness(
   tools: readonly ToolDefinition[],
   canonicalInventory?: readonly CanonicalToolInventoryEntry[],
-): CatalogPhasedReleaseReadiness {
+): RegistryPhasedReleaseReadiness {
   return canonicalInventory === undefined
-    ? evaluateCatalogSurfaceRolloutReadiness(tools, "web")
-    : evaluateCatalogSurfaceRolloutReadiness(tools, "web", canonicalInventory);
+    ? evaluateRegistrySurfaceRolloutReadiness(tools, "web")
+    : evaluateRegistrySurfaceRolloutReadiness(tools, "web", canonicalInventory);
 }

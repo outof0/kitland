@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * KIT-0004: static conformance scan against inventory + web registry source.
- * Does not execute TS catalog (avoids build). Deterministic exit codes.
+ * Does not execute TS registry (avoids build). Deterministic exit codes.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";

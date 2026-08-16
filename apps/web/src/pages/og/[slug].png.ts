@@ -30,7 +30,7 @@ export const getStaticPaths: GetStaticPaths = () => {
         title: "Explore Developer Tools",
         description: "64 local-first utilities that run in your browser with zero payload uploads.",
         family: "developer-tools",
-        badge: "CATALOG · 64 TOOLS",
+        badge: "REGISTRY · 64 TOOLS",
       },
     },
     ...toolPaths,

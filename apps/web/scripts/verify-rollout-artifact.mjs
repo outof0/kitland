@@ -12,16 +12,16 @@ if (!existsSync(distDirectory)) {
   fail(`Missing build output: ${distDirectory}. Run build first.`);
 } else {
   const landing = readHtml("index.html");
-  const catalog = readHtml("explore.html");
-  const editorSlugs = collectEditorSlugs(catalog);
+  const registry = readHtml("explore.html");
+  const editorSlugs = collectEditorSlugs(registry);
   const expectedRouteFiles = editorSlugs.map((slug) => `explore/${slug}.html`).sort();
   const emittedRouteFiles = listHtmlFiles(resolve(distDirectory, "explore")).sort();
 
   if (editorSlugs.length === 0) {
-    fail("The public catalog contains no runnable editor links.");
+    fail("The public registry contains no runnable editor links.");
   }
-  if (countOpenCatalogCards(catalog) !== editorSlugs.length) {
-    fail("Every catalog card marked available must have exactly one editor link.");
+  if (countOpenRegistryCards(registry) !== editorSlugs.length) {
+    fail("Every registry card marked available must have exactly one editor link.");
   }
 
   compareExact("emitted available-tool documents", emittedRouteFiles, expectedRouteFiles);
@@ -51,15 +51,15 @@ function collectEditorSlugs(html) {
   const slugs = [...html.matchAll(/href=["']\/explore\/([^"'#?]+)["']/gu)].map((match) => match[1]);
   const uniqueSlugs = [...new Set(slugs)].sort();
   if (uniqueSlugs.length !== slugs.length) {
-    fail("The public catalog has duplicate editor links.");
+    fail("The public registry has duplicate editor links.");
   }
   if (uniqueSlugs.some((slug) => !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(slug))) {
-    fail("The public catalog contains an invalid editor slug.");
+    fail("The public registry contains an invalid editor slug.");
   }
   return uniqueSlugs;
 }
 
-function countOpenCatalogCards(html) {
+function countOpenRegistryCards(html) {
   return [...html.matchAll(/data-explore-action=["']open["']/gu)].length;
 }
 
@@ -99,7 +99,7 @@ function verifyLandingLinks(html, availableSlugs) {
 /**
  * The full registry is intentionally preserved in every deployment. A
  * release-ready subset certifies rollout work; it must not strip unrelated
- * catalog-available editor chunks from the public artifact.
+ * registry-available editor chunks from the public artifact.
  */
 function verifyRendererChunkCoverage(expectedTools) {
   const assetDirectory = resolve(distDirectory, "_astro");
@@ -122,7 +122,7 @@ function verifyRendererChunkCoverage(expectedTools) {
   const lazyRendererImports = [...source.matchAll(/import\(["'`]\.\/[^"'`]+\.js["'`]\)/gu)];
   if (lazyRendererImports.length !== expectedTools.length) {
     fail(
-      `Workspace emits ${lazyRendererImports.length} lazy renderer imports for ${expectedTools.length} runnable catalog tools.`,
+      `Workspace emits ${lazyRendererImports.length} lazy renderer imports for ${expectedTools.length} runnable registry tools.`,
     );
   }
 }

@@ -5,7 +5,7 @@ const tools = listTools();
 const availableTools = tools.filter((tool) => tool.status === "available");
 const plannedTools = tools.filter((tool) => tool.status !== "available");
 
-test("renders the complete static catalog with only runnable tool links", async ({
+test("renders the complete static registry with only runnable tool links", async ({
   page,
   request,
 }) => {
@@ -32,7 +32,7 @@ test("renders the complete static catalog with only runnable tool links", async 
   }
 });
 
-test("filters across searchable catalog fields, availability, and clears an empty state", async ({
+test("filters across searchable registry fields, availability, and clears an empty state", async ({
   page,
 }) => {
   await page.goto("/explore");
@@ -71,7 +71,7 @@ for (const viewport of [
   { name: "small mobile", width: 320, height: 720 },
   { name: "desktop", width: 1440, height: 900 },
 ] as const) {
-  test(`keeps the ${viewport.name} catalog inside the viewport`, async ({ page }) => {
+  test(`keeps the ${viewport.name} registry inside the viewport`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto("/explore");
 

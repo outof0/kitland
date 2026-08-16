@@ -6,7 +6,7 @@ test.describe("Representative tool renderers", () => {
     { slug: "html-entities", title: "HTML Entities", input: "Text input" },
     { slug: "case-converter", title: "Case Converter", input: "Text" },
   ]) {
-    test(`loads ${tool.slug} through the catalog registry`, async ({ page }) => {
+    test(`loads ${tool.slug} through the registry registry`, async ({ page }) => {
       await page.goto(`/explore/${tool.slug}`);
 
       await expect(page).toHaveTitle(new RegExp(tool.title));

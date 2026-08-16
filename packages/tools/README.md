@@ -18,7 +18,7 @@ Do not infer extension or automation exposure from web availability. See the
 [platform capability contract](../../docs/architecture/platform-capabilities.md)
 and the root [release policy](../../RELEASING.md).
 
-Base64 is a `reference` entry. Use `getCatalogReleaseReadiness()` for the
+Base64 is a `reference` entry. Use `getRegistryReleaseReadiness()` for the
 machine-readable 64-tool production gate; never treat `listAvailableTools()` as
 a release decision. `CANONICAL_TOOL_INVENTORY` is the ordered set of 64 tool
 artboards approved in `design/design.pen`; tool count alone cannot pass the

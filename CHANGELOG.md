@@ -10,10 +10,10 @@ tagged release, changes remain under **Unreleased**.
 ### Added
 
 - Initial local-first web workbench and Base64 reference tool.
-- Core/tool-catalog package boundaries and release foundations.
+- Core/tool-registry package boundaries and release foundations.
 - Explicit per-platform capability contracts, a complete-suite production gate,
   and a separately verified phased web rollout for `release-ready` tools.
-- The complete 64-tool catalog with bounded core contracts and deterministic
+- The complete 64-tool registry with bounded core contracts and deterministic
   tests; every tool is certified `release-ready` on web, browser extension, and
   VS Code, and the full-suite release gate now passes.
 - Shared `@kitland/ui` design system: single light/dark token source, Tailwind
@@ -26,7 +26,7 @@ tagged release, changes remain under **Unreleased**.
 - VS Code extension with a secure webview workbench, host adapters, atomic
   selection commands (Base64, cURL), and a structured JSON inspection surface.
 - VS Code webview now mounts the shared `@kitland/ui` WorkspaceShell so the
-  catalog chrome matches web and the browser extension.
+  registry chrome matches web and the browser extension.
 - All 64 tool UIs live in `@kitland/ui` and are mounted by web, the browser
   extension, and VS Code so layout and chrome stay aligned.
 - Per-surface rollout gates for web, browser-extension, and vscode-extension

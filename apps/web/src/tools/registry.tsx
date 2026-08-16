@@ -45,7 +45,7 @@ function fromEncoding(slug: string): ToolRendererLoader {
 }
 
 /**
- * Every available catalog slug must have a dynamic entry. The exhaustive
+ * Every available registry slug must have a dynamic entry. The exhaustive
  * record makes omissions a type error while preserving one renderer chunk per
  * tool instead of pulling the full suite into ToolWorkspace's client island.
  */
@@ -375,7 +375,7 @@ function assertRendererRegistryComplete(): void {
 
   if (!complete) {
     throw new Error(
-      `Tool renderer registry does not match available catalog tools: expected [${availableSlugs.join(
+      `Tool renderer registry does not match available registry tools: expected [${availableSlugs.join(
         ", ",
       )}], received [${registeredSlugs.join(", ")}].`,
     );

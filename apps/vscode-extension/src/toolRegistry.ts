@@ -35,7 +35,7 @@ export function listSelectionCommands(): readonly RegisteredSelectionCommand[] {
 
 function assertAdapterRegistryComplete(): void {
   const expected = listToolsByPlatform("vscode-extension").map((tool) => tool.id);
-  const registered = ADAPTERS.map((adapter) => adapter.catalogTool.id);
+  const registered = ADAPTERS.map((adapter) => adapter.registryTool.id);
   const unique = new Set(registered);
   const complete =
     unique.size === registered.length &&
@@ -43,8 +43,8 @@ function assertAdapterRegistryComplete(): void {
     expected.every((id) => unique.has(id)) &&
     ADAPTERS.every(
       (adapter) =>
-        adapter.catalogTool.id === adapter.descriptor.id &&
-        adapter.catalogTool.platforms["vscode-extension"].status === "available",
+        adapter.registryTool.id === adapter.descriptor.id &&
+        adapter.registryTool.platforms["vscode-extension"].status === "available",
     );
 
   if (!complete) {

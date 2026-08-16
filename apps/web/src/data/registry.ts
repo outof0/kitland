@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { Braces, Clock3, Dices, Regex, ShieldCheck, Shuffle } from "lucide-react";
 
-export type CatalogFamily = {
+export type RegistryFamily = {
   id: string;
   index: string;
   name: string;
@@ -13,7 +13,7 @@ export type CatalogFamily = {
   examples: readonly [string, string, string, string];
 };
 
-export const CATALOG_FAMILIES = [
+export const REGISTRY_FAMILIES = [
   {
     id: "json-markup",
     index: "01",
@@ -75,7 +75,7 @@ export const CATALOG_FAMILIES = [
     icon: Clock3,
     examples: ["Timestamp", "Timezone", "Cron", "CIDR"],
   },
-] as const satisfies readonly CatalogFamily[];
+] as const satisfies readonly RegistryFamily[];
 
 export const PRINCIPLES = [
   {

@@ -24,7 +24,7 @@ pnpm quality:check
 ```
 
 `pnpm build` builds all three product surfaces and generates the web sitemap
-from available catalog entries. `pnpm quality:check` adds formatting, linting,
+from available registry entries. `pnpm quality:check` adds formatting, linting,
 typechecks, unit tests, dependency audit, bundle/SEO/package gates, and web plus
 browser-extension smoke suites. The browser suites serve production output,
 not development servers. `pnpm release:check` is intentionally unavailable to
@@ -35,7 +35,7 @@ inventory and coordinated artifacts.
 
 1. Keep tool logic platform-neutral in `packages/core`; do not import browser,
    extension, or UI APIs there.
-2. Register a tool in the catalog and add focused tests for its core behavior.
+2. Register a tool in the registry and add focused tests for its core behavior.
    Declare every platform explicitly; `planned` is not permission to expose a
    tool, and `unsupported` must have no capabilities. Follow the
    [platform capability contract](docs/architecture/platform-capabilities.md).

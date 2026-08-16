@@ -43,7 +43,7 @@ const schemas = structuredData
   : [];
 
 // `set:html` is intentional for JSON-LD. Escape `<` so a user-controlled
-// catalog field can never terminate this script tag.
+// registry field can never terminate this script tag.
 const serializedSchemas = JSON.stringify(schemas).replaceAll("<", "\\u003c");
 
 // Keep event-handler and style attributes unavailable everywhere. Astro still

@@ -1,8 +1,8 @@
 import { PROTOCOL_MAX_TEXT_CHARS } from "../../src/constants";
-import { listSelectionCommands, listToolAdapters } from "../../src/toolCatalog";
+import { listSelectionCommands, listToolAdapters } from "../../src/toolRegistry";
 import { getToolById, listToolsByPlatform } from "@kitland/tools";
 
-describe("tool catalog", () => {
+describe("tool registry", () => {
   it("keeps tool and command identifiers unique", () => {
     const adapters = listToolAdapters();
     const toolIds = adapters.map((adapter) => adapter.descriptor.id);
@@ -11,18 +11,18 @@ describe("tool catalog", () => {
     expect(new Set(commandIds).size).toBe(commandIds.length);
   });
 
-  it("derives public identity from the shared product catalog", () => {
+  it("derives public identity from the shared product registry", () => {
     const adapters = listToolAdapters();
-    expect(adapters.map((adapter) => adapter.catalogTool)).toEqual(
+    expect(adapters.map((adapter) => adapter.registryTool)).toEqual(
       adapters.map((adapter) => getToolById(adapter.descriptor.id)),
     );
     expect(adapters.map((adapter) => adapter.descriptor.title)).toEqual(
-      adapters.map((adapter) => adapter.catalogTool.shortName),
+      adapters.map((adapter) => adapter.registryTool.shortName),
     );
     expect(adapters.map((adapter) => adapter.descriptor.description)).toEqual(
-      adapters.map((adapter) => adapter.catalogTool.description),
+      adapters.map((adapter) => adapter.registryTool.description),
     );
-    expect(adapters.map((adapter) => adapter.catalogTool.id).sort()).toEqual(
+    expect(adapters.map((adapter) => adapter.registryTool.id).sort()).toEqual(
       listToolsByPlatform("vscode-extension")
         .map((tool) => tool.id)
         .sort(),

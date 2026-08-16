@@ -13,7 +13,7 @@ export type GenericTransformToolProps = {
   readonly getRuntime: () => HostRuntime | Promise<HostRuntime>;
   /**
    * Host-declared local powers (file open/save). Defaults to local-only; a
-   * host may only pass file powers when its catalog entry grants them.
+   * host may only pass file powers when its registry entry grants them.
    */
   readonly capabilities?: ToolCapabilities;
   /** Prefill from a host selection (VS Code editor). Empty when unused. */
@@ -38,7 +38,7 @@ function slugIconComponent(slug: string) {
 }
 
 /**
- * Web-parity UI for every catalog tool driven by a host transform spec.
+ * Web-parity UI for every registry tool driven by a host transform spec.
  * Same TextTransformEditor the web app mounts; hosts resolve the spec and
  * supply the runtime. Diff tools (secondary input) render the A | Swap | B
  * layout the mount used to own.
@@ -50,9 +50,9 @@ export function GenericTransformTool({
   capabilities = LOCAL_ONLY_CAPABILITIES,
   initialInput = "",
 }: GenericTransformToolProps) {
-  const catalog = getToolBySlug(slug);
+  const registry = getToolBySlug(slug);
   const pattern =
-    catalog?.pattern ??
+    registry?.pattern ??
     (spec.allowEmptyInput ? "generate" : spec.secondaryInput ? "diff" : "transform");
   const isGenerate = pattern === "generate" || Boolean(spec.allowEmptyInput);
   const isInspect = pattern === "inspect";
@@ -158,8 +158,8 @@ export function GenericTransformTool({
   return (
     <TextTransformEditor
       icon={Icon}
-      title={catalog?.shortName ?? slug}
-      description={catalog?.description ?? "Runs locally on this device."}
+      title={registry?.shortName ?? slug}
+      description={registry?.description ?? "Runs locally on this device."}
       inputLabel={isDiff ? "Original (A)" : "Input"}
       outputLabel={isInspect ? "Inspection" : "Result"}
       placeholder="Paste or type input structured text…"

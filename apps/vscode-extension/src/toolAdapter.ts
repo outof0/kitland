@@ -1,5 +1,5 @@
 import type { JsonInspection, ToolResult } from "@kitland/core";
-import type { CatalogTool } from "@kitland/tools";
+import type { RegistryTool } from "@kitland/tools";
 
 export type ToolChoice = { id: string; label: string };
 export type ToolOperation = ToolChoice & { actionLabel: string };
@@ -39,7 +39,7 @@ export type TextInspectRequest = { operationId: string; optionId: string; input:
 export type SelectionCommand = { commandId: string; operationId: string; optionId: string };
 
 type BaseToolAdapter = {
-  readonly catalogTool: CatalogTool;
+  readonly registryTool: RegistryTool;
   readonly descriptor: ToolDescriptor;
   readonly maxOutputChars: number;
   readonly maxSelectionChars: number;

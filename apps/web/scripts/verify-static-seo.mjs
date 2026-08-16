@@ -262,17 +262,17 @@ function verifyNoSpaFallback() {
 }
 
 /**
- * The explorer is the canonical catalog surface. It must remain real static
+ * The explorer is the canonical registry surface. It must remain real static
  * HTML as the registry grows; redirecting it to whichever tool happened to be
  * implemented first would make one reference slice define the whole product.
  */
-function verifyExploreCatalog(pages) {
+function verifyExploreRegistry(pages) {
   const redirects = readText("_redirects");
   if (redirects) {
     for (const line of redirects.split(/\r?\n/)) {
       const source = line.trim().split(/\s+/)[0];
       if (source === "/explore" || source === "/explore/") {
-        fail("/explore must be a static catalog page, not a host-level redirect.");
+        fail("/explore must be a static registry page, not a host-level redirect.");
       }
     }
   }
@@ -282,11 +282,11 @@ function verifyExploreCatalog(pages) {
       existsSync(resolve(DIST_DIRECTORY, file)),
     )
   ) {
-    fail("/explore is missing its static catalog document.");
+    fail("/explore is missing its static registry document.");
   }
 
   if (![...pages.values()].some((page) => page.pathname === "/explore")) {
-    fail("The /explore catalog is missing from the sitemap.");
+    fail("The /explore registry is missing from the sitemap.");
   }
 }
 
@@ -517,7 +517,7 @@ if (!existsSync(DIST_DIRECTORY)) {
 
   verifyNoSpaFallback();
   verifyNoLegacyToolRoutes(pages);
-  verifyExploreCatalog(pages);
+  verifyExploreRegistry(pages);
   verifyPublicDeliveryFiles();
 
   const landingPage = renderedPages.get(SITE_ORIGIN);

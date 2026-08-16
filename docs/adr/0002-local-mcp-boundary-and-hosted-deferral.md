@@ -25,7 +25,7 @@ arbitrary user text remotely.
 A hosted MCP endpoint would create a materially different product: it would
 receive tool inputs on Kitland infrastructure, require an authentication,
 abuse-prevention, retention, observability, incident-response, and privacy
-programme, and weaken the present local-first expectation. The browser catalog
+programme, and weaken the present local-first expectation. The browser registry
 also is not yet a public automation contract: it does not contain versioned
 input/output schemas, operation-level limits, or exposure approval.
 
@@ -89,7 +89,7 @@ process, which returns only that result to the same client.
 
 - The product remains truthful about local-first processing and does not add
   server-side payload retention by implication.
-- Pure core logic and catalog metadata remain reusable without making either
+- Pure core logic and registry metadata remain reusable without making either
   package a premature public AI API.
 - A future AI adapter can be reviewed and versioned independently from the
   browser UI and search delivery.

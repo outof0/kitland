@@ -1,10 +1,10 @@
-function initExploreCatalog() {
-  const catalogForm = document.querySelector<HTMLFormElement>("[data-explore-filters]");
-  if (!catalogForm) return;
+function initExploreRegistry() {
+  const registryForm = document.querySelector<HTMLFormElement>("[data-explore-filters]");
+  if (!registryForm) return;
 
-  const search = catalogForm.querySelector<HTMLInputElement>("[data-explore-search]");
-  const family = catalogForm.querySelector<HTMLSelectElement>("[data-explore-family]");
-  const availability = catalogForm.querySelector<HTMLElement>("[data-explore-availability]");
+  const search = registryForm.querySelector<HTMLInputElement>("[data-explore-search]");
+  const family = registryForm.querySelector<HTMLSelectElement>("[data-explore-family]");
+  const availability = registryForm.querySelector<HTMLElement>("[data-explore-availability]");
   const clearButtons = document.querySelectorAll<HTMLButtonElement>(
     "[data-explore-clear], [data-explore-empty-clear]",
   );
@@ -18,7 +18,7 @@ function initExploreCatalog() {
     availability?.querySelector<HTMLInputElement>('input[name="availability"]:checked')?.value ??
     "all";
 
-  const filterCatalog = () => {
+  const filterRegistry = () => {
     const query = search?.value.trim().toLocaleLowerCase() ?? "";
     const familyValue = family?.value ?? "all";
     const availabilityValue = getAvailability();
@@ -57,15 +57,15 @@ function initExploreCatalog() {
     if (family) family.value = "all";
     const allAvailability = availability?.querySelector<HTMLInputElement>('input[value="all"]');
     if (allAvailability) allAvailability.checked = true;
-    filterCatalog();
+    filterRegistry();
     search?.focus();
   };
 
-  search?.addEventListener("input", filterCatalog);
-  family?.addEventListener("change", filterCatalog);
-  availability?.addEventListener("change", filterCatalog);
-  catalogForm.addEventListener("submit", (event) => event.preventDefault());
+  search?.addEventListener("input", filterRegistry);
+  family?.addEventListener("change", filterRegistry);
+  availability?.addEventListener("change", filterRegistry);
+  registryForm.addEventListener("submit", (event) => event.preventDefault());
   for (const clearButton of clearButtons) clearButton.addEventListener("click", clearFilters);
 }
 
-document.addEventListener("astro:page-load", initExploreCatalog);
+document.addEventListener("astro:page-load", initExploreRegistry);

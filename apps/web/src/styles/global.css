@@ -5,7 +5,7 @@
 @import "@kitland/ui/workspace.css";
 @source "../../../../packages/ui/src";
 
-/* Marketing palette. The landing/catalog intentionally keep a fixed dark
+/* Marketing palette. The landing/registry intentionally keep a fixed dark
  * canvas, but JSX must still consume named Tailwind tokens rather than raw
  * hex values. */
 @theme inline {

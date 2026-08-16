@@ -5,8 +5,8 @@ import { getVscodeHostRuntime } from "../host-runtime";
 import type { TextTransformAdapter } from "../toolAdapter";
 
 function createAdapter(slug: string): TextTransformAdapter {
-  const catalogTool = getToolBySlug(slug);
-  if (!catalogTool) throw new Error(`Missing catalog definition for host transform "${slug}".`);
+  const registryTool = getToolBySlug(slug);
+  if (!registryTool) throw new Error(`Missing registry definition for host transform "${slug}".`);
   const spec = getHostTransformSpec(slug);
   if (!spec) throw new Error(`Missing host transform spec for "${slug}".`);
 
@@ -19,11 +19,11 @@ function createAdapter(slug: string): TextTransformAdapter {
   let runtimePromise: ReturnType<typeof getVscodeHostRuntime> | undefined;
 
   return {
-    catalogTool,
+    registryTool,
     descriptor: {
-      id: catalogTool.id,
-      title: catalogTool.shortName,
-      description: catalogTool.description,
+      id: registryTool.id,
+      title: registryTool.shortName,
+      description: registryTool.description,
       renderer: {
         kind: "text-transform",
         operations: spec.operations,

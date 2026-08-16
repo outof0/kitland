@@ -1,4 +1,4 @@
-import type { CatalogTool, ToolFamilyId } from "@kitland/tools";
+import type { RegistryTool, ToolFamilyId } from "@kitland/tools";
 import { CornerDownLeft, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toolIconFor } from "../tool-meta";
@@ -14,17 +14,17 @@ const FAMILY_LABEL: Record<ToolFamilyId, string> = {
 
 export type ToolSearchDialogProps = {
   readonly open: boolean;
-  readonly tools: readonly CatalogTool[];
+  readonly tools: readonly RegistryTool[];
   readonly favorites: readonly string[];
   readonly onClose: () => void;
   readonly onSelect: (slug: string) => void;
 };
 
 export function rankToolSuggestions(
-  tools: readonly CatalogTool[],
+  tools: readonly RegistryTool[],
   query: string,
   favorites: readonly string[],
-): CatalogTool[] {
+): RegistryTool[] {
   const normalized = query.trim().toLowerCase();
   if (!normalized) {
     const favoriteSet = new Set(favorites);

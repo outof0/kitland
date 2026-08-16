@@ -26,7 +26,7 @@ describe("auto-transform preference", () => {
 });
 
 describe("sidebar tool icons", () => {
-  it("gives every catalog slug a dedicated glyph", () => {
+  it("gives every registry slug a dedicated glyph", () => {
     const icons = CANONICAL_TOOL_INVENTORY.map((entry) => toolIconFor(entry.slug));
     expect(icons.every((svg) => svg.includes("<svg"))).toBe(true);
     expect(new Set(icons).size).toBeGreaterThan(20);

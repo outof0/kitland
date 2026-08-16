@@ -17,7 +17,7 @@
     "./sources.css": "./sources.css",
     "./theme.css": "./theme.css",
     "./workspace.css": "./workspace.css",
-    "./catalog": "./src/tools/shared-catalog-tools.tsx",
+    "./registry": "./src/tools/shared-registry-tools.tsx",
     "./base64-protocol": "./src/lib/base64-worker-protocol.ts",
     "./tools/*": "./src/tools/*"
   },

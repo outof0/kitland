@@ -20,7 +20,7 @@ const FAMILY_IDS = new Set([
 const UI_PATTERNS = new Set(["transform", "generate", "diff", "inspect"]);
 
 /**
- * Validate and deeply freeze a catalog entry at its declaration boundary.
+ * Validate and deeply freeze a registry entry at its declaration boundary.
  *
  * `satisfies ToolDefinition` gives authors compile-time feedback; these runtime
  * checks also protect JavaScript consumers and keep lookup maps coherent.
@@ -73,7 +73,7 @@ export function defineTool<const T extends ToolDefinition>(
   assertReleasePlatforms(definition, releasePlatforms);
 
   // Normalize the omitted pre-certification state to an immutable empty list.
-  // This lets rollout tooling reason about every catalog item uniformly without
+  // This lets rollout tooling reason about every registry item uniformly without
   // forcing authors to repeat `releasePlatforms: []` on unfinished tools.
   const normalized = {
     ...definition,

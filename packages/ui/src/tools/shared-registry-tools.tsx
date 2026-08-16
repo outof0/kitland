@@ -132,15 +132,15 @@ const LOADERS: Record<string, () => Promise<{ default: ComponentType }>> = {
     import("./AgeCalculatorTool").then((m) => ({ default: m.AgeCalculatorTool })),
 };
 
-export type SharedCatalogToolSlug = keyof typeof LOADERS;
+export type SharedRegistryToolSlug = keyof typeof LOADERS;
 
-export function isSharedCatalogToolSlug(slug: string): slug is SharedCatalogToolSlug {
+export function isSharedRegistryToolSlug(slug: string): slug is SharedRegistryToolSlug {
   return Object.hasOwn(LOADERS, slug);
 }
 
-export const SHARED_CATALOG_TOOL_SLUGS = Object.keys(LOADERS) as SharedCatalogToolSlug[];
+export const SHARED_REGISTRY_TOOL_SLUGS = Object.keys(LOADERS) as SharedRegistryToolSlug[];
 
-export function SharedCatalogTool({
+export function SharedRegistryTool({
   slug,
   initialInput,
   capabilities,
@@ -181,7 +181,7 @@ export function SharedCatalogTool({
     };
   }, [slug]);
 
-  if (!isSharedCatalogToolSlug(slug)) return null;
+  if (!isSharedRegistryToolSlug(slug)) return null;
   if (!Tool) {
     return (
       <div

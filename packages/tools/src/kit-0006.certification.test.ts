@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { getToolBySlug, listAvailableTools } from "./catalog";
+import { getToolBySlug, listAvailableTools } from "./registry";
 
-/** KIT-0006 batch A: catalog honesty for the six Web-certified transforms. */
+/** KIT-0006 batch A: registry honesty for the six Web-certified transforms. */
 const KIT_0006_SLUGS = [
   "base64",
   "beautify-minify",
@@ -11,7 +11,7 @@ const KIT_0006_SLUGS = [
   "hex-text",
 ] as const;
 
-describe("KIT-0006 catalog certification", () => {
+describe("KIT-0006 registry certification", () => {
   it("marks each batch tool available with web release-ready and honest host contracts", () => {
     for (const slug of KIT_0006_SLUGS) {
       const tool = getToolBySlug(slug);
@@ -35,7 +35,7 @@ describe("KIT-0006 catalog certification", () => {
     }
   });
 
-  it("includes every KIT-0006 slug in the available catalog set", () => {
+  it("includes every KIT-0006 slug in the available registry set", () => {
     const available = new Set(listAvailableTools().map((tool) => tool.slug));
     for (const slug of KIT_0006_SLUGS) {
       expect(available.has(slug)).toBe(true);

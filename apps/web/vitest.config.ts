@@ -9,9 +9,9 @@ export default defineConfig({
       "@kitland/core": path.resolve(__dirname, "../../packages/core/src/index.ts"),
       "@kitland/ui/workspace.css": path.resolve(__dirname, "../../packages/ui/workspace.css"),
       "@kitland/ui/tools": path.resolve(__dirname, "../../packages/ui/src/tools"),
-      "@kitland/ui/catalog": path.resolve(
+      "@kitland/ui/registry": path.resolve(
         __dirname,
-        "../../packages/ui/src/tools/shared-catalog-tools.tsx",
+        "../../packages/ui/src/tools/shared-registry-tools.tsx",
       ),
       "@kitland/ui": path.resolve(__dirname, "../../packages/ui/src/index.ts"),
     },

@@ -3,7 +3,7 @@
 Host-agnostic Kitland tool shells. **Same UI for every host tool surface** —
 web workspace, extension popup, VS Code webview, and other wraps only supply:
 
-- catalog slug + `HostTransformSpec`
+- registry slug + `HostTransformSpec`
 - `HostRuntime` (crypto / bcrypt / RSA)
 
 ## Non-goals (host wrap)
@@ -50,7 +50,7 @@ root.render(
 );
 ```
 
-Patterns follow catalog `pattern` (transform / generate / diff / inspect) and
+Patterns follow registry `pattern` (transform / generate / diff / inspect) and
 host-spec flags (`allowEmptyInput`, `secondaryInput`). Diff tools render the
 shared editor's A | Swap | B layout with the secondary input passed to
 `spec.transform` as `secondaryInput`.

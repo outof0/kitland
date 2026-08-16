@@ -1,7 +1,7 @@
 export {
-  getCatalogPhasedReleaseReadiness,
-  getCatalogReleaseReadiness,
-  getCatalogSurfaceRolloutReadiness,
+  getRegistryPhasedReleaseReadiness,
+  getRegistryReleaseReadiness,
+  getRegistrySurfaceRolloutReadiness,
   getToolPlatformContract,
   getToolById,
   getToolBySlug,
@@ -18,38 +18,38 @@ export {
   TOOLS,
   type AvailableTool,
   type AvailableToolSlug,
-  type CatalogTool,
+  type RegistryTool,
   type ToolId,
   type ToolSlug,
-} from "./catalog";
+} from "./registry";
 export { defineTool } from "./define-tool";
 export { CANONICAL_TOOL_INVENTORY, type CanonicalToolInventoryEntry } from "./inventory";
 export {
-  CATALOG_RELEASE_POLICY,
-  evaluateCatalogReleaseReadiness,
-  type CatalogReleaseIssue,
-  type CatalogReleaseIssueCode,
-  type CatalogReleaseReadiness,
+  REGISTRY_RELEASE_POLICY,
+  evaluateRegistryReleaseReadiness,
+  type RegistryReleaseIssue,
+  type RegistryReleaseIssueCode,
+  type RegistryReleaseReadiness,
 } from "./release";
 export {
   PHASED_RELEASE_POLICY,
-  evaluateCatalogPhasedReleaseReadiness,
+  evaluateRegistryPhasedReleaseReadiness,
   selectPhasedReleaseTools,
-  type CatalogPhasedReleaseIssue,
-  type CatalogPhasedReleaseIssueCode,
-  type CatalogPhasedReleaseReadiness,
+  type RegistryPhasedReleaseIssue,
+  type RegistryPhasedReleaseIssueCode,
+  type RegistryPhasedReleaseReadiness,
 } from "./phased-release";
 export {
   SURFACE_ROLLOUT_POLICY,
   declaresSurfaceRollout,
-  evaluateCatalogSurfaceRolloutReadiness,
+  evaluateRegistrySurfaceRolloutReadiness,
   isToolCertifiedForSurface,
   parseSurfaceRolloutPlatform,
   selectSurfaceRolloutCandidates,
   selectSurfaceRolloutTools,
-  type CatalogSurfaceRolloutIssue,
-  type CatalogSurfaceRolloutIssueCode,
-  type CatalogSurfaceRolloutReadiness,
+  type RegistrySurfaceRolloutIssue,
+  type RegistrySurfaceRolloutIssueCode,
+  type RegistrySurfaceRolloutReadiness,
 } from "./surface-rollout";
 export { base64Tool, encodingTools } from "./tools/encoding";
 export { jsonMarkupTools } from "./tools/json-markup";

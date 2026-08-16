@@ -12,7 +12,7 @@ export const SURFACE_ROLLOUT_POLICY = Object.freeze({
   requiredReleaseStage: "release-ready" as const,
 });
 
-export type CatalogSurfaceRolloutIssueCode =
+export type RegistrySurfaceRolloutIssueCode =
   | "NO_SURFACE_ROLLOUT_TOOLS"
   | "DUPLICATE_SURFACE_ROLLOUT_TOOL_ID"
   | "DUPLICATE_SURFACE_ROLLOUT_TOOL_SLUG"
@@ -21,13 +21,13 @@ export type CatalogSurfaceRolloutIssueCode =
   | "SURFACE_ROLLOUT_TOOL_NOT_RELEASE_READY"
   | "SURFACE_ROLLOUT_PLATFORM_UNAVAILABLE";
 
-export type CatalogSurfaceRolloutIssue = {
-  readonly code: CatalogSurfaceRolloutIssueCode;
+export type RegistrySurfaceRolloutIssue = {
+  readonly code: RegistrySurfaceRolloutIssueCode;
   readonly message: string;
   readonly toolSlug?: string;
 };
 
-export type CatalogSurfaceRolloutReadiness = {
+export type RegistrySurfaceRolloutReadiness = {
   readonly ready: boolean;
   readonly platform: ToolPlatformId;
   /** Ordered canonical slugs certified for this surface. */
@@ -36,7 +36,7 @@ export type CatalogSurfaceRolloutReadiness = {
   /** Implemented candidates that can next be certified on this surface. */
   readonly candidateToolSlugs: readonly string[];
   readonly candidateToolCount: number;
-  readonly issues: readonly CatalogSurfaceRolloutIssue[];
+  readonly issues: readonly RegistrySurfaceRolloutIssue[];
 };
 
 const NO_RELEASE_PLATFORMS = Object.freeze([]) as readonly ToolPlatformId[];
@@ -88,14 +88,14 @@ export function selectSurfaceRolloutCandidates(
  * contracts on other hosts are intentionally irrelevant here; they are
  * evaluated when those hosts are promoted.
  */
-export function evaluateCatalogSurfaceRolloutReadiness(
+export function evaluateRegistrySurfaceRolloutReadiness(
   tools: readonly ToolDefinition[],
   platform: ToolPlatformId,
   canonicalInventory: readonly CanonicalToolInventoryEntry[] = CANONICAL_TOOL_INVENTORY,
-): CatalogSurfaceRolloutReadiness {
+): RegistrySurfaceRolloutReadiness {
   const targetTools = selectSurfaceRolloutTools(tools, platform);
   const candidateTools = selectSurfaceRolloutCandidates(tools, platform);
-  const issues: CatalogSurfaceRolloutIssue[] = [];
+  const issues: RegistrySurfaceRolloutIssue[] = [];
   const ids = new Set<string>();
   const slugs = new Set<string>();
   const canonicalById = new Map(canonicalInventory.map((entry) => [entry.id, entry]));

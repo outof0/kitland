@@ -1,5 +1,5 @@
 import { WorkspaceShell } from "@kitland/ui";
-import { type CatalogTool } from "@kitland/tools";
+import { type RegistryTool } from "@kitland/tools";
 import { listWebAvailableTools, getWebToolBySlug } from "@/lib/release-scope";
 import { STORAGE_KEYS } from "@/lib/storage";
 import { getToolRenderer } from "@/tools/registry.tsx";
@@ -66,7 +66,7 @@ export function ToolWorkspace({ slug: initialSlug }: ToolWorkspaceProps) {
   }, [setTheme]);
 
   const filterTools = useCallback(
-    (tools: readonly CatalogTool[]) =>
+    (tools: readonly RegistryTool[]) =>
       tools.filter((candidate) => listWebAvailableTools().some((t) => t.slug === candidate.slug)),
     [],
   );
@@ -137,7 +137,7 @@ function ComingSoon({ name }: { name: string }) {
     <div>
       <h2 className="m-0 font-display text-xl font-semibold text-on-surface">{name}</h2>
       <p className="mt-1 mb-0 text-sm leading-[1.45] text-on-muted">
-        This tool is listed in the catalog but not available yet.
+        This tool is listed in the registry but not available yet.
       </p>
     </div>
   );

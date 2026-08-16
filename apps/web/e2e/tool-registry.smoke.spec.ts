@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Catalog-registered tool renderers", () => {
+test.describe("Registry-registered tool renderers", () => {
   for (const tool of [
     { slug: "json-formatter", title: "JSON Formatter", input: "JSON input" },
     { slug: "text-stats", title: "Text Stats", input: "Text to measure", copy: false },
     { slug: "lorem-ipsum", title: "Lorem Ipsum", input: undefined },
   ]) {
-    test(`loads ${tool.slug} through the catalog registry`, async ({ page }) => {
+    test(`loads ${tool.slug} through the registry registry`, async ({ page }) => {
       await page.goto(`/explore/${tool.slug}`);
 
       await expect(page).toHaveTitle(new RegExp(tool.title));

@@ -157,11 +157,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify web rollout catalog gate
+      - name: Verify web rollout registry gate
         run: pnpm release:verify:rollout
 
-      # The rollout must certify exactly the normal catalog artifact built by
-      # the main quality job. It must never create a filtered tool catalog.
+      # The rollout must certify exactly the normal registry artifact built by
+      # the main quality job. It must never create a filtered tool registry.
       - name: Download normal web artifact
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
@@ -174,7 +174,7 @@ jobs:
       - name: Verify web static SEO output
         run: pnpm --filter @kitland/web seo:check
 
-      - name: Verify full-catalog web artifact
+      - name: Verify full-registry web artifact
         run: pnpm --filter @kitland/web rollout:artifact:check
 
       - name: Install Playwright Chromium
@@ -200,7 +200,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # A tool rollout is an explicit web-only production surface. It certifies
-    # selected tools, but deploys the normal full-catalog web artifact.
+    # selected tools, but deploys the normal full-registry web artifact.
     if: >-
       github.event_name == 'push'
       && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
@@ -234,7 +234,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify web rollout catalog gate
+      - name: Verify web rollout registry gate
         run: pnpm release:verify:rollout
 
       - name: Download verified normal web artifact
@@ -243,7 +243,7 @@ jobs:
           name: kitland-web-dist
           path: apps/web/dist
 
-      - name: Verify downloaded full-catalog web artifact
+      - name: Verify downloaded full-registry web artifact
         run: pnpm --filter @kitland/web rollout:artifact:check
 
       - name: Validate deployment credentials

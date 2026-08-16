@@ -1,6 +1,6 @@
 # Architecture index
 
-Kitland separates pure tool logic from catalog metadata and browser-specific
+Kitland separates pure tool logic from registry metadata and browser-specific
 experience:
 
 ```text

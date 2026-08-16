@@ -1,6 +1,6 @@
 # Tool platform and capability contract
 
-The shared catalog describes where a tool is intentionally exposed. Availability
+The shared registry describes where a tool is intentionally exposed. Availability
 on one host never implies availability or permission on another host.
 
 ## Source of truth
@@ -14,7 +14,7 @@ on one host never implies availability or permission on another host.
 Every `ToolDefinition` supplies a contract for every platform with an explicit
 status (`available`, `planned`, or `unsupported`) and a reviewed set of
 host-neutral capabilities. `defineTool()` validates and freezes declarations so
-catalog lookup maps cannot drift after initialization.
+registry lookup maps cannot drift after initialization.
 
 Tool delivery maturity is tracked separately as `reference`, `planned`,
 `implemented`, or `release-ready`. `available` means a host can expose the tool
@@ -51,12 +51,12 @@ security review.
    registry is typed by `AvailableToolSlug`, so omissions fail typecheck.
 5. Test capability mapping, payload limits, errors, and host permission denial.
 6. Record breaking platform-contract changes in the changelog and apply SemVer
-   once a catalog package is public.
+   once a registry package is public.
 
 ## Complete-suite release gate
 
-`getCatalogReleaseReadiness()` and `evaluateCatalogReleaseReadiness()` implement
-the first-production-release policy. The gate requires the catalog to match the
+`getRegistryReleaseReadiness()` and `evaluateRegistryReleaseReadiness()` implement
+the first-production-release policy. The gate requires the registry to match the
 committed canonical inventory at exactly 64 identities, every tool at
 `release-ready`, every tool available on web, unique ids and slugs, and no
 remaining `planned` platform decision. A platform may be explicitly
@@ -71,4 +71,4 @@ Normal CI remains green during development. The complete-suite production
 deploy job runs the separate `release:verify` command, which intentionally
 fails until all 64 tools are ready. A different `release:verify:rollout` gate
 evaluates the declared targets for one platform (web by default) and is paired
-with a full-catalog artifact verifier before a certified web rollout can deploy.
+with a full-registry artifact verifier before a certified web rollout can deploy.

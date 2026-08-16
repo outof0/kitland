@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { listReleaseReadyTools, listTools, listToolsByPlatform } from "./catalog";
+import { listReleaseReadyTools, listTools, listToolsByPlatform } from "./registry";
 
 /**
  * KIT-0020 path B: full multi-host availability for the canonical 64-tool suite.
  */
-describe("multi-host full catalog rollout", () => {
+describe("multi-host full registry rollout", () => {
   it("makes every tool available on web, browser-extension, and VS Code", () => {
     const all = listTools();
     const be = listToolsByPlatform("browser-extension");

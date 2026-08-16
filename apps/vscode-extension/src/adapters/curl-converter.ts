@@ -3,10 +3,10 @@ import { getToolBySlug } from "@kitland/tools";
 import type { TextTransformAdapter } from "../toolAdapter";
 
 const curlConverterTool = getToolBySlug("curl-converter");
-if (!curlConverterTool) throw new Error("Missing cURL Converter catalog definition.");
+if (!curlConverterTool) throw new Error("Missing cURL Converter registry definition.");
 
 export const curlConverterAdapter: TextTransformAdapter = {
-  catalogTool: curlConverterTool,
+  registryTool: curlConverterTool,
   descriptor: {
     id: curlConverterTool.id,
     title: curlConverterTool.shortName,

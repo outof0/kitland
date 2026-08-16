@@ -5,7 +5,7 @@
 **Related:** [Tool UI design-system contract](./tool-ui-contract.md)
 
 Kitland tools share a shell, but they do not all share one interaction model.
-Every catalog definition declares one of four patterns. That declaration is a
+Every registry definition declares one of four patterns. That declaration is a
 reviewable UX contract, not a styling hint, and host adapters must preserve the
 same user outcome even when their controls differ.
 
@@ -115,7 +115,7 @@ labels (Encode/Decode/Beautify) are never disguised Copy actions.
 
 | Concern           | Web                                                   | Browser extension                                            | VS Code                                                          |
 | ----------------- | ----------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
-| Discovery         | Static `/explore` catalog and route per runnable tool | Searchable extension catalog; lazy renderer per exposed tool | Quick Pick plus contributed commands where justified             |
+| Discovery         | Static `/explore` registry and route per runnable tool | Searchable extension registry; lazy renderer per exposed tool | Quick Pick plus contributed commands where justified             |
 | Input             | Paste/upload inside the workspace                     | Paste/upload inside the popup; no page access by default     | Panel input or explicit editor selection                         |
 | Output            | Copy/download and reviewed fragment sharing           | Copy/download; no implicit tab/page access                   | Copy or one atomic editor edit with an undo stop                 |
 | Navigation        | URL route                                             | Hash route inside extension pages                            | Command id/tool id; panel lifecycle                              |

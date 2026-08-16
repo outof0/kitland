@@ -32,9 +32,9 @@ test("serves a semantic landing without a hydrated application shell", async ({
     await expect(page.locator(`a[href="/explore/${tool.slug}"]`)).toHaveCount(1);
   }
 
-  const catalogResponse = await request.get("/explore");
-  expect(catalogResponse.ok()).toBe(true);
-  expect(await catalogResponse.text()).not.toContain("<astro-island");
+  const registryResponse = await request.get("/explore");
+  expect(registryResponse.ok()).toBe(true);
+  expect(await registryResponse.text()).not.toContain("<astro-island");
 });
 
 for (const viewport of [

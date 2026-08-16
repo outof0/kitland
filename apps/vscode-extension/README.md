@@ -1,12 +1,12 @@
 # Kitland Tools for VS Code
 
 The VS Code surface for Kitland's local, privacy-first developer-tool suite. This package is a
-catalog-driven host: only tools declared `available` on `vscode-extension` appear here. Web
+registry-driven host: only tools declared `available` on `vscode-extension` appear here. Web
 availability never implies a VS Code adapter.
 
 ## Current host surface
 
-- `Kitland: Open Tool...` discovers every catalog-available VS Code tool and opens the shared workbench.
+- `Kitland: Open Tool...` discovers every registry-available VS Code tool and opens the shared workbench.
 - Specialty selection commands remain hand-reviewed:
   - `Kitland: Base64: Encode and Replace Selection` / `Decode and Replace Selection`
   - `Kitland: cURL Converter: Convert Selection to Fetch`
@@ -16,12 +16,12 @@ availability never implies a VS Code adapter.
   `src/adapters/host-transforms.ts` (Open Tool only; no mass selection-command contributions).
 - The same runtime is bundled for desktop, remote, and VS Code for the Web.
 
-## Architecture for the full catalog
+## Architecture for the full registry
 
 `@kitland/tools` owns immutable product identity and platform capability metadata;
-`src/toolCatalog.ts` is the VS Code adapter discovery boundary. Each adapter supplies safety limits,
+`src/toolRegistry.ts` is the VS Code adapter discovery boundary. Each adapter supplies safety limits,
 renderer configuration, and optional editor commands. `src/toolPanel.ts` owns one secure webview
-lifecycle and switches between catalog entries. The renderer contract is discriminated by `kind`;
+lifecycle and switches between registry entries. The renderer contract is discriminated by `kind`;
 `text-transform` preserves bounded transformation and atomic selection behavior, while `text-inspect`
 renders structured read-only inspection results. New renderer families should add a separate contract
 and renderer implementation rather than adding tool-specific conditions to the panel.
@@ -65,7 +65,7 @@ VSIX contents.
 ## Gaps before the complete suite can ship
 
 1. Promote remaining web-only tools (generators, inspectors, diff, crypto, network) only when host
-   adapters, budgets, and privacy disclosures exist; keep those catalog hosts `planned` until then.
+   adapters, budgets, and privacy disclosures exist; keep those registry hosts `planned` until then.
 2. Add renderer contracts beyond text transformation/inspection (forms, diff, generators) with
    accessibility and protocol tests per renderer.
 3. Optionally expand hand-reviewed selection commands; host-transform adapters intentionally ship

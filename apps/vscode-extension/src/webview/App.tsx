@@ -1,6 +1,6 @@
 import { LOCAL_ONLY_CAPABILITIES, WorkspaceShell } from "@kitland/ui";
 import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
-import type { CatalogToolEntry } from "../protocol";
+import type { RegistryToolEntry } from "../protocol";
 import { parseHostMessage } from "../protocol";
 import { resolveToolRegistration, type ToolComponentProps } from "./toolRegistry";
 import { CodeEditorProvider } from "./CodeEditorProvider";
@@ -33,7 +33,7 @@ function detectVscodeTheme(): "dark" | "light" {
 }
 
 export function App() {
-  const [tools, setTools] = useState<CatalogToolEntry[]>([]);
+  const [tools, setTools] = useState<RegistryToolEntry[]>([]);
   const [activeSlug, setActiveSlug] = useState("");
   const [theme, setTheme] = useState<"dark" | "light">(detectVscodeTheme);
   const [ToolComponent, setToolComponent] = useState<ComponentType<ToolComponentProps> | null>(
@@ -47,7 +47,7 @@ export function App() {
   const loadGenerationRef = useRef(0);
   const toolComponentRef = useRef<ComponentType<ToolComponentProps> | null>(null);
 
-  const loadTool = useCallback(async (entry: CatalogToolEntry) => {
+  const loadTool = useCallback(async (entry: RegistryToolEntry) => {
     const generation = ++loadGenerationRef.current;
     setLoading(true);
     const registration = resolveToolRegistration(entry);
@@ -79,12 +79,12 @@ export function App() {
       if (!message) return;
 
       if (message.type === "toolsList") {
-        const catalog = message.tools as CatalogToolEntry[];
-        setTools(catalog);
+        const registry = message.tools as RegistryToolEntry[];
+        setTools(registry);
         if (message.collapseSidebar !== undefined) {
           setSidebarCollapsed(message.collapseSidebar);
         }
-        const entry = catalog.find((t) => t.id === message.activeToolId);
+        const entry = registry.find((t) => t.id === message.activeToolId);
         if (entry) {
           const isSameTool =
             activeToolIdRef.current === message.activeToolId &&

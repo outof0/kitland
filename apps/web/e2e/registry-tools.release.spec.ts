@@ -2,7 +2,7 @@ import { listAvailableTools } from "@kitland/tools";
 import { expect, test } from "@playwright/test";
 
 /**
- * A catalog entry is not releasable merely because its renderer compiles. Each
+ * A registry entry is not releasable merely because its renderer compiles. Each
  * available tool must hydrate from the production build without a page error
  * and render its own workspace heading.
  */

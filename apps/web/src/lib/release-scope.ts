@@ -1,19 +1,19 @@
-import { listAvailableTools, listTools, type CatalogTool } from "@kitland/tools";
+import { listAvailableTools, listTools, type RegistryTool } from "@kitland/tools";
 
 /**
- * Returns the complete public product catalog. The catalog is a roadmap as
+ * Returns the complete public product registry. The registry is a roadmap as
  * well as a directory. Per-tool rollout certification must never shrink this
- * public surface or change which catalog-available tools are runnable.
+ * public surface or change which registry-available tools are runnable.
  */
-export function listWebTools(): readonly CatalogTool[] {
+export function listWebTools(): readonly RegistryTool[] {
   return listTools();
 }
 
-export function listWebAvailableTools(): readonly CatalogTool[] {
+export function listWebAvailableTools(): readonly RegistryTool[] {
   return listAvailableTools();
 }
 
-export function getWebToolBySlug(slug: string): CatalogTool | undefined {
+export function getWebToolBySlug(slug: string): RegistryTool | undefined {
   return listWebTools().find((tool) => tool.slug === slug);
 }
 

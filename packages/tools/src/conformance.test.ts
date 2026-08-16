@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { listTools } from "./catalog";
+import { listTools } from "./registry";
 import { evaluateToolConformance, isInventoryToolId } from "./conformance";
 import { CANONICAL_TOOL_INVENTORY } from "./inventory";
 import { getToolBudget, DEFAULT_TOOL_BUDGET } from "./tool-budgets";
@@ -11,7 +11,7 @@ describe("KIT-0004 tool factory / conformance harness", () => {
     expect(isInventoryToolId("")).toBe(false);
   });
 
-  it("every inventory entry is unique and catalogs match count 64", () => {
+  it("every inventory entry is unique and registrys match count 64", () => {
     const ids = CANONICAL_TOOL_INVENTORY.map((e) => e.id);
     expect(new Set(ids).size).toBe(64);
     expect(listTools()).toHaveLength(64);
@@ -34,7 +34,7 @@ describe("KIT-0004 tool factory / conformance harness", () => {
     });
 
     expect(report.inventoryCount).toBe(64);
-    expect(report.catalogCount).toBe(64);
+    expect(report.registryCount).toBe(64);
     expect(report.issues.filter((i) => i.code === "MISSING_PLATFORM_ADAPTER")).toEqual([]);
     expect(report.ready).toBe(true);
 

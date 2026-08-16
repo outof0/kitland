@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { getToolAdapter, listSelectionCommands, listToolAdapters } from "./toolCatalog";
+import { getToolAdapter, listSelectionCommands, listToolAdapters } from "./toolRegistry";
 import { ToolPanel } from "./toolPanel";
 import { hasOverlappingRanges, transformSelectedValues } from "./selectionTransform";
-import type { RegisteredSelectionCommand } from "./toolCatalog";
+import type { RegisteredSelectionCommand } from "./toolRegistry";
 import type { ToolAdapter } from "./toolAdapter";
 
 import { KitlandViewProvider } from "./kitlandViewProvider";

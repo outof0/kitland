@@ -2,7 +2,7 @@ import {
   getToolBySlug,
   listToolsByPlatform,
   supportsToolPlatform,
-  type CatalogTool,
+  type RegistryTool,
   type ToolSlug,
 } from "@kitland/tools";
 import { createElement, lazy, type ComponentType, type LazyExoticComponent } from "react";
@@ -14,7 +14,7 @@ type ToolRendererLoader = () => Promise<ToolRendererModule>;
 export type ToolRenderer = LazyExoticComponent<ComponentType>;
 
 export type ToolRegistration = {
-  readonly tool: CatalogTool;
+  readonly tool: RegistryTool;
   readonly load: ToolRendererLoader;
 };
 
@@ -41,7 +41,7 @@ function fromEncoding(slug: string): ToolRendererLoader {
 
 /**
  * Same shape as the web ToolWorkspace registry: one lazy React renderer per
- * catalog slug. Host wrappers exist only when the extension must inject a
+ * registry slug. Host wrappers exist only when the extension must inject a
  * worker. Everything else is the shared @kitland/ui tool — not a second
  * mount API or GenericTransform fallback.
  */
@@ -237,9 +237,9 @@ export function getToolRenderer(slug: string): ToolRenderer | undefined {
 
 function register(slug: ToolSlug, load: ToolRendererLoader): ToolRegistration {
   const tool = getToolBySlug(slug);
-  if (!tool) throw new Error(`Browser extension renderer has no catalog entry for "${slug}".`);
+  if (!tool) throw new Error(`Browser extension renderer has no registry entry for "${slug}".`);
   if (!supportsToolPlatform(slug, "browser-extension")) {
-    throw new Error(`Browser extension renderer exposes non-available catalog tool "${slug}".`);
+    throw new Error(`Browser extension renderer exposes non-available registry tool "${slug}".`);
   }
   return Object.freeze({ tool, load });
 }

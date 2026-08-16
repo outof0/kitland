@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   getToolBySlug,
-  getCatalogReleaseReadiness,
+  getRegistryReleaseReadiness,
   getToolPlatformContract,
   isAvailableToolSlug,
   isToolSlug,
@@ -10,14 +10,14 @@ import {
   listToolsByFamily,
   listToolsByPlatform,
   supportsToolPlatform,
-} from "./catalog";
+} from "./registry";
 import { defineTool } from "./define-tool";
-import { CATALOG_RELEASE_POLICY, evaluateCatalogReleaseReadiness } from "./release";
+import { REGISTRY_RELEASE_POLICY, evaluateRegistryReleaseReadiness } from "./release";
 import { base64Tool } from "./tools/encoding";
 import type { ToolDefinition } from "./types";
 import { CANONICAL_TOOL_INVENTORY, type CanonicalToolInventoryEntry } from "./inventory";
 
-describe("tool catalog", () => {
+describe("tool registry", () => {
   it("includes Base64 as a release-ready available tool", () => {
     const tools = listTools();
     expect(tools.length).toBeGreaterThanOrEqual(1);
@@ -207,18 +207,18 @@ describe("tool catalog", () => {
   });
 
   it("deeply freezes definitions so lookup maps cannot become stale", () => {
-    const catalogBase64 = getToolBySlug("base64");
-    expect(catalogBase64).toBeDefined();
-    expect(Object.isFrozen(catalogBase64)).toBe(true);
-    expect(Object.isFrozen(catalogBase64!.keywords)).toBe(true);
-    expect(Object.isFrozen(catalogBase64!.platforms)).toBe(true);
-    expect(Object.isFrozen(catalogBase64!.platforms.web)).toBe(true);
-    expect(Object.isFrozen(catalogBase64!.platforms.web.capabilities)).toBe(true);
-    expect(Reflect.set(catalogBase64 as object, "slug", "mutated")).toBe(false);
-    expect(getToolBySlug("base64")).toBe(catalogBase64);
+    const registryBase64 = getToolBySlug("base64");
+    expect(registryBase64).toBeDefined();
+    expect(Object.isFrozen(registryBase64)).toBe(true);
+    expect(Object.isFrozen(registryBase64!.keywords)).toBe(true);
+    expect(Object.isFrozen(registryBase64!.platforms)).toBe(true);
+    expect(Object.isFrozen(registryBase64!.platforms.web)).toBe(true);
+    expect(Object.isFrozen(registryBase64!.platforms.web.capabilities)).toBe(true);
+    expect(Reflect.set(registryBase64 as object, "slug", "mutated")).toBe(false);
+    expect(getToolBySlug("base64")).toBe(registryBase64);
   });
 
-  it("rejects invalid declarations before they enter the catalog", () => {
+  it("rejects invalid declarations before they enter the registry", () => {
     expect(() => defineTool({ ...base64Tool, id: "Not Valid" })).toThrow(/kebab-case/);
     expect(() =>
       defineTool({
@@ -243,8 +243,8 @@ describe("tool catalog", () => {
     ).toThrow(/must not contain duplicates/);
   });
 
-  it("passes the complete-suite release gate on the assembled catalog", () => {
-    const readiness = getCatalogReleaseReadiness();
+  it("passes the complete-suite release gate on the assembled registry", () => {
+    const readiness = getRegistryReleaseReadiness();
     expect(readiness.ready).toBe(true);
     expect(readiness.targetToolCount).toBe(64);
     expect(readiness.currentToolCount).toBe(64);
@@ -265,9 +265,9 @@ describe("tool catalog", () => {
     expect(tools.filter((tool) => tool.releaseStage === "release-ready")).toHaveLength(64);
   });
 
-  it("passes only when the complete catalog is release-ready with resolved platforms", () => {
+  it("passes only when the complete registry is release-ready with resolved platforms", () => {
     const tools: ToolDefinition[] = Array.from(
-      { length: CATALOG_RELEASE_POLICY.targetToolCount },
+      { length: REGISTRY_RELEASE_POLICY.targetToolCount },
       (_, index) => ({
         ...base64Tool,
         id: `release-tool-${index + 1}`,
@@ -282,16 +282,16 @@ describe("tool catalog", () => {
     );
     const inventory: CanonicalToolInventoryEntry[] = tools.map(({ id, slug }) => ({ id, slug }));
 
-    expect(evaluateCatalogReleaseReadiness(tools, null)).toMatchObject({
+    expect(evaluateRegistryReleaseReadiness(tools, null)).toMatchObject({
       ready: false,
       currentToolCount: 64,
       canonicalInventoryCount: null,
     });
     expect(
-      evaluateCatalogReleaseReadiness(tools, null).issues.map((issue) => issue.code),
+      evaluateRegistryReleaseReadiness(tools, null).issues.map((issue) => issue.code),
     ).toContain("CANONICAL_INVENTORY_MISSING");
 
-    expect(evaluateCatalogReleaseReadiness(tools, inventory)).toMatchObject({
+    expect(evaluateRegistryReleaseReadiness(tools, inventory)).toMatchObject({
       ready: true,
       currentToolCount: 64,
       canonicalInventoryCount: 64,
@@ -300,9 +300,9 @@ describe("tool catalog", () => {
     });
   });
 
-  it("rejects catalogs above the exact 64-tool product boundary", () => {
+  it("rejects registrys above the exact 64-tool product boundary", () => {
     const tools: ToolDefinition[] = Array.from(
-      { length: CATALOG_RELEASE_POLICY.targetToolCount + 1 },
+      { length: REGISTRY_RELEASE_POLICY.targetToolCount + 1 },
       (_, index) => ({
         ...base64Tool,
         id: `extra-tool-${index + 1}`,
@@ -317,21 +317,21 @@ describe("tool catalog", () => {
     );
     const inventory: CanonicalToolInventoryEntry[] = tools.map(({ id, slug }) => ({ id, slug }));
 
-    expect(evaluateCatalogReleaseReadiness(tools, inventory)).toMatchObject({
+    expect(evaluateRegistryReleaseReadiness(tools, inventory)).toMatchObject({
       ready: false,
       currentToolCount: 65,
       canonicalInventoryCount: 65,
     });
     expect(
-      evaluateCatalogReleaseReadiness(tools, inventory).issues.map((issue) => issue.code),
+      evaluateRegistryReleaseReadiness(tools, inventory).issues.map((issue) => issue.code),
     ).toEqual(
       expect.arrayContaining(["TOOL_COUNT_MISMATCH", "CANONICAL_INVENTORY_COUNT_MISMATCH"]),
     );
   });
 
-  it("rejects a full catalog that does not match its canonical identities", () => {
+  it("rejects a full registry that does not match its canonical identities", () => {
     const tools: ToolDefinition[] = Array.from(
-      { length: CATALOG_RELEASE_POLICY.targetToolCount },
+      { length: REGISTRY_RELEASE_POLICY.targetToolCount },
       (_, index) => ({
         ...base64Tool,
         id: `identity-tool-${index + 1}`,
@@ -347,8 +347,8 @@ describe("tool catalog", () => {
     const inventory: CanonicalToolInventoryEntry[] = tools.map(({ id, slug }) => ({ id, slug }));
     inventory[0] = { id: tools[0]!.id, slug: "agreed-slug" };
 
-    const readiness = evaluateCatalogReleaseReadiness(tools, inventory);
+    const readiness = evaluateRegistryReleaseReadiness(tools, inventory);
     expect(readiness.ready).toBe(false);
-    expect(readiness.issues.map((issue) => issue.code)).toContain("CATALOG_INVENTORY_MISMATCH");
+    expect(readiness.issues.map((issue) => issue.code)).toContain("REGISTRY_INVENTORY_MISMATCH");
   });
 });

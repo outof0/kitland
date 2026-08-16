@@ -1,23 +1,23 @@
 import { listAvailableTools, listSurfaceRolloutTools, listTools } from "@kitland/tools";
 import { expect, test } from "@playwright/test";
 
-const catalogTools = listTools();
+const registryTools = listTools();
 const availableTools = listAvailableTools();
-const plannedTools = catalogTools.filter((tool) => tool.status !== "available");
+const plannedTools = registryTools.filter((tool) => tool.status !== "available");
 const rolloutTools = listSurfaceRolloutTools("web");
 
-test("keeps every catalog-available tool accessible while certifying rollout targets", async ({
+test("keeps every registry-available tool accessible while certifying rollout targets", async ({
   page,
   request,
 }) => {
   expect(rolloutTools.length).toBeGreaterThan(0);
   expect(rolloutTools.every((tool) => tool.status === "available")).toBe(true);
 
-  const catalogResponse = await request.get("/explore");
-  expect(catalogResponse.ok()).toBe(true);
+  const registryResponse = await request.get("/explore");
+  expect(registryResponse.ok()).toBe(true);
 
   await page.goto("/explore");
-  await expect(page.locator("[data-explore-card]")).toHaveCount(catalogTools.length);
+  await expect(page.locator("[data-explore-card]")).toHaveCount(registryTools.length);
   await expect(page.locator("[data-explore-family-group]")).toHaveCount(6);
   await expect(page.locator('[data-explore-card][data-explore-action="open"]')).toHaveCount(
     availableTools.length,
@@ -52,7 +52,7 @@ test("keeps every catalog-available tool accessible while certifying rollout tar
   expect(landingResponse.ok()).toBe(true);
   const landingHtml = await landingResponse.text();
   expect(landingHtml).toMatch(
-    new RegExp(`${catalogTools.length}(?:<!--\\s*-->)?\\s*LOCAL-FIRST TOOLS`),
+    new RegExp(`${registryTools.length}(?:<!--\\s*-->)?\\s*LOCAL-FIRST TOOLS`),
   );
   expect(landingHtml).toContain("RELEASE ROADMAP");
 });

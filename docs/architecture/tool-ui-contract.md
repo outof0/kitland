@@ -19,7 +19,7 @@ and Toggle). When another primitive is introduced, add it once to that local UI
 layer and use it from product components; do not copy a second version into
 each of the 64 tools.
 
-The official shadcn/ui catalog is the component reference. This project stages
+The official shadcn/ui registry is the component reference. This project stages
 primitives only after they pass its static-CSP browser check. In particular,
 Radix overlays and roving-focus groups can inject inline styles, so they are
 not a drop-in fit for this policy.
@@ -33,7 +33,7 @@ abstract component inventory:
   Escape handling, and focus return. Its current semantic drawer is deliberate:
   a Sheet migration needs a CSP-compatible adapter and equivalent browser
   evidence before replacing it.
-- `ToolSidebar` owns catalog/favorite state and currently implements drawer
+- `ToolSidebar` owns registry/favorite state and currently implements drawer
   focus containment itself. Sidebar/Collapsible primitives must replace only
   the duplicated interaction mechanics, not its product data rules.
 - `Base64Tool` owns domain state and safe conversion semantics, but its editor
@@ -52,7 +52,7 @@ abstract component inventory:
 
 | Owner                                                  | Owns                                                                                                                     | Does not own                                                                                              |
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `apps/web/src/components/ui/*`                         | Generated/adapted shadcn primitives, their accessible behavior, variants, focus, disabled state, and token bindings      | Tool domain state, routing, catalog data, or per-tool copy                                                |
+| `apps/web/src/components/ui/*`                         | Generated/adapted shadcn primitives, their accessible behavior, variants, focus, disabled state, and token bindings      | Tool domain state, routing, registry data, or per-tool copy                                                |
 | `apps/web/src/components/tools/*`                      | Reusable Kitland shell composites assembled from primitives: navigation, workspace chrome, and shared tool affordances   | A second Button/Card/Textarea implementation or raw Radix wiring                                          |
 | `apps/web/src/tools/*`                                 | Domain-specific workflow, calls to `@kitland/core`, tool copy, and composition of the shared primitives                  | Global layout CSS, bespoke primitive variants, or browser-platform behavior in `core`                     |
 | Tailwind utilities                                     | Token-backed layout, spacing, responsive composition, and a one-off presentational adjustment inside an owning component | Reimplementing interactive states, colors, focus rings, or disabled behavior already owned by a primitive |
@@ -93,7 +93,7 @@ the migration is underway.
 | Current surface              | Evidence in the current code                                                                                                             | Target shadcn/ui primitive(s)                                | Kitland ownership / invariant                                                                                                                                                                      |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ToolWorkspace`              | `components/tools/ToolWorkspace.tsx` owns theme, route selection, responsive drawer state, inert background, skip link, and focus return | `Button` for trigger/backdrop; semantic drawer composite     | The workspace remains the app-owned composite. It owns route, persistence, and focus-return policy; do not replace the drawer with a Radix overlay until strict-CSP behavior is tested.            |
-| `ToolSidebar`                | `components/tools/ToolSidebar.tsx` owns favorites, section expansion, and focus containment                                              | `Button` and semantic navigation                             | Catalog/favorite logic stays in the composite. It should not grow a second icon-button implementation.                                                                                             |
+| `ToolSidebar`                | `components/tools/ToolSidebar.tsx` owns favorites, section expansion, and focus containment                                              | `Button` and semantic navigation                             | Registry/favorite logic stays in the composite. It should not grow a second icon-button implementation.                                                                                             |
 | `ToolTopBar`                 | `components/tools/ToolTopBar.tsx` renders navigation, theme buttons, and favorite action                                                 | `Button`, fieldset-based pressed controls                    | It remains a shell composite. Theme and favorite persistence remain outside the primitive.                                                                                                         |
 | Base64 header actions        | `tools/Base64Tool.tsx` has Sample and an explicit Share-input action                                                                     | `Button` variants; visible privacy notice                    | Header actions are global/session actions only. Share is opt-in, hash-only, and must disclose that the input is in the link. Do not put pane-local Copy/Clear here.                                |
 | Base64 direction and format  | `Base64Tool.tsx` uses pressed Encode/Decode and Standard/Base64URL buttons                                                               | `Button` segments grouped by a semantic fieldset             | Direction is a workflow state, not a fake submit CTA. Switching moves a valid visible result into input; invalid/oversize transfers keep the safe state and explain why.                           |

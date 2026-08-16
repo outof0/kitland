@@ -31,8 +31,8 @@ Astro (static routes, HTML, SEO metadata, 404s, sitemap)
 ```
 
 - Astro is the route and document owner. It statically generates `/`, the
-  `/explore` catalog/status page, and each available `/explore/<slug>` route
-  from the catalog. The suite catalog never redirects to the first reference
+  `/explore` registry/status page, and each available `/explore/<slug>` route
+  from the registry. The suite registry never redirects to the first reference
   implementation.
 - React is retained only where browser state and interactions are needed. Tool
   workspaces mount with `client:only="react"` because each renderer is a lazy
@@ -87,7 +87,7 @@ SPA routing and SEO problem.
 - Each tool is a real static page with crawlable, route-specific metadata.
 - Client JavaScript is explicitly scoped to interactive islands instead of
   booting a whole-site SPA for every search visitor.
-- The existing pure core and catalog package boundaries remain valid for web,
+- The existing pure core and registry package boundaries remain valid for web,
   future adapters, and an optional local MCP adapter.
 - Shadcn component source remains owned and reviewable by this repository;
   Tailwind v4 and React 19 remain first-class supported paths.
@@ -105,8 +105,8 @@ SPA routing and SEO problem.
 ## Cutover and rollback
 
 1. Add Astro, the React integration, and a static `astro.config` while keeping
-   `@kitland/core`, the catalog, and current React tool components intact.
-2. Create Astro layout/pages with `getStaticPaths()` sourced from the catalog,
+   `@kitland/core`, the registry, and current React tool components intact.
+2. Create Astro layout/pages with `getStaticPaths()` sourced from the registry,
    route metadata, JSON-LD, sitemap, robots, and a true 404 page.
 3. Render the current workspace as a React island, then remove `App.tsx`, the
    history router, Vite SPA redirects, and Vite-only SEO generation once
@@ -125,7 +125,7 @@ SPA routing and SEO problem.
   title, description, canonical URL, Open Graph fields, and JSON-LD before
   hydration.
 - Unknown tool routes return HTTP 404.
-- The sitemap and generated page set derive from the same catalog release.
+- The sitemap and generated page set derive from the same registry release.
 - The Base64 tool works with JavaScript enabled; its static document still
   gives a useful purpose, privacy statement, and usage guidance without it.
 - CI checks route HTML, sitemap/robots, headers, accessibility, bundle budget,

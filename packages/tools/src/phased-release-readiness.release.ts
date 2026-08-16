@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { getCatalogSurfaceRolloutReadiness } from "./catalog";
+import { getRegistrySurfaceRolloutReadiness } from "./registry";
 
 describe("legacy phased web rollout gate", () => {
   it("delegates to the web surface certification contract", () => {
-    const readiness = getCatalogSurfaceRolloutReadiness("web");
+    const readiness = getRegistrySurfaceRolloutReadiness("web");
 
     if (!readiness.ready) {
       const failures = readiness.issues
         .map((issue) => `- ${issue.code}: ${issue.message}`)
         .join("\n");
       throw new Error(
-        `Web rollout is blocked by the catalog contract:\n${failures}\n` +
+        `Web rollout is blocked by the registry contract:\n${failures}\n` +
           "Certify a tool only after its focused web checks pass.",
       );
     }

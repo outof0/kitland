@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { getToolRegistration, TOOL_REGISTRATIONS } from "../src/registry";
 
 describe("generic extension renderer registry", () => {
-  it("registers unique catalog-backed slugs", () => {
+  it("registers unique registry-backed slugs", () => {
     const slugs = TOOL_REGISTRATIONS.map(({ tool }) => tool.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
     for (const registration of TOOL_REGISTRATIONS) {
@@ -32,7 +32,7 @@ describe("generic extension renderer registry", () => {
     }
   });
 
-  it("does not infer a renderer for an unknown catalog slug", () => {
+  it("does not infer a renderer for an unknown registry slug", () => {
     expect(getToolRegistration("not-registered")).toBeUndefined();
   });
 });

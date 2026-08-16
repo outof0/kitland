@@ -22,7 +22,7 @@
 
 - Package: `packages/ui` → **`@kitland/ui`** (renamed from tool-ui).
 - No file-open / share / network on host shells.
-- Catalog: 64 available on all three platforms; all 64 tools release-ready.
+- Registry: 64 available on all three platforms; all 64 tools release-ready.
 
 ## By column
 

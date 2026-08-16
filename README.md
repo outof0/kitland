@@ -5,9 +5,9 @@
 Everyday developer tools, in one place — local-first, open source, no account.
 
 > **Pre-release development snapshot:** the coordinated product launch remains
-> gated on the exact, product-approved 64-tool catalog across the repository's
+> gated on the exact, product-approved 64-tool registry across the repository's
 > platform contracts. Finished tools can be certified for rollout on a specific
-> surface without shrinking the public 64-tool catalog or publishing an
+> surface without shrinking the public 64-tool registry or publishing an
 > extension marketplace artifact.
 
 |             |                                   |
@@ -19,8 +19,8 @@ Everyday developer tools, in one place — local-first, open source, no account.
 ## Layout
 
 ```text
-apps/web/                 Astro catalog/landing + lazy React tool islands
-apps/browser-extension/   Permission-free MV3 catalog + lazy tool adapters
+apps/web/                 Astro registry/landing + lazy React tool islands
+apps/browser-extension/   Permission-free MV3 registry + lazy tool adapters
 apps/vscode-extension/    Desktop/web extension host + secure tool panel
 packages/core/            Pure bounded tool logic (no platform APIs)
 packages/tools/    Identity, platform contracts, release readiness
@@ -48,14 +48,14 @@ until all 64 Pencil-approved tools are release-ready with resolved platform
 contracts. `pnpm release:verify:rollout` is separate and certifies only the
 tools explicitly declared for the web surface in `releasePlatforms`. Each
 target must be canonical, `release-ready`, and available on that surface.
-Certification never changes the 64-tool landing page, Explore catalog, or
-which catalog-available editor routes ship in the web artifact.
+Certification never changes the 64-tool landing page, Explore registry, or
+which registry-available editor routes ship in the web artifact.
 
 Start with the [64-tool rollout playbook](docs/product/tool-rollout.md),
 [interaction pattern contracts](docs/architecture/tool-patterns.md), and
 [platform capability contract](docs/architecture/platform-capabilities.md).
-Each rollout target follows the same catalog and surface contract; no one tool
-defines the public catalog scope.
+Each rollout target follows the same registry and surface contract; no one tool
+defines the public registry scope.
 
 ## Platform checks
 
@@ -70,12 +70,12 @@ Use the coordinated release gate for the complete product launch:
 
 ```bash
 pnpm artifacts:check # browser ZIP + VSIX package validation
-pnpm release:check   # quality + exact catalog gate + artifacts
+pnpm release:check   # quality + exact registry gate + artifacts
 ```
 
 For a certified public web rollout, use the separate gate. It runs the normal
 quality suite first, then certifies the web targets against their host
-contracts. It deploys the normal full web artifact: every catalog-available
+contracts. It deploys the normal full web artifact: every registry-available
 tool keeps its editor route, while planned tools remain visible as planned:
 
 ```bash
@@ -136,13 +136,13 @@ Add repository secrets:
 
 For a certified web rollout, leave `CLOUDFLARE_PAGES_ENABLED` unset and add
 the repository variable `CLOUDFLARE_PAGES_ROLLOUT_ENABLED=true`. GitHub
-Actions then deploys the normal full-catalog web artifact after validating the
+Actions then deploys the normal full-registry web artifact after validating the
 web rollout targets. It never uploads the browser extension ZIP or VS Code
 VSIX to a marketplace.
 
 For the coordinated 64-tool product launch, unset
 `CLOUDFLARE_PAGES_ROLLOUT_ENABLED` and set `CLOUDFLARE_PAGES_ENABLED=true`.
-That deploy remains blocked until the machine-readable complete-suite catalog
+That deploy remains blocked until the machine-readable complete-suite registry
 gate passes. Keeping both variables unset leaves all deploy jobs skipped.
 
 Create the Pages project once (name must match `kitland`):

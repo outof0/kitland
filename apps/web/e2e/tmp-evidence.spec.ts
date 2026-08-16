@@ -9,7 +9,7 @@ test("capture shell evidence screenshots", async ({ page }) => {
     crumb: document.querySelector('[data-testid="tool-title"]')?.textContent ?? null,
     brand: document.querySelector(".brand-mark")?.textContent ?? null,
     theme: document.documentElement.dataset.theme ?? null,
-    sidebarLinks: document.querySelectorAll(".catalog-nav a").length,
+    sidebarLinks: document.querySelectorAll(".registry-nav a").length,
     activeCrumb: document.querySelector(".active-crumb")?.textContent ?? null,
   }));
   expect(light.crumb).toBeTruthy();

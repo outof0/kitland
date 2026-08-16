@@ -1,5 +1,5 @@
 /**
- * Shared catalog types. Platform apps (web / VS Code / Chrome) consume these
+ * Shared registry types. Platform apps (web / VS Code / Chrome) consume these
  * without importing React or host APIs.
  */
 
@@ -27,13 +27,13 @@ export type ToolStatus = "available" | "coming-soon";
  * Delivery maturity is separate from preview availability. A reference tool
  * may be usable during development without counting toward a product release.
  * `release-ready` means that at least one explicitly named product surface has
- * completed its certification contract; it does not make the whole catalog or
+ * completed its certification contract; it does not make the whole registry or
  * every host releasable.
  */
 export type ToolReleaseStage = "reference" | "planned" | "implemented" | "release-ready";
 
 /**
- * Product hosts supported by the shared catalog. `browser-extension` refers to
+ * Product hosts supported by the shared registry. `browser-extension` refers to
  * Chromium/Firefox-style extensions; it is deliberately distinct from the
  * ordinary public web application.
  */
@@ -74,7 +74,7 @@ export type ToolPlatformContract = {
 };
 
 export type ToolDefinition = {
-  /** Stable machine id, kebab-case, unique across the catalog */
+  /** Stable machine id, kebab-case, unique across the registry */
   readonly id: string;
   /** URL segment under /explore/:slug */
   readonly slug: string;

@@ -8,7 +8,7 @@ import tailwindcss from "@tailwindcss/postcss";
 const appRoot = fileURLToPath(new URL("../", import.meta.url));
 const outdir = fileURLToPath(new URL("../dist/", import.meta.url));
 const coreSrc = fileURLToPath(new URL("../../../packages/core/src", import.meta.url));
-const catalogEntry = fileURLToPath(
+const registryEntry = fileURLToPath(
   new URL("../../../packages/tools/src/index.ts", import.meta.url),
 );
 const uiEntry = fileURLToPath(new URL("../../../packages/ui/src/index.ts", import.meta.url));
@@ -52,9 +52,9 @@ await Promise.all([
     ...shared,
     alias: {
       "@kitland/core": coreSrc,
-      "@kitland/tools": catalogEntry,
-      "@kitland/ui/catalog": fileURLToPath(
-        new URL("../../../packages/ui/src/tools/shared-catalog-tools.tsx", import.meta.url),
+      "@kitland/tools": registryEntry,
+      "@kitland/ui/registry": fileURLToPath(
+        new URL("../../../packages/ui/src/tools/shared-registry-tools.tsx", import.meta.url),
       ),
       "@kitland/ui/tools": fileURLToPath(
         new URL("../../../packages/ui/src/tools", import.meta.url),

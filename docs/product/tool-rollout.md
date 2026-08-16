@@ -1,4 +1,4 @@
-# 64-tool catalog and rollout playbook
+# 64-tool registry and rollout playbook
 
 Status: canonical 64-tool inventory committed; all 64 tools release-ready
 Release policy: [ADR 0003](../adr/0003-release-the-complete-tool-suite.md)
@@ -8,7 +8,7 @@ Release policy: [ADR 0003](../adr/0003-release-the-complete-tool-suite.md)
 `design/design.pen` contains the 64 authoritative tool artboards. Its ordered
 identity list is committed in the release manifest, and every artboard now has
 one matching `ToolDefinition`. The definitions are intentionally `planned`
-until an agent delivers the vertical slice. The catalog is the metadata source
+until an agent delivers the vertical slice. The registry is the metadata source
 of truth for:
 
 - stable id, slug, public name, short name, family, and search keywords;
@@ -18,12 +18,12 @@ of truth for:
 - design frame or an explicit design-needed state;
 - complexity/risk tier and dependencies on shared libraries.
 
-The identity manifest is the reviewed product scope; the matching catalog
+The identity manifest is the reviewed product scope; the matching registry
 definitions own all descriptive and platform metadata so the repository does
-not maintain two copies that can drift. Catalog tests validate the committed
+not maintain two copies that can drift. Registry tests validate the committed
 inventory and static design-frame metadata; a design review resolves those ids
 through Pencil MCP. No test or script parses `design/design.pen`. The strict
-release gate compares every catalog id/slug to the manifest.
+release gate compares every registry id/slug to the manifest.
 
 ## Agent ownership model
 
@@ -43,29 +43,29 @@ Recommended assignment size:
 | L    | cryptography, large-file work, diff visualization, or risky platform APIs |             1–2 |
 
 Do not mix two agents in the same tool. One integration owner updates generated
-catalog indexes after a wave; agents add isolated definition/renderer files so
+registry indexes after a wave; agents add isolated definition/renderer files so
 parallel changes do not collide in central registries.
 
 ## Wave order
 
 1. **Conformance wave:** one non-Base64 tool for each UI pattern. This proves
    the shell is not accidentally specialized for transform tools. Use the
-   committed catalog rather than inventing additional tool identities.
+   committed registry rather than inventing additional tool identities.
 2. **Low-risk breadth:** deterministic format/encode/text tools with shared
    primitives and small payloads.
 3. **Generators and inspectors:** option schemas, entropy contracts, structured
    result views, and active-editor integration.
 4. **High-risk tools:** crypto, large input, complex diff, filesystem, or host
    APIs. Require explicit threat models and performance budgets.
-5. **Catalog closure:** missing design/SEO/accessibility evidence, naming
+5. **Registry closure:** missing design/SEO/accessibility evidence, naming
    consistency, cross-tool search, and platform packaging.
 
 Every wave should keep normal CI green. It must not weaken the release gate to
-make an incomplete catalog appear shippable.
+make an incomplete registry appear shippable.
 
 ## Per-tool definition of done
 
-- Catalog definition is immutable, unique, searchable, and exhaustive for all
+- Registry definition is immutable, unique, searchable, and exhaustive for all
   platform statuses.
 - Core has success, malformed, boundary, Unicode, empty, and size-limit tests.
 - Errors are typed and actionable; sensitive data is not logged or persisted.
@@ -81,29 +81,29 @@ make an incomplete catalog appear shippable.
 ## Per-surface rollout certification
 
 The full-suite gate is intentionally not the only way to ship a finished tool.
-`getCatalogSurfaceRolloutReadiness(platform)` evaluates the tools explicitly
+`getRegistrySurfaceRolloutReadiness(platform)` evaluates the tools explicitly
 declared for one surface in `releasePlatforms`. A target must be canonical,
 `release-ready`, and available on the selected surface. The gate is non-empty
 by design so a rollout cannot pass as an accidental no-op. It does not change
-`getCatalogReleaseReadiness()` or the 64-tool product-release policy.
+`getRegistryReleaseReadiness()` or the 64-tool product-release policy.
 
-The target set is catalog-driven: promoting a tool requires its focused host
+The target set is registry-driven: promoting a tool requires its focused host
 checks, then a reviewed `releasePlatforms` declaration for that surface. This
 makes web, browser-extension, and VS Code certification independent rather
 than assuming one host's readiness implies another's.
 
 `pnpm release:check:rollout` first runs normal quality checks, then certifies
-the web rollout targets and verifies the normal full-catalog web artifact. Its
-artifact verifier rejects a build that drops a catalog-available tool's static
+the web rollout targets and verifies the normal full-registry web artifact. Its
+artifact verifier rejects a build that drops a registry-available tool's static
 route, sitemap URL, public link, or lazy renderer import; a separate browser
-smoke test exercises the complete catalog. The landing page and Explore catalog
+smoke test exercises the complete registry. The landing page and Explore registry
 always show the 64-tool roadmap, every `available` entry remains runnable, and
 planned entries remain visibly planned. GitHub Actions deploys this normal
 artifact only with `CLOUDFLARE_PAGES_ROLLOUT_ENABLED=true`.
 
 The default rollout command certifies `web`. To evaluate another surface, run
 `KITLAND_RELEASE_PLATFORM=browser-extension pnpm --filter @kitland/tools release:verify:rollout`
-or replace the platform with `vscode-extension`. Those catalog checks do not
+or replace the platform with `vscode-extension`. Those registry checks do not
 publish a browser extension ZIP, VS Code VSIX, or npm package; each package and
 marketplace release remains a distinct approval. No per-surface rollout alters
 the requirements below for the coordinated 64-tool launch.
@@ -113,7 +113,7 @@ the requirements below for the coordinated 64-tool launch.
 The product is release-ready only when all of these are true:
 
 1. the committed inventory contains exactly the agreed 64 unique tools;
-2. every inventory tool has a matching catalog definition and core contract;
+2. every inventory tool has a matching registry definition and core contract;
 3. every required platform entry is available and has an exhaustive renderer;
 4. all route, search, accessibility, unit, integration, bundle, security audit,
    browser-package, and VS Code-package checks pass from a clean checkout;
@@ -126,7 +126,7 @@ The product is release-ready only when all of these are true:
 - Assign disjoint tool ids and directories.
 - Do not hand-edit a shared registry from every branch; generate it from tool
   definitions or reserve one integration pass per wave.
-- Rebase/check the catalog before merge so slug and command collisions fail
+- Rebase/check the registry before merge so slug and command collisions fail
   locally, not during the final wave.
 - Require one reviewer to compare output semantics across tools in the same
   family; visual consistency alone is not sufficient.

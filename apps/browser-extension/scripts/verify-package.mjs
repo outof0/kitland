@@ -151,14 +151,14 @@ function verifyDistribution() {
   );
 }
 
-/** Per-entry budgets scale with a lazy 64-tool catalog; total package size does not equal startup cost. */
+/** Per-entry budgets scale with a lazy 64-tool registry; total package size does not equal startup cost. */
 function scriptBudget(file) {
   if (file === "sw.js") {
     // Launcher only: listens for toolbar clicks and opens the packaged page.
     return { label: "Launcher service worker", maxBytes: 4 * 1024 };
   }
   if (/\/popup-[^/]+\.js$/.test(`/${file}`)) {
-    // Page shell: catalog-backed registry + chrome. Host tools stay lazy.
+    // Page shell: registry-backed registry + chrome. Host tools stay lazy.
     return { label: "Extension shell", maxBytes: 40 * 1024 };
   }
   if (/\/adapter-[^/]+\.js$/.test(`/${file}`)) {
@@ -169,7 +169,7 @@ function scriptBudget(file) {
     // Specialty workers ship focused core tool modules (not the full barrel).
     return { label: "Tool worker", maxBytes: 24 * 1024 };
   }
-  // Shared chunks hold catalog + host-tool map for multi-tool popups.
+  // Shared chunks hold registry + host-tool map for multi-tool popups.
   return { label: "Shared lazy chunk", maxBytes: 96 * 1024 };
 }
 

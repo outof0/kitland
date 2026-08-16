@@ -5,7 +5,7 @@ import { LOCAL_ONLY_CAPABILITIES, type ToolCapabilities } from "../capabilities"
 import { ChevronDown, CodeXml, UnfoldVertical } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const SAMPLE = '<catalog><item id="1"><name>café 🍵</name></item><item id="2"/></catalog>';
+const SAMPLE = '<registry><item id="1"><name>café 🍵</name></item><item id="2"/></registry>';
 
 export type XmlFormatterToolProps = {
   readonly initialInput?: string;

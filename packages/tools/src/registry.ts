@@ -5,10 +5,10 @@ import { cryptoSecurityTools } from "./tools/crypto-security";
 import { generatorTools } from "./tools/generators";
 import { textRegexTools } from "./tools/text-regex";
 import { datetimeUtilityTools } from "./tools/datetime-utility";
-import { evaluateCatalogReleaseReadiness } from "./release";
-import { evaluateCatalogPhasedReleaseReadiness, selectPhasedReleaseTools } from "./phased-release";
+import { evaluateRegistryReleaseReadiness } from "./release";
+import { evaluateRegistryPhasedReleaseReadiness, selectPhasedReleaseTools } from "./phased-release";
 import {
-  evaluateCatalogSurfaceRolloutReadiness,
+  evaluateRegistrySurfaceRolloutReadiness,
   selectSurfaceRolloutCandidates,
   selectSurfaceRolloutTools,
 } from "./surface-rollout";
@@ -34,7 +34,7 @@ const domainToolsById = new Map<string, ToolDefinition>(
 );
 
 /**
- * Ordered catalog of tools matching the canonical product inventory.
+ * Ordered registry of tools matching the canonical product inventory.
  * Each tool explicitly declares its three platform contracts; availability
  * is never inferred from another host (KIT-0020 path B completed via explicit
  * per-tool declarations).
@@ -47,20 +47,20 @@ const toolDefinitions = CANONICAL_TOOL_INVENTORY.map((entry) => {
   return tool;
 }) as unknown as readonly ToolDefinition[];
 
-assertUniqueCatalogKeys(toolDefinitions);
+assertUniqueRegistryKeys(toolDefinitions);
 
 export const TOOLS = Object.freeze(toolDefinitions);
 
-export type CatalogTool = (typeof TOOLS)[number];
+export type RegistryTool = (typeof TOOLS)[number];
 export type ToolId = (typeof CANONICAL_TOOL_INVENTORY)[number]["id"];
 export type ToolSlug = (typeof CANONICAL_TOOL_INVENTORY)[number]["slug"];
 export type AvailableTool = ToolDefinition & { readonly status: "available" };
 export type AvailableToolSlug = AvailableTool["slug"];
 
-const bySlug = new Map<string, CatalogTool>(TOOLS.map((tool) => [tool.slug, tool]));
-const byId = new Map<string, CatalogTool>(TOOLS.map((tool) => [tool.id, tool]));
+const bySlug = new Map<string, RegistryTool>(TOOLS.map((tool) => [tool.slug, tool]));
+const byId = new Map<string, RegistryTool>(TOOLS.map((tool) => [tool.id, tool]));
 
-export function listTools(): readonly CatalogTool[] {
+export function listTools(): readonly RegistryTool[] {
   return TOOLS;
 }
 
@@ -68,22 +68,22 @@ export function listAvailableTools(): readonly AvailableTool[] {
   return TOOLS.filter((tool): tool is AvailableTool => tool.status === "available");
 }
 
-export function getToolBySlug(slug: string): CatalogTool | undefined {
+export function getToolBySlug(slug: string): RegistryTool | undefined {
   return bySlug.get(slug);
 }
 
-export function getToolById(id: string): CatalogTool | undefined {
+export function getToolById(id: string): RegistryTool | undefined {
   return byId.get(id);
 }
 
-export function listToolsByFamily(family: ToolFamilyId): readonly CatalogTool[] {
+export function listToolsByFamily(family: ToolFamilyId): readonly RegistryTool[] {
   return TOOLS.filter((t) => t.family === family);
 }
 
 export function listToolsByPlatform(
   platform: ToolPlatformId,
   status: ToolPlatformStatus = "available",
-): readonly CatalogTool[] {
+): readonly RegistryTool[] {
   return TOOLS.filter((tool) => tool.platforms[platform].status === status);
 }
 
@@ -106,42 +106,42 @@ export function isAvailableToolSlug(slug: string): slug is AvailableToolSlug {
   return getToolBySlug(slug)?.status === "available";
 }
 
-export function getCatalogReleaseReadiness() {
-  return evaluateCatalogReleaseReadiness(TOOLS);
+export function getRegistryReleaseReadiness() {
+  return evaluateRegistryReleaseReadiness(TOOLS);
 }
 
 /** Tools certified for rollout on one product surface. */
-export function listSurfaceRolloutTools(platform: ToolPlatformId): readonly CatalogTool[] {
-  return selectSurfaceRolloutTools(TOOLS, platform) as readonly CatalogTool[];
+export function listSurfaceRolloutTools(platform: ToolPlatformId): readonly RegistryTool[] {
+  return selectSurfaceRolloutTools(TOOLS, platform) as readonly RegistryTool[];
 }
 
 /**
  * Implemented tools that are structurally eligible for the next certification
  * wave on one surface. This is a queue, not a release decision.
  */
-export function listSurfaceRolloutCandidates(platform: ToolPlatformId): readonly CatalogTool[] {
-  return selectSurfaceRolloutCandidates(TOOLS, platform) as readonly CatalogTool[];
+export function listSurfaceRolloutCandidates(platform: ToolPlatformId): readonly RegistryTool[] {
+  return selectSurfaceRolloutCandidates(TOOLS, platform) as readonly RegistryTool[];
 }
 
 /** Machine-readable rollout gate for one product surface. */
-export function getCatalogSurfaceRolloutReadiness(platform: ToolPlatformId) {
-  return evaluateCatalogSurfaceRolloutReadiness(TOOLS, platform);
+export function getRegistrySurfaceRolloutReadiness(platform: ToolPlatformId) {
+  return evaluateRegistrySurfaceRolloutReadiness(TOOLS, platform);
 }
 
 /**
  * @deprecated Use listSurfaceRolloutTools("web"). Release certification does
- * not decide catalog discovery or route availability.
+ * not decide registry discovery or route availability.
  */
-export function listReleaseReadyTools(): readonly CatalogTool[] {
-  return selectPhasedReleaseTools(TOOLS) as readonly CatalogTool[];
+export function listReleaseReadyTools(): readonly RegistryTool[] {
+  return selectPhasedReleaseTools(TOOLS) as readonly RegistryTool[];
 }
 
-/** @deprecated Use getCatalogSurfaceRolloutReadiness("web"). */
-export function getCatalogPhasedReleaseReadiness() {
-  return evaluateCatalogPhasedReleaseReadiness(TOOLS);
+/** @deprecated Use getRegistrySurfaceRolloutReadiness("web"). */
+export function getRegistryPhasedReleaseReadiness() {
+  return evaluateRegistryPhasedReleaseReadiness(TOOLS);
 }
 
-function assertUniqueCatalogKeys(tools: readonly ToolDefinition[]): void {
+function assertUniqueRegistryKeys(tools: readonly ToolDefinition[]): void {
   const ids = new Set<string>();
   const slugs = new Set<string>();
 

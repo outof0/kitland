@@ -53,11 +53,11 @@ test("keeps the shared sidebar search reachable by keyboard and navigable", asyn
   await expect(page).toHaveURL(/\/explore\/base64$/);
 });
 
-test("clears the shared sidebar search with Escape and restores the catalog", async ({ page }) => {
+test("clears the shared sidebar search with Escape and restores the registry", async ({ page }) => {
   await page.goto("/explore/base64");
 
-  const catalog = page.getByRole("navigation", { name: "Registered tools" });
-  await expect(catalog.getByRole("button", { name: "Base64", exact: true })).toBeVisible();
+  const registry = page.getByRole("navigation", { name: "Registered tools" });
+  await expect(registry.getByRole("button", { name: "Base64", exact: true })).toBeVisible();
 
   await page.keyboard.press("Control+k");
   const searchInput = page.getByRole("combobox", {
@@ -65,11 +65,11 @@ test("clears the shared sidebar search with Escape and restores the catalog", as
   });
   await searchInput.fill("base");
   await expect(page.getByRole("option", { name: /JSON Formatter/ })).toHaveCount(0);
-  await expect(catalog.getByRole("button", { name: "JSON Formatter", exact: true })).toBeVisible();
+  await expect(registry.getByRole("button", { name: "JSON Formatter", exact: true })).toBeVisible();
 
   await page.keyboard.press("Escape");
   await expect(searchInput).toHaveCount(0);
-  await expect(catalog.getByRole("button", { name: "JSON Formatter", exact: true })).toBeVisible();
+  await expect(registry.getByRole("button", { name: "JSON Formatter", exact: true })).toBeVisible();
 });
 
 test("keeps the shared shell usable at mobile width without overflow", async ({ page }) => {
@@ -94,20 +94,20 @@ test("keeps the shared shell usable at mobile width without overflow", async ({ 
 test("expands the category of the active tool and marks its row", async ({ page }) => {
   await page.goto("/explore/base64");
 
-  const catalog = page.getByRole("navigation", { name: "Registered tools" });
-  const category = catalog.getByRole("button", { name: /Encode \/ Decode/ });
+  const registry = page.getByRole("navigation", { name: "Registered tools" });
+  const category = registry.getByRole("button", { name: /Encode \/ Decode/ });
   await expect(category).toHaveAttribute("aria-expanded", "true");
-  await expect(catalog.getByRole("button", { name: "Base64", exact: true })).toHaveAttribute(
+  await expect(registry.getByRole("button", { name: "Base64", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
 
   await category.click();
   await expect(category).toHaveAttribute("aria-expanded", "false");
-  await expect(catalog.getByRole("button", { name: "Base64", exact: true })).toHaveCount(0);
+  await expect(registry.getByRole("button", { name: "Base64", exact: true })).toHaveCount(0);
 
   await category.click();
-  await expect(catalog.getByRole("button", { name: "Base64", exact: true })).toBeVisible();
+  await expect(registry.getByRole("button", { name: "Base64", exact: true })).toBeVisible();
 });
 
 test("encodes, swaps, reports invalid Base64, and recovers", async ({ page }) => {
@@ -289,7 +289,7 @@ test("keeps the shared category accordion keyboard operable", async ({ page }) =
     .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
     .toBe(true);
 
-  // At compact widths the catalog is a drawer; open it before focusing categories.
+  // At compact widths the registry is a drawer; open it before focusing categories.
   const drawerToggle = page.getByRole("button", { name: /Open tools navigation/ });
   await expect(drawerToggle).toBeVisible({ timeout: 10_000 });
   await drawerToggle.click();

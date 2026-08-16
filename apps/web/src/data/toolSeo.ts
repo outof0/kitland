@@ -41,7 +41,7 @@ function localTransformSeo(toolName: string, detail: string): ToolSeoContent {
 }
 
 /**
- * Indexable tool copy lives beside the catalog rather than inside a client
+ * Indexable tool copy lives beside the registry rather than inside a client
  * component. A new public tool must supply real explanatory content; this
  * prevents 64 thin, near-duplicate landing pages from entering the sitemap.
  */
@@ -403,7 +403,7 @@ export function getToolSeoContent(slug: string): ToolSeoContent | undefined {
   return TOOL_SEO_CONTENT[slug];
 }
 
-/** Fail static generation if a catalog entry would create a thin SEO page. */
+/** Fail static generation if a registry entry would create a thin SEO page. */
 export function requireToolSeoContent(tool: ToolDefinition): ToolSeoContent {
   const content = getToolSeoContent(tool.slug);
   if (!content) {

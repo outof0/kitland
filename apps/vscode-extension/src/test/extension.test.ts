@@ -39,7 +39,7 @@ suite("Kitland Tools extension", () => {
     assert.match(document.getText(), /fetch\("https:\/\/two\.test"/u);
   });
 
-  test("opens catalog tools by stable identifier without mutating JSON selections", async () => {
+  test("opens registry tools by stable identifier without mutating JSON selections", async () => {
     const result = await vscode.commands.executeCommand("kitland.openTool", "base64");
     assert.equal(result, undefined);
     const document = await vscode.workspace.openTextDocument({ content: '{"selected":true}' });

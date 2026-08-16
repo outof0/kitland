@@ -149,7 +149,7 @@ describe("webview protocol", () => {
     ).toBeUndefined();
   });
 
-  it("accepts a complete catalog-backed initialization message", () => {
+  it("accepts a complete registry-backed initialization message", () => {
     const message = {
       type: "init",
       tool,

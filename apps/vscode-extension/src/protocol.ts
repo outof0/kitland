@@ -9,7 +9,7 @@ import {
   type ToolResult,
 } from "@kitland/core";
 import {
-  PROTOCOL_MAX_CATALOG_CHOICES,
+  PROTOCOL_MAX_REGISTRY_CHOICES,
   PROTOCOL_MAX_DESCRIPTION_CHARS,
   PROTOCOL_MAX_ID_CHARS,
   PROTOCOL_MAX_LABEL_CHARS,
@@ -55,8 +55,8 @@ export type WebviewMessage =
 
 export type ToolInputLimit = { operationId: string; maxInputChars: number };
 
-/** Serialized catalog entry sent to the webview for sidebar rendering. */
-export type CatalogToolEntry = {
+/** Serialized registry entry sent to the webview for sidebar rendering. */
+export type RegistryToolEntry = {
   id: string;
   slug: string;
   shortName: string;
@@ -106,7 +106,7 @@ export type HostMessage =
   | { type: "copyResult"; requestId: number; toolId: string; ok: false; message: string }
   | {
       type: "toolsList";
-      tools: readonly CatalogToolEntry[];
+      tools: readonly RegistryToolEntry[];
       activeToolId: string;
       initialInput: string;
       collapseSidebar?: boolean;
@@ -155,7 +155,7 @@ function parseOperation(value: unknown): ToolOperation | undefined {
     : undefined;
 }
 function parseArray<T>(value: unknown, parser: (entry: unknown) => T | undefined): T[] | undefined {
-  if (!Array.isArray(value) || value.length === 0 || value.length > PROTOCOL_MAX_CATALOG_CHOICES)
+  if (!Array.isArray(value) || value.length === 0 || value.length > PROTOCOL_MAX_REGISTRY_CHOICES)
     return undefined;
   const result: T[] = [];
   for (const entry of value) {
@@ -260,7 +260,7 @@ function parseToolDescriptor(value: unknown): ToolDescriptor | undefined {
 }
 
 function parseInputLimits(value: unknown): ToolInputLimit[] | undefined {
-  if (!Array.isArray(value) || value.length === 0 || value.length > PROTOCOL_MAX_CATALOG_CHOICES)
+  if (!Array.isArray(value) || value.length === 0 || value.length > PROTOCOL_MAX_REGISTRY_CHOICES)
     return undefined;
   const limits: ToolInputLimit[] = [];
   for (const entry of value) {
@@ -466,7 +466,7 @@ export function parseHostMessage(value: unknown): HostMessage | undefined {
       !isBoundedString(record.initialInput, PROTOCOL_MAX_TEXT_CHARS)
     )
       return undefined;
-    const tools: CatalogToolEntry[] = [];
+    const tools: RegistryToolEntry[] = [];
     for (const entry of record.tools) {
       const item = entry as UnknownRecord | null;
       if (

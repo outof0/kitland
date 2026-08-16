@@ -149,7 +149,7 @@ export function decodeBase64(input: string, options: Base64Options = {}): ToolRe
 }
 
 /**
- * Run encode or decode by mode. Single entry for catalog/adapters.
+ * Run encode or decode by mode. Single entry for registry/adapters.
  */
 export function runBase64(
   mode: Base64Mode,

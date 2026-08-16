@@ -5,7 +5,7 @@ Use this as the always-on guardrail. For a tool vertical slice, also follow
 
 ## Source of truth
 
-1. Start with `docs/architecture/README.md`, then the selected tool's catalog
+1. Start with `docs/architecture/README.md`, then the selected tool's registry
    definition and tests.
 2. Read `tool-patterns.md`, `tool-ui-contract.md`,
    `platform-capabilities.md`, and `tool-rollout.md` before changing a tool.
@@ -16,7 +16,7 @@ Use this as the always-on guardrail. For a tool vertical slice, also follow
 
 ## Implementation boundaries
 
-- Work as a vertical slice: pure bounded core → catalog contract → host
+- Work as a vertical slice: pure bounded core → registry contract → host
   adapters → static SEO/docs → tests and browser evidence.
 - Keep `packages/core` deterministic and free of DOM, React, browser,
   extension, VS Code, network, filesystem, and persistence APIs.

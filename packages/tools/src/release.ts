@@ -1,58 +1,58 @@
 import { TOOL_PLATFORM_IDS, type ToolDefinition, type ToolPlatformId } from "./types";
 import { CANONICAL_TOOL_INVENTORY, type CanonicalToolInventoryEntry } from "./inventory";
 
-export const CATALOG_RELEASE_POLICY = Object.freeze({
+export const REGISTRY_RELEASE_POLICY = Object.freeze({
   /** Product direction: the first public production release is the full suite. */
   targetToolCount: 64,
   requiredWebPlatform: "web" as const satisfies ToolPlatformId,
   requiredReleaseStage: "release-ready" as const,
 });
 
-export type CatalogReleaseIssueCode =
+export type RegistryReleaseIssueCode =
   | "TOOL_COUNT_MISMATCH"
   | "CANONICAL_INVENTORY_MISSING"
   | "CANONICAL_INVENTORY_COUNT_MISMATCH"
   | "DUPLICATE_CANONICAL_TOOL_ID"
   | "DUPLICATE_CANONICAL_TOOL_SLUG"
-  | "CATALOG_INVENTORY_MISMATCH"
+  | "REGISTRY_INVENTORY_MISMATCH"
   | "DUPLICATE_TOOL_ID"
   | "DUPLICATE_TOOL_SLUG"
   | "TOOL_NOT_RELEASE_READY"
   | "WEB_PLATFORM_UNAVAILABLE"
   | "PLATFORM_CONTRACT_UNRESOLVED";
 
-export type CatalogReleaseIssue = {
-  readonly code: CatalogReleaseIssueCode;
+export type RegistryReleaseIssue = {
+  readonly code: RegistryReleaseIssueCode;
   readonly message: string;
   readonly toolSlug?: string;
 };
 
-export type CatalogReleaseReadiness = {
+export type RegistryReleaseReadiness = {
   readonly ready: boolean;
   readonly targetToolCount: number;
   readonly currentToolCount: number;
   readonly canonicalInventoryCount: number | null;
   readonly releaseReadyToolCount: number;
-  readonly issues: readonly CatalogReleaseIssue[];
+  readonly issues: readonly RegistryReleaseIssue[];
 };
 
 /**
  * Machine-readable complete-suite gate. Preview builds and tests may run while
  * this is false; a production release may not.
  */
-export function evaluateCatalogReleaseReadiness(
+export function evaluateRegistryReleaseReadiness(
   tools: readonly ToolDefinition[],
   canonicalInventory: readonly CanonicalToolInventoryEntry[] | null = CANONICAL_TOOL_INVENTORY,
-): CatalogReleaseReadiness {
-  const issues: CatalogReleaseIssue[] = [];
+): RegistryReleaseReadiness {
+  const issues: RegistryReleaseIssue[] = [];
   const ids = new Set<string>();
   const slugs = new Set<string>();
 
-  if (tools.length !== CATALOG_RELEASE_POLICY.targetToolCount) {
+  if (tools.length !== REGISTRY_RELEASE_POLICY.targetToolCount) {
     const toolNoun = tools.length === 1 ? "tool" : "tools";
     issues.push({
       code: "TOOL_COUNT_MISMATCH",
-      message: `Catalog has ${tools.length} ${toolNoun}; exactly ${CATALOG_RELEASE_POLICY.targetToolCount} are required for the complete-suite release.`,
+      message: `Registry has ${tools.length} ${toolNoun}; exactly ${REGISTRY_RELEASE_POLICY.targetToolCount} are required for the complete-suite release.`,
     });
   }
 
@@ -76,7 +76,7 @@ export function evaluateCatalogReleaseReadiness(
     ids.add(tool.id);
     slugs.add(tool.slug);
 
-    if (tool.releaseStage !== CATALOG_RELEASE_POLICY.requiredReleaseStage) {
+    if (tool.releaseStage !== REGISTRY_RELEASE_POLICY.requiredReleaseStage) {
       issues.push({
         code: "TOOL_NOT_RELEASE_READY",
         message: `Tool "${tool.slug}" is ${tool.releaseStage}, not release-ready.`,
@@ -86,7 +86,7 @@ export function evaluateCatalogReleaseReadiness(
 
     if (
       tool.status !== "available" ||
-      tool.platforms[CATALOG_RELEASE_POLICY.requiredWebPlatform].status !== "available"
+      tool.platforms[REGISTRY_RELEASE_POLICY.requiredWebPlatform].status !== "available"
     ) {
       issues.push({
         code: "WEB_PLATFORM_UNAVAILABLE",
@@ -109,11 +109,11 @@ export function evaluateCatalogReleaseReadiness(
   const frozenIssues = Object.freeze(issues.map((issue) => Object.freeze(issue)));
   return Object.freeze({
     ready: frozenIssues.length === 0,
-    targetToolCount: CATALOG_RELEASE_POLICY.targetToolCount,
+    targetToolCount: REGISTRY_RELEASE_POLICY.targetToolCount,
     currentToolCount: tools.length,
     canonicalInventoryCount: canonicalInventory?.length ?? null,
     releaseReadyToolCount: tools.filter(
-      (tool) => tool.releaseStage === CATALOG_RELEASE_POLICY.requiredReleaseStage,
+      (tool) => tool.releaseStage === REGISTRY_RELEASE_POLICY.requiredReleaseStage,
     ).length,
     issues: frozenIssues,
   });
@@ -122,7 +122,7 @@ export function evaluateCatalogReleaseReadiness(
 function validateCanonicalInventory(
   tools: readonly ToolDefinition[],
   canonicalInventory: readonly CanonicalToolInventoryEntry[] | null,
-  issues: CatalogReleaseIssue[],
+  issues: RegistryReleaseIssue[],
 ): void {
   if (canonicalInventory === null) {
     issues.push({
@@ -133,10 +133,10 @@ function validateCanonicalInventory(
     return;
   }
 
-  if (canonicalInventory.length !== CATALOG_RELEASE_POLICY.targetToolCount) {
+  if (canonicalInventory.length !== REGISTRY_RELEASE_POLICY.targetToolCount) {
     issues.push({
       code: "CANONICAL_INVENTORY_COUNT_MISMATCH",
-      message: `Canonical inventory has ${canonicalInventory.length} entries; exactly ${CATALOG_RELEASE_POLICY.targetToolCount} are required.`,
+      message: `Canonical inventory has ${canonicalInventory.length} entries; exactly ${REGISTRY_RELEASE_POLICY.targetToolCount} are required.`,
     });
   }
 
@@ -164,25 +164,25 @@ function validateCanonicalInventory(
     canonicalById.set(entry.id, entry);
   }
 
-  const catalogIds = new Set(tools.map((tool) => tool.id));
+  const registryIds = new Set(tools.map((tool) => tool.id));
   for (const tool of tools) {
     const canonical = canonicalById.get(tool.id);
     if (canonical?.slug !== tool.slug) {
       issues.push({
-        code: "CATALOG_INVENTORY_MISMATCH",
+        code: "REGISTRY_INVENTORY_MISMATCH",
         message: canonical
-          ? `Catalog tool id "${tool.id}" uses slug "${tool.slug}"; canonical slug is "${canonical.slug}".`
-          : `Catalog tool "${tool.id}" / "${tool.slug}" is absent from the canonical inventory.`,
+          ? `Registry tool id "${tool.id}" uses slug "${tool.slug}"; canonical slug is "${canonical.slug}".`
+          : `Registry tool "${tool.id}" / "${tool.slug}" is absent from the canonical inventory.`,
         toolSlug: tool.slug,
       });
     }
   }
 
   for (const entry of canonicalInventory) {
-    if (!catalogIds.has(entry.id)) {
+    if (!registryIds.has(entry.id)) {
       issues.push({
-        code: "CATALOG_INVENTORY_MISMATCH",
-        message: `Canonical tool "${entry.id}" / "${entry.slug}" is missing from the catalog.`,
+        code: "REGISTRY_INVENTORY_MISMATCH",
+        message: `Canonical tool "${entry.id}" / "${entry.slug}" is missing from the registry.`,
         toolSlug: entry.slug,
       });
     }
