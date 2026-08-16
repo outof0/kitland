@@ -48,7 +48,7 @@ const firefoxFiles = files.map((absolutePath) => {
   let data = readFileSync(absolutePath);
   if (name === "manifest.json") {
     const manifest = JSON.parse(data.toString("utf8"));
-    const { scripts, ...background } = manifest.background ?? {};
+    const { scripts: _scripts, ...background } = manifest.background ?? {};
     const patched = {
       ...manifest,
       background,
