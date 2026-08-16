@@ -8,7 +8,6 @@ import {
   NoteText,
   ResultHead,
   ResultPanel,
-  RunButton,
   SampleAction,
   StatusBar,
   ToolHeader,
@@ -115,13 +114,9 @@ export function CronParserTool() {
             ))}
           </div>
 
-          <div className="flex-1" />
-          <RunButton onClick={() => setExpression(expression.trim() || SAMPLE)}>
-            Build Schedule
-          </RunButton>
           <NoteText>
-            Adjust fields to preview upcoming runs. 5-field Unix cron: */step, ranges, lists, names,
-            L, W and #.
+            Adjust fields to preview upcoming runs automatically. 5-field Unix cron: */step, ranges,
+            lists, names, L, W and #.
           </NoteText>
         </FormPanel>
 

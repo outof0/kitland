@@ -6,7 +6,6 @@ import {
   FieldRow,
   FormPanel,
   ResultPanel,
-  RunButton,
   SampleAction,
   StatusBar,
   ToolHeader,
@@ -145,10 +144,7 @@ export function TimezoneConverterTool() {
               </span>
             </div>
           ))}
-          <div className="flex-1" />
-          <RunButton onClick={() => setInput(input.trim() || nowLocal())} disabled={!ok}>
-            Convert
-          </RunButton>
+
         </FormPanel>
 
         <ResultPanel>
