@@ -1,82 +1,89 @@
-import { lookupMimeTypes, MIME_TYPES, type MimeCategory, type MimeType } from "@kitland/core";
-import { Check, Copy, FileCode2, Layers, Search, Server, Terminal } from "lucide-react";
-import { useMemo, useState, useCallback } from "react";
-import { useCopyFeedback } from "../hooks/useCopyFeedback";
+import {
+  generateMimeApacheSnippet,
+  generateMimeContentTypeHeader,
+  generateMimeFetchSnippet,
+  generateMimeNginxSnippet,
+  lookupMimeTypes,
+  MIME_TYPES,
+  type MimeCategory,
+} from "@kitland/core";
+import { Check, Code2, Copy, FileCode2, Layers, Search, Server, Terminal, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FieldLabel, SampleAction, StatusBar, ToolHeader } from "../components/tool-form";
+import { useCopyFeedback } from "../hooks/useCopyFeedback";
 
-const CATEGORIES: readonly { id: MimeCategory | "all"; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "application", label: "Application" },
-  { id: "text", label: "Text" },
-  { id: "image", label: "Image" },
-  { id: "audio", label: "Audio" },
-  { id: "video", label: "Video" },
-  { id: "font", label: "Font" },
-  { id: "model", label: "3D Model" },
-  { id: "multipart", label: "Multipart" },
-];
+type SnippetTab = "header" | "fetch" | "nginx" | "apache";
 
-const COMMON_SAMPLES = [
+const POPULAR_EXTENSIONS = [
   ".json",
   ".svg",
-  ".wasm",
-  ".mp4",
-  ".pdf",
   ".png",
   ".webp",
+  ".pdf",
+  ".mp4",
   ".woff2",
   ".csv",
-  ".zip",
-];
+] as const;
 
 function getCategoryColor(category: MimeCategory) {
   switch (category) {
     case "application":
-      return "bg-indigo-500/15 text-indigo-400 border-indigo-500/30";
+      return {
+        badge: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/25",
+        text: "text-indigo-600 dark:text-indigo-400",
+        ring: "ring-indigo-500/30 border-indigo-500/50",
+      };
     case "text":
-      return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+      return {
+        badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
+        text: "text-emerald-600 dark:text-emerald-400",
+        ring: "ring-emerald-500/30 border-emerald-500/50",
+      };
     case "image":
-      return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+      return {
+        badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25",
+        text: "text-amber-600 dark:text-amber-400",
+        ring: "ring-amber-500/30 border-amber-500/50",
+      };
     case "audio":
-      return "bg-purple-500/15 text-purple-400 border-purple-500/30";
+      return {
+        badge: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/25",
+        text: "text-purple-600 dark:text-purple-400",
+        ring: "ring-purple-500/30 border-purple-500/50",
+      };
     case "video":
-      return "bg-rose-500/15 text-rose-400 border-rose-500/30";
+      return {
+        badge: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25",
+        text: "text-rose-600 dark:text-rose-400",
+        ring: "ring-rose-500/30 border-rose-500/50",
+      };
     case "font":
-      return "bg-cyan-500/15 text-cyan-400 border-cyan-500/30";
+      return {
+        badge: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/25",
+        text: "text-cyan-600 dark:text-cyan-400",
+        ring: "ring-cyan-500/30 border-cyan-500/50",
+      };
     case "model":
-      return "bg-orange-500/15 text-orange-400 border-orange-500/30";
+      return {
+        badge: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/25",
+        text: "text-orange-600 dark:text-orange-400",
+        ring: "ring-orange-500/30 border-orange-500/50",
+      };
     case "multipart":
-      return "bg-pink-500/15 text-pink-400 border-pink-500/30";
+      return {
+        badge: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/25",
+        text: "text-pink-600 dark:text-pink-400",
+        ring: "ring-pink-500/30 border-pink-500/50",
+      };
   }
-}
-
-function generateContentTypeHeader(entry: MimeType): string {
-  if (entry.charset) {
-    return `Content-Type: ${entry.mime}; charset=${entry.charset.toLowerCase()}`;
-  }
-  return `Content-Type: ${entry.mime}`;
-}
-
-function generateNginxSnippet(entry: MimeType): string {
-  if (entry.extensions.length === 0) {
-    return `# Nginx types configuration\ntypes {\n    ${entry.mime};\n}`;
-  }
-  return `# Nginx mime.types mapping\ntypes {\n    ${entry.mime} ${entry.extensions.join(" ")};\n}`;
-}
-
-function generateApacheSnippet(entry: MimeType): string {
-  if (entry.extensions.length === 0) {
-    return `# Apache .htaccess / httpd.conf\n# No default extension mapping for ${entry.mime}`;
-  }
-  const exts = entry.extensions.map((e) => `.${e}`).join(" ");
-  return `# Apache .htaccess / httpd.conf\nAddType ${entry.mime} ${exts}`;
 }
 
 export function MimeTypesTool() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<MimeCategory | "all">("all");
   const [selectedMime, setSelectedMime] = useState<string>("image/svg+xml");
+  const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>("header");
 
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { isCopied, copy } = useCopyFeedback();
 
   const selectedEntry = useMemo(() => {
@@ -84,24 +91,13 @@ export function MimeTypesTool() {
   }, [selectedMime]);
 
   const filteredEntries = useMemo(() => {
-    let list = MIME_TYPES;
-    if (selectedCategory !== "all") {
-      list = list.filter((m) => m.category === selectedCategory);
+    if (!searchQuery.trim()) return MIME_TYPES;
+    const result = lookupMimeTypes(searchQuery);
+    if (result.ok) {
+      return result.value.matches;
     }
-    if (searchQuery.trim()) {
-      const result = lookupMimeTypes(searchQuery);
-      if (result.ok) {
-        if (selectedCategory !== "all") {
-          list = result.value.matches.filter((m) => m.category === selectedCategory);
-        } else {
-          list = result.value.matches;
-        }
-      } else {
-        list = [];
-      }
-    }
-    return list;
-  }, [searchQuery, selectedCategory]);
+    return [];
+  }, [searchQuery]);
 
   const handleSelectMime = useCallback((mime: string) => {
     setSelectedMime(mime);
@@ -109,25 +105,57 @@ export function MimeTypesTool() {
 
   const handleSample = useCallback(() => {
     setSearchQuery("");
-    setSelectedCategory("all");
     setSelectedMime("image/svg+xml");
+    setActiveSnippetTab("header");
   }, []);
 
-  const handleQuickSample = useCallback((ext: string) => {
-    setSearchQuery(ext);
-    setSelectedCategory("all");
-    const result = lookupMimeTypes(ext);
-    if (result.ok && result.value.matches.length > 0) {
-      setSelectedMime(result.value.matches[0]!.mime);
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery("");
+    searchInputRef.current?.focus();
+  }, []);
+
+  const handleQuickExtension = useCallback((ext: string) => {
+    const bareExt = ext.replace(/^\./, "");
+    const match = MIME_TYPES.find((m) => m.extensions.includes(bareExt));
+    if (match) {
+      setSelectedMime(match.mime);
     }
   }, []);
 
+  // Keyboard shortcut '/' to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "/" && document.activeElement !== searchInputRef.current) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const colorStyles = getCategoryColor(selectedEntry.category);
+
   const contentTypeHeader = useMemo(
-    () => generateContentTypeHeader(selectedEntry),
+    () => generateMimeContentTypeHeader(selectedEntry),
     [selectedEntry],
   );
-  const nginxSnippet = useMemo(() => generateNginxSnippet(selectedEntry), [selectedEntry]);
-  const apacheSnippet = useMemo(() => generateApacheSnippet(selectedEntry), [selectedEntry]);
+  const fetchSnippet = useMemo(() => generateMimeFetchSnippet(selectedEntry), [selectedEntry]);
+  const nginxSnippet = useMemo(() => generateMimeNginxSnippet(selectedEntry), [selectedEntry]);
+  const apacheSnippet = useMemo(() => generateMimeApacheSnippet(selectedEntry), [selectedEntry]);
+
+  const activeSnippet = useMemo(() => {
+    switch (activeSnippetTab) {
+      case "header":
+        return contentTypeHeader;
+      case "fetch":
+        return fetchSnippet;
+      case "nginx":
+        return nginxSnippet;
+      case "apache":
+        return apacheSnippet;
+    }
+  }, [activeSnippetTab, contentTypeHeader, fetchSnippet, nginxSnippet, apacheSnippet]);
 
   const relatedSameType = useMemo(() => {
     return MIME_TYPES.filter(
@@ -144,70 +172,74 @@ export function MimeTypesTool() {
         actions={<SampleAction onClick={handleSample} label="Sample (.svg)" />}
       />
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[380px_minmax(0,1fr)] xl:grid-cols-[420px_minmax(0,1fr)]">
-        {/* Left Column: Search, Category Filters, and MIME List */}
-        <section className="flex min-h-[480px] flex-col rounded-[14px] border border-outline bg-bg-elevated p-4 max-lg:max-h-[380px]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[360px_minmax(0,1fr)] xl:grid-cols-[400px_minmax(0,1fr)] lg:h-[calc(100dvh-175px)] lg:max-h-[920px]">
+        {/* Left Column: Search, Popular Extensions, and MIME List */}
+        <section className="flex h-full min-h-0 flex-col rounded-[14px] border border-outline bg-bg-elevated p-3.5 max-lg:min-h-[460px]">
           {/* Search box */}
           <div className="relative mb-3 flex items-center">
             <Search className="pointer-events-none absolute left-3 size-4 text-on-faint" />
             <input
+              ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search extension (.svg, png), MIME type, name…"
               aria-label="Search MIME types or extensions"
-              className="h-10 w-full rounded-[9px] border border-outline bg-surface pl-9 pr-3 font-ui text-[13px] text-on-surface outline-none placeholder:text-on-faint focus:border-primary focus:ring-1 focus:ring-primary/40 transition-all"
+              className="h-10 w-full rounded-[9px] border border-outline bg-surface pl-9 pr-14 font-ui text-[13px] text-on-surface outline-none placeholder:text-on-faint focus:border-primary focus:ring-1 focus:ring-primary/40 transition-all"
             />
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="absolute right-2.5 flex size-5 items-center justify-center rounded-full bg-surface-high text-on-muted hover:text-on-surface transition-colors cursor-pointer"
+                aria-label="Clear search"
+              >
+                <X className="size-3" />
+              </button>
+            ) : (
+              <kbd className="pointer-events-none absolute right-3 hidden rounded border border-outline bg-surface-low px-1.5 py-0.5 font-mono text-[10px] text-on-faint sm:inline-block">
+                /
+              </kbd>
+            )}
           </div>
 
-          {/* Category Tabs */}
-          <div className="mb-3 flex flex-wrap gap-1">
-            {CATEGORIES.map((cat) => {
-              const active = selectedCategory === cat.id;
-              const count =
-                cat.id === "all"
-                  ? MIME_TYPES.length
-                  : MIME_TYPES.filter((m) => m.category === cat.id).length;
-              return (
+          {/* Popular Extensions Quick-Select Bar */}
+          <div className="mb-3 flex flex-col gap-1.5">
+            <div className="flex items-center justify-between px-0.5">
+              <span className="font-mono text-[10.5px] font-semibold uppercase tracking-wider text-on-faint">
+                Popular
+              </span>
+              {searchQuery && (
                 <button
-                  key={cat.id}
                   type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
-                  aria-pressed={active}
-                  className={`flex h-7 items-center gap-1.5 rounded-[7px] px-2.5 font-mono text-[11px] font-semibold transition-all cursor-pointer ${
-                    active
-                      ? "bg-primary text-on-primary shadow-sm"
-                      : "bg-surface text-on-muted hover:bg-surface-high hover:text-on-surface"
-                  }`}
+                  onClick={handleClearSearch}
+                  className="font-mono text-[10.5px] text-primary hover:underline cursor-pointer"
                 >
-                  <span>{cat.label}</span>
-                  <span
-                    className={`rounded-full px-1 text-[9.5px] ${
-                      active ? "bg-black/20 text-white" : "bg-surface-low text-on-faint"
+                  Clear search
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              {POPULAR_EXTENSIONS.map((ext) => {
+                const bareExt = ext.replace(/^\./, "");
+                const isSelected = selectedEntry.extensions.includes(bareExt);
+                return (
+                  <button
+                    key={ext}
+                    type="button"
+                    onClick={() => handleQuickExtension(ext)}
+                    aria-pressed={isSelected}
+                    className={`flex h-7 flex-1 items-center justify-center rounded-[6px] font-mono text-[11px] font-semibold transition-all cursor-pointer border ${
+                      isSelected
+                        ? "bg-primary text-on-primary border-primary shadow-xs"
+                        : "bg-surface text-on-muted hover:text-on-surface hover:bg-surface-high border-outline"
                     }`}
                   >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Quick Common Extension Chips */}
-          <div className="mb-2 flex flex-wrap items-center gap-1">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-on-faint mr-1">
-              Popular:
-            </span>
-            {COMMON_SAMPLES.map((ext) => (
-              <button
-                key={ext}
-                type="button"
-                onClick={() => handleQuickSample(ext)}
-                className="rounded-[5px] bg-surface px-1.5 py-0.5 font-mono text-[11px] font-semibold text-on-muted hover:bg-surface-high hover:text-on-surface transition-colors cursor-pointer"
-              >
-                {ext}
-              </button>
-            ))}
+                    {ext}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="h-px bg-outline mb-2" />
@@ -224,18 +256,18 @@ export function MimeTypesTool() {
                     type="button"
                     onClick={() => handleSelectMime(entry.mime)}
                     aria-selected={isSelected}
-                    className={`flex flex-col gap-1 rounded-[10px] border p-2.5 text-left transition-all cursor-pointer ${
+                    className={`group relative flex flex-col gap-1 rounded-[10px] border p-2.5 text-left transition-all cursor-pointer ${
                       isSelected
                         ? "border-primary bg-surface shadow-sm ring-1 ring-primary/40"
-                        : "border-transparent bg-surface/60 hover:bg-surface hover:border-outline"
+                        : "border-transparent bg-surface/50 hover:bg-surface hover:border-outline"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-mono text-[13px] font-semibold text-on-surface">
+                      <span className="truncate font-mono text-[12.5px] font-semibold text-on-surface">
                         {entry.mime}
                       </span>
                       <span
-                        className={`shrink-0 rounded-[5px] border px-1.5 py-0.2 font-mono text-[9.5px] font-bold uppercase ${catColor}`}
+                        className={`shrink-0 rounded-[5px] border px-1.5 py-0.2 font-mono text-[9.5px] font-bold uppercase ${catColor.badge}`}
                       >
                         {entry.category}
                       </span>
@@ -247,7 +279,7 @@ export function MimeTypesTool() {
                       </span>
                       {entry.extensions.length > 0 && (
                         <div className="flex items-center gap-1 shrink-0">
-                          {entry.extensions.slice(0, 3).map((ext) => (
+                          {entry.extensions.slice(0, 2).map((ext) => (
                             <span
                               key={ext}
                               className="rounded border border-outline bg-surface-low px-1 font-mono text-[9.5px] text-on-faint"
@@ -255,9 +287,9 @@ export function MimeTypesTool() {
                               .{ext}
                             </span>
                           ))}
-                          {entry.extensions.length > 3 && (
+                          {entry.extensions.length > 2 && (
                             <span className="font-mono text-[9px] text-on-faint">
-                              +{entry.extensions.length - 3}
+                              +{entry.extensions.length - 2}
                             </span>
                           )}
                         </div>
@@ -272,13 +304,10 @@ export function MimeTypesTool() {
                 <span className="text-[12px]">No MIME types match "{searchQuery}"</span>
                 <button
                   type="button"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedCategory("all");
-                  }}
-                  className="mt-1 text-[11px] text-primary hover:underline"
+                  onClick={handleClearSearch}
+                  className="mt-1 text-[11px] text-primary hover:underline cursor-pointer"
                 >
-                  Clear filters
+                  Clear search
                 </button>
               </div>
             )}
@@ -292,14 +321,12 @@ export function MimeTypesTool() {
         </section>
 
         {/* Right Column: Deep MIME Inspector & Configuration Snippets */}
-        <section className="flex min-h-[480px] min-w-0 flex-1 flex-col gap-4 rounded-[14px] border border-outline bg-surface p-5 overflow-y-auto">
+        <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col gap-4 rounded-[14px] border border-outline bg-surface p-5 sm:p-6 overflow-y-auto">
           {/* Header Row */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-outline pb-4">
             <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`rounded-[7px] border px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wider ${getCategoryColor(
-                  selectedEntry.category,
-                )}`}
+                className={`rounded-[7px] border px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wider ${colorStyles.badge}`}
               >
                 {selectedEntry.category}
               </span>
@@ -307,7 +334,7 @@ export function MimeTypesTool() {
                 {selectedEntry.source} Authority
               </span>
               {selectedEntry.compressible ? (
-                <span className="rounded-[7px] border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10.5px] font-semibold text-emerald-400">
+                <span className="rounded-[7px] border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10.5px] font-semibold text-emerald-600 dark:text-emerald-400">
                   Compressible (Gzip / Brotli)
                 </span>
               ) : (
@@ -338,18 +365,22 @@ export function MimeTypesTool() {
                 className="flex h-8 items-center gap-1.5 rounded-[7px] border border-outline bg-surface-low px-2.5 text-[12px] font-semibold text-on-surface hover:bg-surface-high transition-colors cursor-pointer"
                 title="Copy HTTP Content-Type header"
               >
-                <Layers className="size-3.5 text-on-muted" />
+                {isCopied("copy-header") ? (
+                  <Check className="size-3.5 text-success" />
+                ) : (
+                  <Layers className="size-3.5 text-on-muted" />
+                )}
                 <span>Copy Header</span>
               </button>
             </div>
           </div>
 
           {/* Hero MIME Type */}
-          <div className="flex flex-col gap-2">
-            <h3 className="m-0 break-all font-mono text-[32px] font-extrabold text-on-surface">
+          <div className="flex flex-col gap-1.5">
+            <h3 className="m-0 break-all font-mono text-[30px] sm:text-[36px] font-extrabold tracking-tight text-on-surface">
               {selectedEntry.mime}
             </h3>
-            <p className="m-0 text-[14px] font-medium leading-relaxed text-on-muted">
+            <p className="m-0 text-[13.5px] leading-relaxed text-on-muted">
               {selectedEntry.description}
             </p>
           </div>
@@ -364,23 +395,27 @@ export function MimeTypesTool() {
                     key={ext}
                     type="button"
                     onClick={() => void copy(`ext-${ext}`, `.${ext}`)}
-                    className="flex items-center gap-1.5 rounded-[8px] border border-outline bg-surface px-3 py-1.5 font-mono text-[13px] font-semibold text-on-surface hover:border-primary hover:text-primary transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 rounded-[8px] border border-outline bg-surface px-2.5 py-1 font-mono text-[12px] font-semibold text-on-surface hover:border-primary hover:text-primary transition-colors cursor-pointer"
                     title={`Click to copy ".${ext}"`}
                   >
                     <span>.{ext}</span>
-                    <Copy className="size-3 text-on-faint" />
+                    {isCopied(`ext-${ext}`) ? (
+                      <Check className="size-3 text-success" />
+                    ) : (
+                      <Copy className="size-3 text-on-faint" />
+                    )}
                   </button>
                 ))}
               </div>
             ) : (
               <span className="text-[12px] text-on-faint">
-                No specific file extension associated (stream or payload only).
+                No specific file extension associated (stream or protocol payload only).
               </span>
             )}
           </div>
 
           {/* Property Matrix Grid */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="flex flex-col gap-1 rounded-[10px] border border-outline bg-bg-elevated p-3">
               <span className="font-mono text-[10px] uppercase tracking-wider text-on-faint">
                 Media Type
@@ -402,12 +437,12 @@ export function MimeTypesTool() {
                 Default Charset
               </span>
               <span className="font-mono text-[13px] font-semibold text-on-surface">
-                {selectedEntry.charset ?? "Binary / Not text"}
+                {selectedEntry.charset ?? "Binary / None"}
               </span>
             </div>
             <div className="flex flex-col gap-1 rounded-[10px] border border-outline bg-bg-elevated p-3">
               <span className="font-mono text-[10px] uppercase tracking-wider text-on-faint">
-                Gzip / Brotli
+                Compression
               </span>
               <span className="text-[13px] font-semibold text-on-surface">
                 {selectedEntry.compressible ? "Compressible" : "Uncompressed"}
@@ -415,65 +450,82 @@ export function MimeTypesTool() {
             </div>
           </div>
 
-          {/* HTTP Content-Type Header Snippet */}
+          {/* Multi-Tab Interactive Code Snippet Preview */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <FieldLabel>HTTP Response Header</FieldLabel>
-              <button
-                type="button"
-                onClick={() => void copy("copy-content-type", contentTypeHeader)}
-                className="flex items-center gap-1 font-mono text-[11px] text-primary hover:underline cursor-pointer"
-              >
-                <Copy className="size-3" />
-                <span>Copy</span>
-              </button>
-            </div>
-            <pre className="m-0 overflow-x-auto rounded-[10px] border border-outline bg-marketing-canvas p-3 font-mono text-[12px] text-on-surface select-all">
-              {contentTypeHeader}
-            </pre>
-          </div>
-
-          {/* Server Config Snippets */}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {/* Nginx */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1 font-mono text-[11px] font-semibold text-on-muted">
-                  <Server className="size-3.5" />
-                  <span>Nginx Configuration</span>
-                </span>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-1 rounded-[8px] bg-bg-elevated p-1 border border-outline">
                 <button
                   type="button"
-                  onClick={() => void copy("copy-nginx", nginxSnippet)}
-                  className="font-mono text-[11px] text-primary hover:underline cursor-pointer"
+                  onClick={() => setActiveSnippetTab("header")}
+                  className={`flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-[11.5px] font-semibold transition-all cursor-pointer ${
+                    activeSnippetTab === "header"
+                      ? "bg-surface text-on-surface shadow-sm border border-outline"
+                      : "text-on-muted hover:text-on-surface"
+                  }`}
                 >
-                  Copy
+                  <FileCode2 className="size-3.5" />
+                  <span>HTTP Header</span>
                 </button>
-              </div>
-              <pre className="m-0 overflow-x-auto rounded-[10px] border border-outline bg-marketing-canvas p-3 font-mono text-[11.5px] text-on-surface select-all">
-                {nginxSnippet}
-              </pre>
-            </div>
-
-            {/* Apache */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1 font-mono text-[11px] font-semibold text-on-muted">
+                <button
+                  type="button"
+                  onClick={() => setActiveSnippetTab("fetch")}
+                  className={`flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-[11.5px] font-semibold transition-all cursor-pointer ${
+                    activeSnippetTab === "fetch"
+                      ? "bg-surface text-on-surface shadow-sm border border-outline"
+                      : "text-on-muted hover:text-on-surface"
+                  }`}
+                >
+                  <Code2 className="size-3.5" />
+                  <span>Fetch Response</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSnippetTab("nginx")}
+                  className={`flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-[11.5px] font-semibold transition-all cursor-pointer ${
+                    activeSnippetTab === "nginx"
+                      ? "bg-surface text-on-surface shadow-sm border border-outline"
+                      : "text-on-muted hover:text-on-surface"
+                  }`}
+                >
+                  <Server className="size-3.5" />
+                  <span>Nginx Config</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSnippetTab("apache")}
+                  className={`flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-[11.5px] font-semibold transition-all cursor-pointer ${
+                    activeSnippetTab === "apache"
+                      ? "bg-surface text-on-surface shadow-sm border border-outline"
+                      : "text-on-muted hover:text-on-surface"
+                  }`}
+                >
                   <Terminal className="size-3.5" />
                   <span>Apache .htaccess</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => void copy("copy-apache", apacheSnippet)}
-                  className="font-mono text-[11px] text-primary hover:underline cursor-pointer"
-                >
-                  Copy
                 </button>
               </div>
-              <pre className="m-0 overflow-x-auto rounded-[10px] border border-outline bg-marketing-canvas p-3 font-mono text-[11.5px] text-on-surface select-all">
-                {apacheSnippet}
-              </pre>
+
+              <button
+                type="button"
+                onClick={() => void copy("copy-active-snippet", activeSnippet)}
+                className="flex items-center gap-1 font-mono text-[11px] text-primary hover:underline cursor-pointer"
+              >
+                {isCopied("copy-active-snippet") ? (
+                  <>
+                    <Check className="size-3 text-success" />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="size-3" />
+                    <span>Copy Snippet</span>
+                  </>
+                )}
+              </button>
             </div>
+
+            <pre className="m-0 overflow-x-auto rounded-[10px] border border-outline bg-surface-low p-3.5 font-mono text-[12px] leading-relaxed text-on-surface select-all">
+              {activeSnippet}
+            </pre>
           </div>
 
           {/* Related Media Types */}
@@ -486,7 +538,7 @@ export function MimeTypesTool() {
                     key={rel.mime}
                     type="button"
                     onClick={() => handleSelectMime(rel.mime)}
-                    className="flex flex-col gap-0.5 rounded-[8px] border border-outline bg-bg-elevated p-2 text-left transition-colors hover:bg-surface-high cursor-pointer"
+                    className="flex flex-col gap-0.5 rounded-[8px] border border-outline bg-bg-elevated p-2 text-left transition-colors hover:bg-surface-high hover:border-outline-strong cursor-pointer"
                   >
                     <span className="truncate font-mono text-[12px] font-semibold text-on-surface">
                       {rel.mime}

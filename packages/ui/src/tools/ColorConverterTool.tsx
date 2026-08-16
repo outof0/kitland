@@ -9,7 +9,6 @@ import {
   ResultHead,
   ResultPanel,
   ResultRow,
-  RunButton,
   SampleAction,
   StatusBar,
   ToolHeader,
@@ -191,7 +190,6 @@ export function ColorConverterTool() {
             />
             <span className="shrink-0 text-[13px] text-on-muted">%</span>
           </div>
-          <RunButton onClick={() => setInput(input.trim() || SAMPLE)}>Convert</RunButton>
           <NoteText>Accepts #hex, rgb(), hsl() and named colors.</NoteText>
         </FormPanel>
 

@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { lookupMimeTypes, MIME_TYPES, MIME_TYPES_MAX_QUERY_CHARS } from "./mime-types";
+import {
+  generateMimeApacheSnippet,
+  generateMimeContentTypeHeader,
+  generateMimeFetchSnippet,
+  generateMimeNginxSnippet,
+  lookupMimeTypes,
+  MIME_TYPES,
+  MIME_TYPES_MAX_QUERY_CHARS,
+} from "./mime-types";
 
 describe("MIME type lookup", () => {
   it("looks up a dotted extension and preserves multiple valid mappings", () => {
@@ -60,4 +68,21 @@ describe("MIME type lookup", () => {
       new Set(["application", "text", "image", "audio", "video", "font", "model", "multipart"]),
     );
   });
+
+  it("generates correct snippets for headers, nginx, apache, and fetch", () => {
+    const jsonEntry = MIME_TYPES.find((m) => m.mime === "application/json")!;
+    expect(generateMimeContentTypeHeader(jsonEntry)).toBe(
+      "Content-Type: application/json; charset=utf-8",
+    );
+    expect(generateMimeNginxSnippet(jsonEntry)).toContain("application/json json map;");
+    expect(generateMimeApacheSnippet(jsonEntry)).toBe(
+      "# Apache .htaccess / httpd.conf\nAddType application/json .json .map",
+    );
+    expect(generateMimeFetchSnippet(jsonEntry)).toContain('"Content-Type": "application/json; charset=utf-8"');
+
+    const octetEntry = MIME_TYPES.find((m) => m.mime === "application/octet-stream")!;
+    expect(generateMimeContentTypeHeader(octetEntry)).toBe("Content-Type: application/octet-stream");
+    expect(generateMimeFetchSnippet(octetEntry)).toContain('"Content-Type": "application/octet-stream"');
+  });
 });
+

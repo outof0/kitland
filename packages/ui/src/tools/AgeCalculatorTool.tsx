@@ -8,7 +8,6 @@ import {
   FormPanel,
   ResultPanel,
   ResultRow,
-  RunButton,
   SampleAction,
   StatusBar,
   ToolHeader,
@@ -172,10 +171,6 @@ export function AgeCalculatorTool({
               className="min-w-0 flex-1 bg-transparent font-mono text-[15px] font-semibold text-on-surface outline-none"
             />
           </FieldRow>
-          <div className="flex-1" />
-          <RunButton onClick={() => setReference(new Date().toISOString().slice(0, 10))}>
-            Calculate Age
-          </RunButton>
         </FormPanel>
 
         <ResultPanel>

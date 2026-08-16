@@ -227,27 +227,62 @@ export function parseFetchSource(source: string): ToolResult<CurlRequest> {
 }
 
 function parseHeaderObject(source: string): ToolResult<readonly CurlHeader[]> {
-  const trimmed = source.trim();
-  if (!trimmed.startsWith("{"))
-    return err("UNSUPPORTED_SYNTAX", "headers must be an object literal.");
-  if (!trimmed.endsWith("}")) return err("UNSUPPORTED_SYNTAX", "Close the headers object with }.");
-  const inner = trimmed.slice(1, -1);
-  const headers: CurlHeader[] = [];
-  for (const entry of splitTopLevel(inner, ",")) {
-    const pair = entry.trim();
-    if (!pair) continue;
-    const colon = pair.indexOf(":");
-    if (colon < 0) return err("INVALID_HEADER", "Each header must have a name and value.");
-    const name = pair
-      .slice(0, colon)
-      .trim()
-      .replace(/^["'`]|["'`]$/g, "");
-    if (!name) return err("INVALID_HEADER", "Each header must have a name and value.");
-    const value = parseStringLiteral(pair.slice(colon + 1).trim());
-    if (value === null) return err("INVALID_HEADER", "Header values must be quoted strings.");
-    headers.push({ name, value });
+  let trimmed = source.trim();
+  if (
+    (trimmed.startsWith("new Headers(") && trimmed.endsWith(")")) ||
+    (trimmed.startsWith("new Headers (") && trimmed.endsWith(")"))
+  ) {
+    const inner = trimmed.slice(trimmed.indexOf("(") + 1, -1).trim();
+    if (!inner) return ok([]);
+    trimmed = inner;
   }
-  return ok(headers);
+
+  if (trimmed.startsWith("{")) {
+    if (!trimmed.endsWith("}"))
+      return err("UNSUPPORTED_SYNTAX", "Close the headers object with }.");
+    const inner = trimmed.slice(1, -1);
+    const headers: CurlHeader[] = [];
+    for (const entry of splitTopLevel(inner, ",")) {
+      const pair = entry.trim();
+      if (!pair) continue;
+      const colon = pair.indexOf(":");
+      if (colon < 0) return err("INVALID_HEADER", "Each header must have a name and value.");
+      const name = pair
+        .slice(0, colon)
+        .trim()
+        .replace(/^["'`]|["'`]$/g, "");
+      if (!name) return err("INVALID_HEADER", "Each header must have a name and value.");
+      const value = parseStringLiteral(pair.slice(colon + 1).trim());
+      if (value === null) return err("INVALID_HEADER", "Header values must be quoted strings.");
+      headers.push({ name, value });
+    }
+    return ok(headers);
+  }
+
+  if (trimmed.startsWith("[")) {
+    if (!trimmed.endsWith("]")) return err("UNSUPPORTED_SYNTAX", "Close the headers array with ].");
+    const inner = trimmed.slice(1, -1);
+    const headers: CurlHeader[] = [];
+    for (const entry of splitTopLevel(inner, ",")) {
+      const item = entry.trim();
+      if (!item) continue;
+      if (!item.startsWith("[") || !item.endsWith("]"))
+        return err("INVALID_HEADER", "Each header entry must be a [name, value] pair.");
+      const pairInner = item.slice(1, -1);
+      const parts = splitTopLevel(pairInner, ",");
+      if (parts.length !== 2)
+        return err("INVALID_HEADER", "Each header entry must be a [name, value] pair.");
+      const name = parseStringLiteral(parts[0]?.trim() ?? "");
+      if (name === null || !name)
+        return err("INVALID_HEADER", "Each header must have a name and value.");
+      const value = parseStringLiteral(parts[1]?.trim() ?? "");
+      if (value === null) return err("INVALID_HEADER", "Header values must be quoted strings.");
+      headers.push({ name, value });
+    }
+    return ok(headers);
+  }
+
+  return err("UNSUPPORTED_SYNTAX", "headers must be an object literal or array.");
 }
 
 function extractFetchCall(source: string): ToolResult<{ args: string; objectEnd: number | null }> {
@@ -346,9 +381,20 @@ function parseStringLiteral(part: string): string | null {
   if (quote === "`" && inner.includes("${")) return null;
   let out = "";
   let escaped = false;
-  for (const character of inner) {
+  for (let i = 0; i < inner.length; i += 1) {
+    const character = inner[i]!;
     if (escaped) {
-      out += character;
+      if (character === "n") out += "\n";
+      else if (character === "r") out += "\r";
+      else if (character === "t") out += "\t";
+      else if (character === "b") out += "\b";
+      else if (character === "f") out += "\f";
+      else if (character === "0") out += "\0";
+      else if (character === "\\") out += "\\";
+      else if (character === "'") out += "'";
+      else if (character === '"') out += '"';
+      else if (character === "`") out += "`";
+      else out += character;
       escaped = false;
     } else if (character === "\\") {
       escaped = true;

@@ -11,7 +11,6 @@ import {
   ResultHead,
   ResultPanel,
   ResultRow,
-  RunButton,
   SampleAction,
   Segmented,
   StatusBar,
@@ -198,8 +197,6 @@ export function DateCalculatorTool({
               ariaLabel="Amount unit"
             />
           </FieldRow>
-          <div className="flex-1" />
-          <RunButton onClick={() => setAmount(amount.trim() || "7")}>Calculate</RunButton>
         </FormPanel>
 
         <ResultPanel>

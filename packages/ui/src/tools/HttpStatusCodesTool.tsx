@@ -1,40 +1,19 @@
 import {
-  findHttpStatuses,
   generateClientFetchSnippet,
   generateHttpWireResponse,
   generateServerExpressSnippet,
   getHttpStatus,
   HTTP_STATUS_CODES,
-  type HttpStatus,
   type HttpStatusCategory,
 } from "@kitland/core";
-import {
-  Check,
-  Code2,
-  Copy,
-  Globe2,
-  Layers,
-  Search,
-  Server,
-  Terminal,
-  X,
-} from "lucide-react";
+import { Check, Code2, Copy, Globe2, Layers, Search, Server, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FieldLabel, SampleAction, StatusBar, ToolHeader } from "../components/tool-form";
 import { useCopyFeedback } from "../hooks/useCopyFeedback";
 
 type SnippetTab = "wire" | "fetch" | "express";
 
-const CATEGORIES: readonly { id: HttpStatusCategory | "All"; label: string; short: string }[] = [
-  { id: "All", label: "All", short: "All" },
-  { id: "Informational", label: "1xx Informational", short: "1xx Info" },
-  { id: "Success", label: "2xx Success", short: "2xx Success" },
-  { id: "Redirection", label: "3xx Redirection", short: "3xx Redirect" },
-  { id: "Client Error", label: "4xx Client Error", short: "4xx Client" },
-  { id: "Server Error", label: "5xx Server Error", short: "5xx Server" },
-];
-
-const COMMON_CODES = [200, 201, 204, 301, 304, 400, 401, 403, 404, 422, 429, 500, 502, 503];
+const POPULAR_CODES = [200, 201, 204, 301, 400, 401, 403, 404, 500] as const;
 
 function getCategoryColor(category: HttpStatusCategory) {
   switch (category) {
@@ -54,7 +33,8 @@ function getCategoryColor(category: HttpStatusCategory) {
         ring: "ring-emerald-500/30 border-emerald-500/50",
         card: "border-emerald-500/25 bg-emerald-500/5",
         dot: "bg-emerald-500",
-        activeItem: "bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400",
+        activeItem:
+          "bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400",
       };
     case "Redirection":
       return {
@@ -88,7 +68,6 @@ function getCategoryColor(category: HttpStatusCategory) {
 
 export function HttpStatusCodesTool() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<HttpStatusCategory | "All">("All");
   const [selectedCode, setSelectedCode] = useState<number>(404);
   const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>("wire");
 
@@ -101,29 +80,23 @@ export function HttpStatusCodesTool() {
   );
 
   const filteredStatuses = useMemo(() => {
-    let list = HTTP_STATUS_CODES;
-    if (selectedCategory !== "All") {
-      list = list.filter((s) => s.category === selectedCategory);
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      list = list.filter((s) => {
-        const haystack = [
-          String(s.code),
-          s.name,
-          s.category,
-          s.spec,
-          s.description,
-          s.detail,
-          ...(s.commonHeaders ?? []),
-        ]
-          .join(" ")
-          .toLowerCase();
-        return haystack.includes(q);
-      });
-    }
-    return list;
-  }, [searchQuery, selectedCategory]);
+    if (!searchQuery.trim()) return HTTP_STATUS_CODES;
+    const q = searchQuery.trim().toLowerCase();
+    return HTTP_STATUS_CODES.filter((s) => {
+      const haystack = [
+        String(s.code),
+        s.name,
+        s.category,
+        s.spec,
+        s.description,
+        s.detail,
+        ...(s.commonHeaders ?? []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [searchQuery]);
 
   const selectCode = useCallback((code: number) => {
     setSelectedCode(code);
@@ -131,7 +104,6 @@ export function HttpStatusCodesTool() {
 
   const handleSample = useCallback(() => {
     setSearchQuery("");
-    setSelectedCategory("All");
     setSelectedCode(404);
     setActiveSnippetTab("wire");
   }, []);
@@ -213,61 +185,42 @@ export function HttpStatusCodesTool() {
             )}
           </div>
 
-          {/* Category Tabs */}
-          <div className="mb-2.5 flex flex-wrap gap-1">
-            {CATEGORIES.map((cat) => {
-              const active = selectedCategory === cat.id;
-              const count =
-                cat.id === "All"
-                  ? HTTP_STATUS_CODES.length
-                  : HTTP_STATUS_CODES.filter((s) => s.category === cat.id).length;
-              return (
+          {/* Popular Codes Quick-Select Bar */}
+          <div className="mb-3 flex flex-col gap-1.5">
+            <div className="flex items-center justify-between px-0.5">
+              <span className="font-mono text-[10.5px] font-semibold uppercase tracking-wider text-on-faint">
+                Popular Codes
+              </span>
+              {searchQuery && (
                 <button
-                  key={cat.id}
                   type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
-                  aria-pressed={active}
-                  className={`flex h-7 items-center gap-1.5 rounded-[7px] px-2 font-mono text-[11px] font-semibold transition-all cursor-pointer ${
-                    active
-                      ? "bg-primary text-on-primary shadow-sm"
-                      : "bg-surface text-on-muted hover:bg-surface-high hover:text-on-surface"
-                  }`}
+                  onClick={handleClearSearch}
+                  className="font-mono text-[10.5px] text-primary hover:underline cursor-pointer"
                 >
-                  <span>{cat.short}</span>
-                  <span
-                    className={`rounded-full px-1 text-[9.5px] ${
-                      active ? "bg-black/20 text-white" : "bg-surface-low text-on-faint"
+                  Clear search
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              {POPULAR_CODES.map((code) => {
+                const isSelected = selectedStatus.code === code;
+                return (
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={() => selectCode(code)}
+                    aria-pressed={isSelected}
+                    className={`flex h-7 flex-1 items-center justify-center rounded-[6px] font-mono text-[11px] font-semibold transition-all cursor-pointer border ${
+                      isSelected
+                        ? "bg-primary text-on-primary border-primary shadow-xs"
+                        : "bg-surface text-on-muted hover:text-on-surface hover:bg-surface-high border-outline"
                     }`}
                   >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Quick Common Code Chips */}
-          <div className="mb-2.5 flex flex-wrap items-center gap-1">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-on-faint mr-1">
-              Popular:
-            </span>
-            {COMMON_CODES.map((code) => {
-              const isSelected = selectedStatus.code === code;
-              return (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => selectCode(code)}
-                  className={`rounded-[5px] px-1.5 py-0.5 font-mono text-[11px] font-semibold transition-colors cursor-pointer ${
-                    isSelected
-                      ? "bg-primary text-on-primary"
-                      : "bg-surface text-on-muted hover:bg-surface-high hover:text-on-surface"
-                  }`}
-                >
-                  {code}
-                </button>
-              );
-            })}
+                    {code}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="h-px bg-outline mb-2" />
@@ -319,13 +272,10 @@ export function HttpStatusCodesTool() {
                 <span className="text-[12px]">No status codes match "{searchQuery}"</span>
                 <button
                   type="button"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedCategory("All");
-                  }}
+                  onClick={handleClearSearch}
                   className="mt-1 text-[11px] text-primary hover:underline cursor-pointer"
                 >
-                  Clear filters
+                  Clear search
                 </button>
               </div>
             )}
@@ -588,4 +538,3 @@ export function HttpStatusCodesTool() {
     </div>
   );
 }
-

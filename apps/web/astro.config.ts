@@ -76,14 +76,16 @@ export default defineConfig({
         "@": path.resolve(rootDir, "src"),
       },
     },
+    server: {
+      watch: {
+        ignored: ["**/node_modules/**", "**/dist/**", "**/.astro/**", "**/artifacts/**", "**/.hermes/**"],
+      },
+      hmr: {
+        overlay: true,
+      },
+    },
   },
   server: {
     port: 5173,
-    watch: {
-      ignored: ["**/node_modules/**", "**/dist/**", "**/.astro/**", "**/artifacts/**", "**/.hermes/**"],
-    },
-    hmr: {
-      overlay: true,
-    },
   },
 });

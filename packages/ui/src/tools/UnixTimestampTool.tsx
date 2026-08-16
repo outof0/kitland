@@ -8,7 +8,6 @@ import {
   FormPanel,
   ResultHead,
   ResultPanel,
-  RunButton,
   Segmented,
   StatusBar,
   ToolHeader,
@@ -39,15 +38,27 @@ export function UnixTimestampTool() {
   }, []);
 
   const result = useMemo(() => {
-    if (dir === "date") {
-      const ms = Date.parse(value);
-      if (Number.isNaN(ms)) return { ok: false as const, error: { message: "Invalid date." } };
-      return {
-        ok: true as const,
-        value: { seconds: String(Math.floor(ms / 1000)), milliseconds: String(ms) },
-      };
+    const trimmed = value.trim();
+    if (!trimmed) return { ok: false as const, error: { message: "Enter a value." } };
+    // Auto-detect: numeric → unix, otherwise try date. Dir is a hint, not a strict gate.
+    const isNumeric = /^-?\d+$/.test(trimmed);
+    if (dir === "date" || (!isNumeric && trimmed.includes("-")) || trimmed.includes("T") || trimmed.includes("/")) {
+      const ms = Date.parse(trimmed);
+      if (!Number.isNaN(ms)) {
+        return {
+          ok: true as const,
+          value: { seconds: String(Math.floor(ms / 1000)), milliseconds: String(ms) },
+        };
+      }
+      if (dir === "date") return { ok: false as const, error: { message: "Invalid date. Try YYYY-MM-DD or ISO 8601." } };
     }
-    return parseUnixTimestamp(value);
+    const unixRes = parseUnixTimestamp(trimmed);
+    if (unixRes.ok) return unixRes;
+    // If numeric parse failed but input looks like a date, suggest switching
+    if (/[a-zA-Z]/.test(trimmed) || trimmed.includes("-") || trimmed.includes("/")) {
+      return { ok: false as const, error: { message: "Invalid timestamp. Try switching to Date → Unix." } };
+    }
+    return unixRes;
   }, [dir, value]);
 
   const parsed = useMemo(() => {
@@ -199,15 +210,6 @@ export function UnixTimestampTool() {
               ]}
             />
           )}
-          <div className="flex-1" />
-          <RunButton
-            onClick={() => {
-              const now = Math.floor(Date.now() / 1000);
-              setValue(dir === "date" ? new Date(now * 1000).toISOString() : String(now));
-            }}
-          >
-            Convert
-          </RunButton>
         </FormPanel>
 
         <ResultPanel>

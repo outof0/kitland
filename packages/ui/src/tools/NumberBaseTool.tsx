@@ -9,7 +9,6 @@ import {
   ResultHead,
   ResultPanel,
   ResultRow,
-  RunButton,
   SampleAction,
   StatusBar,
   ToolHeader,
@@ -136,7 +135,6 @@ export function NumberBaseTool() {
               ))}
             </select>
           </label>
-          <RunButton onClick={() => setInput(input.trim() || SAMPLE)}>Convert Base</RunButton>
           <NoteText>Supports 2..36, negative and fractional input.</NoteText>
         </FormPanel>
 

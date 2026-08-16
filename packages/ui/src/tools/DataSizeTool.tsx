@@ -9,7 +9,6 @@ import {
   ResultHead,
   ResultPanel,
   ResultRow,
-  RunButton,
   SampleAction,
   Segmented,
   StatusBar,
@@ -129,8 +128,6 @@ export function DataSizeTool() {
             ]}
             size="sm"
           />
-          <div className="flex-1" />
-          <RunButton onClick={() => setInput(input.trim() || "1024")}>Convert</RunButton>
         </FormPanel>
 
         <ResultPanel>

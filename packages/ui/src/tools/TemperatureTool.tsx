@@ -9,7 +9,6 @@ import {
   ResultHead,
   ResultPanel,
   ResultRow,
-  RunButton,
   SampleAction,
   Segmented,
   StatusBar,
@@ -140,8 +139,6 @@ export function TemperatureTool() {
             options={SCALES.map((scale) => ({ value: scale.unit, label: scale.symbol }))}
             size="sm"
           />
-          <div className="flex-1" />
-          <RunButton onClick={() => setInput(input.trim() || "100")}>Convert</RunButton>
         </FormPanel>
 
         <ResultPanel>

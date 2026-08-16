@@ -159,6 +159,10 @@ export {
 } from "./tools/user-agent-parser";
 export {
   lookupMimeTypes,
+  generateMimeContentTypeHeader,
+  generateMimeNginxSnippet,
+  generateMimeApacheSnippet,
+  generateMimeFetchSnippet,
   MIME_TYPES,
   MIME_TYPES_MAX_QUERY_CHARS,
   type MimeCategory,

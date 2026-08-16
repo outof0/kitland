@@ -63,4 +63,40 @@ describe("CurlConverterTool", () => {
     });
     await waitFor(() => expect(curlOutput.value).toContain("-X POST"));
   });
+
+  it("swaps back and forth using the swap button without errors", async () => {
+    render(<CurlConverterTool />);
+    fireEvent.click(screen.getByRole("button", { name: "Sample" }));
+    await waitFor(() => expect(output().value).toContain('method: "POST"'));
+
+    const swapButton = screen.getByRole("button", {
+      name: "Use the result as input and switch direction",
+    });
+
+    // Swap #1: cURL -> Fetch becomes Fetch -> cURL
+    fireEvent.click(swapButton);
+    const fetchInput = screen.getByRole("textbox", {
+      name: "Fetch request",
+    }) as HTMLTextAreaElement;
+    const curlOutput = screen.getByRole("textbox", { name: "cURL command" }) as HTMLTextAreaElement;
+    expect(fetchInput.value).toContain("await fetch(");
+    await waitFor(() =>
+      expect(curlOutput.value).toContain("curl 'https://api.example.com/v1/users'"),
+    );
+    expect(curlOutput.value).toContain("-H 'Content-Type: application/json'");
+    expect(curlOutput.value).toContain('-d \'{"name":"Ada Lovelace"}\'');
+    expect(screen.queryByRole("alert")).toBeNull();
+
+    // Swap #2: Fetch -> cURL becomes cURL -> Fetch
+    fireEvent.click(swapButton);
+    const curlInput2 = screen.getByRole("textbox", { name: "cURL command" }) as HTMLTextAreaElement;
+    const fetchOutput2 = screen.getByRole("textbox", {
+      name: "Fetch result",
+    }) as HTMLTextAreaElement;
+    expect(curlInput2.value).toContain("curl 'https://api.example.com/v1/users'");
+    await waitFor(() =>
+      expect(fetchOutput2.value).toContain('["Content-Type", "application/json"]'),
+    );
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
 });

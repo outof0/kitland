@@ -9,7 +9,6 @@ import {
   ResultHead,
   ResultPanel,
   ResultRow,
-  RunButton,
   SampleAction,
   StatusBar,
   ToolHeader,
@@ -86,8 +85,6 @@ export function IpSubnetCalculatorTool() {
             />
             <span className="text-[11px] text-on-muted">IPv4 CIDR or IPv6</span>
           </div>
-          <div className="flex-1" />
-          <RunButton onClick={() => setCidr(cidr.trim() || SAMPLE)}>Calculate</RunButton>
           <NoteText>
             192.168.x is a private IP range (RFC 1918). Everything is computed locally — nothing is
             sent anywhere.

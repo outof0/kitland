@@ -344,4 +344,90 @@ describe("cURL converter", () => {
     expect(curl).toContain("-d 'it'\\''s here'");
     expect(parseCurlCommand(curl).ok).toBe(true);
   });
+
+  it("parses array headers and new Headers(...) expressions", () => {
+    const arrayFetch = `const response = await fetch("https://api.example.com/v1/users", {
+  method: "POST",
+  headers: [
+    ["Content-Type", "application/json"],
+    ["X-Request-Id", "demo-123"]
+  ],
+  body: "{\\"name\\":\\"Ada Lovelace\\"}"
+});`;
+    const arrayParsed = parseFetchSource(arrayFetch);
+    expect(arrayParsed).toEqual({
+      ok: true,
+      value: {
+        url: "https://api.example.com/v1/users",
+        method: "POST",
+        headers: [
+          { name: "Content-Type", value: "application/json" },
+          { name: "X-Request-Id", value: "demo-123" },
+        ],
+        body: '{"name":"Ada Lovelace"}',
+      },
+    });
+
+    const headersCtorFetch = `fetch('https://example.test', {
+      headers: new Headers([['Accept', 'text/plain']]),
+    })`;
+    expect(parseFetchSource(headersCtorFetch)).toEqual({
+      ok: true,
+      value: {
+        url: "https://example.test",
+        method: "GET",
+        headers: [{ name: "Accept", value: "text/plain" }],
+        body: null,
+      },
+    });
+
+    const emptyCtorFetch = `fetch('https://example.test', { headers: new Headers() })`;
+    expect(parseFetchSource(emptyCtorFetch)).toEqual({
+      ok: true,
+      value: {
+        url: "https://example.test",
+        method: "GET",
+        headers: [],
+        body: null,
+      },
+    });
+  });
+
+  it("validates malformed header arrays", () => {
+    expect(parseFetchSource('fetch("https://example.test", { headers: [ ["A"] ] })')).toEqual(
+      exactError("INVALID_HEADER", "Each header entry must be a [name, value] pair."),
+    );
+    expect(parseFetchSource('fetch("https://example.test", { headers: [ ["A", 123] ] })')).toEqual(
+      exactError("INVALID_HEADER", "Header values must be quoted strings."),
+    );
+    expect(parseFetchSource('fetch("https://example.test", { headers: [ "A" })')).toEqual(
+      exactError("UNSUPPORTED_SYNTAX", "Close the headers array with ]."),
+    );
+  });
+
+  it("perfectly swaps back and forth between cURL and Fetch", () => {
+    const originalCurl =
+      "curl -X POST 'https://api.example.com/v1/users' \\\n  -H 'Content-Type: application/json' \\\n  -H 'X-Request-Id: demo-123' \\\n  -d '{\"name\":\"Ada Lovelace\"}'";
+
+    // Direction 1: cURL -> Fetch
+    const parsed1 = parseCurlCommand(originalCurl);
+    if (!parsed1.ok) throw new Error(parsed1.error.message);
+    const fetchOutput = formatFetchRequest(parsed1.value);
+
+    // Direction 2: Fetch -> cURL (Swap #1)
+    const parsed2 = parseFetchSource(fetchOutput);
+    if (!parsed2.ok) throw new Error(parsed2.error.message);
+    const curlOutput = formatCurlCommand(parsed2.value);
+
+    // Direction 3: cURL -> Fetch (Swap #2)
+    const parsed3 = parseCurlCommand(curlOutput);
+    if (!parsed3.ok) throw new Error(parsed3.error.message);
+    const fetchOutput2 = formatFetchRequest(parsed3.value);
+
+    // Ensure complete equivalence across swaps
+    expect(curlOutput).toBe(
+      "curl 'https://api.example.com/v1/users' \\\n  -X POST \\\n  -H 'Content-Type: application/json' \\\n  -H 'X-Request-Id: demo-123' \\\n  -d '{\"name\":\"Ada Lovelace\"}'",
+    );
+    expect(fetchOutput2).toBe(fetchOutput);
+  });
 });

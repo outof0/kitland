@@ -67,6 +67,33 @@ test.describe("cURL converter contract", () => {
       curlOutput,
       "curl 'https://example.test/api' \\\n  -X PUT \\\n  -H 'X-A: 1' \\\n  -d 'a=1'",
     );
+
+    // Swap back to cURL -> Fetch using the swap button
+    await page.getByRole("button", { name: "Use the result as input and switch direction" }).click();
+    const swappedSource = pane(page, "cURL command");
+    const swappedResult = pane(page, "Fetch result");
+    await expectPaneText(
+      swappedSource,
+      "curl 'https://example.test/api' \\\n  -X PUT \\\n  -H 'X-A: 1' \\\n  -d 'a=1'",
+    );
+    await expectPaneText(
+      swappedResult,
+      [
+        'const response = await fetch("https://example.test/api", {',
+        '  method: "PUT",',
+        "  headers: [",
+        '    ["X-A", "1"]',
+        "  ],",
+        '  body: "a=1"',
+        "});",
+        "",
+        "if (!response.ok) {",
+        "  throw new Error(`HTTP ${response.status}`);",
+        "}",
+        "",
+        "const data = await response.text();",
+      ].join("\n"),
+    );
   });
 
   test("owns only declared actions and enforces the UTF-16 limit", async ({ page }) => {

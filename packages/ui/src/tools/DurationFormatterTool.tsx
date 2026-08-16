@@ -10,7 +10,6 @@ import {
   ResultHead,
   ResultPanel,
   ResultRow,
-  RunButton,
   SampleAction,
   Segmented,
   StatusBar,
@@ -154,8 +153,6 @@ export function DurationFormatterTool() {
               { value: "clock", label: "HH:MM:SS" },
             ]}
           />
-          <div className="flex-1" />
-          <RunButton onClick={() => setInput(input.trim() || "3661")}>Format</RunButton>
         </FormPanel>
 
         <ResultPanel>

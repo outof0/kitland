@@ -28,11 +28,12 @@ describe("HttpStatusCodesTool", () => {
     expect(screen.getByRole("heading", { name: "I'm a teapot" })).toBeDefined();
   });
 
-  it("switches category filter tabs", () => {
+  it("selects status code via popular buttons", () => {
     render(<HttpStatusCodesTool />);
-    fireEvent.click(screen.getByRole("button", { name: /5xx Server/ }));
+    const button500 = screen.getAllByRole("button", { name: "500" })[0]!;
+    fireEvent.click(button500);
     expect(screen.getAllByText("500").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("Internal Server Error")).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Internal Server Error" })).toBeDefined();
   });
 
   it("switches snippet tabs between wire, fetch, and express", () => {

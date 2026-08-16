@@ -983,3 +983,31 @@ export function lookupMimeTypes(query: string): ToolResult<MimeLookupResult> {
   );
   return ok({ query: normalized, kind: "search", matches: searchMatches });
 }
+
+export function generateMimeContentTypeHeader(entry: MimeType): string {
+  if (entry.charset) {
+    return `Content-Type: ${entry.mime}; charset=${entry.charset.toLowerCase()}`;
+  }
+  return `Content-Type: ${entry.mime}`;
+}
+
+export function generateMimeNginxSnippet(entry: MimeType): string {
+  if (entry.extensions.length === 0) {
+    return `# Nginx types configuration\ntypes {\n    ${entry.mime};\n}`;
+  }
+  return `# Nginx mime.types mapping\ntypes {\n    ${entry.mime} ${entry.extensions.join(" ")};\n}`;
+}
+
+export function generateMimeApacheSnippet(entry: MimeType): string {
+  if (entry.extensions.length === 0) {
+    return `# Apache .htaccess / httpd.conf\n# No default extension mapping for ${entry.mime}`;
+  }
+  const exts = entry.extensions.map((e) => `.${e}`).join(" ");
+  return `# Apache .htaccess / httpd.conf\nAddType ${entry.mime} ${exts}`;
+}
+
+export function generateMimeFetchSnippet(entry: MimeType): string {
+  const charset = entry.charset ? `; charset=${entry.charset.toLowerCase()}` : "";
+  return `// Standard Web Fetch / Response\nconst response = new Response(data, {\n  status: 200,\n  headers: {\n    "Content-Type": "${entry.mime}${charset}",\n  },\n});`;
+}
+
