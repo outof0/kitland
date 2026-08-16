@@ -152,7 +152,7 @@ export function RsaKeyPairTool() {
             onCopy={() => void copy("all", `${pub}\n\n${priv}`)}
             copied={isCopied("all")}
             filled
-            copyLabel="Copy Both"
+            copyLabel="Copy All"
           />
 
           {error ? (

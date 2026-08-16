@@ -9,13 +9,13 @@ import {
   ResultCard,
   ResultHead,
   ResultPanel,
-  RunButton,
   StatusBar,
   ToolHeader,
 } from "../components/tool-form";
 
 const SAMPLE_JWT =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDQyIiwibmFtZSI6IkFkYSIsImlhdCI6MTc0MDkwNDU0MiwiZXhwIjoxNzQwOTA4MTQyfQ.signature";
+const DEBOUNCE_MS = 150;
 
 export type JwtDecoderToolProps = {
   readonly initialInput?: string;
@@ -74,7 +74,17 @@ export function JwtDecoderTool({
   }, []);
 
   useEffect(() => {
-    decode(token);
+    if (!token.trim()) {
+      setHeaderJson("");
+      setPayloadJson("");
+      setSignatureText("");
+      setError(null);
+      return;
+    }
+    const timer = setTimeout(() => {
+      decode(token);
+    }, DEBOUNCE_MS);
+    return () => clearTimeout(timer);
   }, [token, decode]);
 
   const onSample = useCallback(() => {
@@ -99,14 +109,24 @@ export function JwtDecoderTool({
         title="JWT Decoder"
         subtitle="Inspect JWT claims; verify only with a supplied key"
         actions={
-          <button
-            type="button"
-            onClick={onSample}
-            className="flex h-[34px] cursor-pointer items-center gap-[7px] rounded-[8px] border border-outline bg-surface-low px-3 text-[13px] font-semibold text-on-surface transition-colors hover:bg-surface hover:border-outline-strong"
-          >
-            <FileInput className="size-[15px] text-on-muted" />
-            <span>Sample</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onSample}
+              className="flex h-[34px] cursor-pointer items-center gap-[7px] rounded-[8px] border border-outline bg-surface-low px-3 text-[13px] font-semibold text-on-surface transition-colors hover:bg-surface hover:border-outline-strong"
+            >
+              <FileInput className="size-[15px] text-on-muted" />
+              <span>Sample</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClear}
+              className="flex h-[34px] cursor-pointer items-center gap-[7px] rounded-[8px] border border-outline bg-surface-low px-3 text-[13px] font-semibold text-on-muted transition-colors hover:bg-surface hover:text-on-surface"
+            >
+              <Trash2 className="size-[15px] text-on-muted" />
+              <span>Clear</span>
+            </button>
+          </div>
         }
       />
 
@@ -134,18 +154,6 @@ export function JwtDecoderTool({
               spellCheck={false}
               className="w-full resize-none bg-transparent font-mono text-[12px] leading-relaxed text-on-surface outline-none placeholder:text-on-faint"
             />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <RunButton onClick={() => decode(token)}>Decode</RunButton>
-            <button
-              type="button"
-              onClick={onClear}
-              className="flex h-[38px] cursor-pointer items-center justify-center gap-1 rounded-[10px] border border-outline bg-surface px-4 text-[13px] font-semibold text-on-muted transition-colors hover:bg-surface-low hover:text-on-surface"
-            >
-              <Trash2 className="size-4" />
-              <span>Clear</span>
-            </button>
           </div>
 
           <p className="m-0 text-[11px] leading-relaxed text-on-faint">

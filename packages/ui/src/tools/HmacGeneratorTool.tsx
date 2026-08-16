@@ -9,13 +9,13 @@ import {
   ResultCard,
   ResultHead,
   ResultPanel,
-  RunButton,
   StatusBar,
   ToolHeader,
 } from "../components/tool-form";
 
 const SAMPLE_SECRET = "s3cr3t-k3y";
 const SAMPLE_MESSAGE = "hello world";
+const DEBOUNCE_MS = 150;
 
 export type HmacGeneratorToolProps = {
   readonly initialInput?: string;
@@ -52,10 +52,10 @@ export function HmacGeneratorTool({
   const { isCopied, copy } = useCopyFeedback();
   const hmacGenRef = useRef(0);
 
-  const computeHmac = useCallback(async () => {
+  const computeHmac = useCallback(async (sec: string, msg: string) => {
     const gen = hmacGenRef.current + 1;
     hmacGenRef.current = gen;
-    if (!secret || !message) {
+    if (!sec || !msg) {
       if (gen !== hmacGenRef.current) return;
       setSignature("");
       setError(null);
@@ -64,8 +64,8 @@ export function HmacGeneratorTool({
     setBusy(true);
     try {
       const runtime = createWebCryptoHostRuntime(globalThis.crypto);
-      const res = await signHmacSha256(secret, message, runtime.hmacSha256);
-      if (gen !== hmacGenRef.current) return;
+      const res = await signHmacSha256(sec, msg, runtime.hmacSha256);
+      if (gen !== hashGenRefOrLocal(hmacGenRef)) return;
       if (res.ok) {
         setSignature(res.value.digest);
         setError(null);
@@ -78,11 +78,19 @@ export function HmacGeneratorTool({
     } finally {
       if (gen === hmacGenRef.current) setBusy(false);
     }
-  }, [secret, message]);
+  }, []);
 
   useEffect(() => {
-    void computeHmac();
-  }, [computeHmac]);
+    if (!secret || !message) {
+      setSignature("");
+      setError(null);
+      return;
+    }
+    const timer = setTimeout(() => {
+      void computeHmac(secret, message);
+    }, DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [secret, message, computeHmac]);
 
   const onSample = useCallback(() => {
     setSecret(SAMPLE_SECRET);
@@ -173,16 +181,11 @@ export function HmacGeneratorTool({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Enter message to sign..."
-              rows={4}
+              rows={5}
               spellCheck={false}
               className="w-full resize-none bg-transparent font-mono text-[12px] leading-relaxed text-on-surface outline-none placeholder:text-on-faint"
             />
           </div>
-
-          {/* Run Action */}
-          <RunButton onClick={() => void computeHmac()} disabled={busy} aria-label="Compute HMAC">
-            {busy ? "Signing..." : "Compute HMAC"}
-          </RunButton>
 
           <p className="m-0 text-[11px] leading-relaxed text-on-faint">
             Keyed-hash message authentication code (256-bit).
@@ -209,7 +212,7 @@ export function HmacGeneratorTool({
               </code>
             ) : (
               <div className="font-mono text-[13px] italic text-on-faint">
-                {busy ? "Computing signature..." : "No signature yet. Enter key and message."}
+                {busy ? "Computing signature..." : "No signature yet. Enter key and message to generate HMAC."}
               </div>
             )}
             <div className="select-none font-mono text-[12px] text-on-faint">
@@ -228,4 +231,8 @@ export function HmacGeneratorTool({
       />
     </div>
   );
+}
+
+function hashGenRefOrLocal(ref: { current: number }) {
+  return ref.current;
 }

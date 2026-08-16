@@ -9,13 +9,13 @@ import {
   ResultCard,
   ResultHead,
   ResultPanel,
-  RunButton,
   StatusBar,
   ToolHeader,
 } from "../components/tool-form";
 
 const SAMPLE_INPUT = "hello world";
 const ENCODINGS: readonly ShaHashEncoding[] = ["hex", "base64", "base64url"];
+const DEBOUNCE_MS = 150;
 
 export type ShaHashToolProps = {
   readonly initialInput?: string;
@@ -81,7 +81,15 @@ export function ShaHashTool({
   }, []);
 
   useEffect(() => {
-    void computeHash(input, encoding);
+    if (!input) {
+      setDigest("");
+      setError(null);
+      return;
+    }
+    const timer = setTimeout(() => {
+      void computeHash(input, encoding);
+    }, DEBOUNCE_MS);
+    return () => clearTimeout(timer);
   }, [input, encoding, computeHash]);
 
   const onSample = useCallback(() => {
@@ -175,16 +183,11 @@ export function ShaHashTool({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Enter text to hash..."
-              rows={4}
+              rows={5}
               spellCheck={false}
               className="w-full resize-none bg-transparent font-mono text-[12px] leading-relaxed text-on-surface outline-none placeholder:text-on-faint"
             />
           </div>
-
-          {/* Run Action */}
-          <RunButton onClick={() => void computeHash(input, encoding)} disabled={busy}>
-            {busy ? "Hashing..." : "Hash It"}
-          </RunButton>
 
           <p className="m-0 text-[11px] leading-relaxed text-on-faint">
             One-way digest, fixed 256-bit output.
@@ -211,7 +214,7 @@ export function ShaHashTool({
               </code>
             ) : (
               <div className="font-mono text-[13px] italic text-on-faint">
-                {busy ? "Computing digest..." : "No digest yet. Enter text and choose Hash It."}
+                {busy ? "Computing digest..." : "No digest yet. Enter text to generate a hash."}
               </div>
             )}
             <div className="select-none font-mono text-[12px] text-on-faint">

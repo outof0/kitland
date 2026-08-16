@@ -217,7 +217,7 @@ const TOOL_SAMPLES: Record<string, string> = {
   "url-encode": "kitland.dev/search?q=developer tools & category=utilities #intro",
   "html-entities": '<div class="card">Hello & Welcome to "Kitland" © 2026</div>',
   "hex-text": "Kitland",
-  "unicode-converter": "Kitland 🚀 Developer Tools",
+  "unicode-converter": "Kitland 🚀 Tools",
   "binary-text": "Kit",
   "rot13-caesar": "Hello World! Tools out. Work on.",
   "morse-code": "KITLAND DEV TOOLS",

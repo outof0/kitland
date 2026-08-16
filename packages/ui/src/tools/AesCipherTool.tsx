@@ -14,7 +14,6 @@ import {
   ResultCard,
   ResultHead,
   ResultPanel,
-  RunButton,
   Segmented,
   StatusBar,
   ToolHeader,
@@ -284,20 +283,11 @@ export function AesCipherTool({
               placeholder={
                 mode === "encrypt" ? "Enter text to encrypt..." : "Paste ciphertext to decrypt..."
               }
-              rows={4}
+              rows={5}
               spellCheck={false}
               className="w-full resize-none bg-transparent font-mono text-[12px] leading-relaxed text-on-surface outline-none placeholder:text-on-faint"
             />
           </div>
-
-          {/* Run CTA */}
-          <RunButton onClick={() => {}} disabled={busy}>
-            {busy
-              ? "Processing..."
-              : mode === "encrypt"
-                ? "Encrypt (AES-GCM)"
-                : "Decrypt (AES-GCM)"}
-          </RunButton>
 
           <p className="m-0 text-[11px] leading-relaxed text-on-faint">
             Authenticated and symmetric; use a 256-bit key with 96-bit nonce.

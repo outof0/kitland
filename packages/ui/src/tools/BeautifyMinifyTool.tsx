@@ -36,7 +36,7 @@ const EMPTY_RESULT: TextTransformResult = { ok: true, value: "" };
 const LANGUAGE_SAMPLES: Record<BeautifyMinifyLanguage, string> = {
   auto: '{\n  "name": "Kitland",\n  "features": ["local", "fast"],\n  "enabled": true\n}',
   json: '{\n  "name": "Kitland",\n  "version": "1.0.0",\n  "tags": ["developer", "tools", "offline"],\n  "settings": { "theme": "dark", "autoFormat": true }\n}',
-  html: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<title>Kitland</title>\n</head>\n<body>\n<main class="hero">\n<h1>Fast & Private Developer Tools</h1>\n<p>No telemetry, 100% in-browser processing.</p>\n<button type="button" class="btn">Get Started</button>\n</main>\n</body>\n</html>',
+  html: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<title>Kitland</title>\n</head>\n<body>\n<main class="hero">\n<h1>Fast & Private Tools</h1>\n<p>No telemetry, 100% in-browser processing.</p>\n<button type="button" class="btn">Get Started</button>\n</main>\n</body>\n</html>',
   css: ":root {\n  --primary: #2563eb;\n  --bg-surface: #15171c;\n}\n\n.card-container {\n  display: flex;\n  flex-direction: column;\n  padding: 1.5rem;\n  border-radius: 12px;\n  background: var(--bg-surface);\n  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);\n}",
   javascript:
     'function calculateInvoice(items, taxRate = 0.08) {\n  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);\n  const tax = subtotal * taxRate;\n  return {\n    subtotal,\n    tax,\n    total: subtotal + tax\n  };\n}\n\nconst invoice = calculateInvoice([{ name: "Tool Subscription", price: 29, quantity: 2 }]);\nconsole.log(invoice);',
