@@ -50,7 +50,7 @@
     "esbuild": "^0.28.1",
     "oxlint": "^1.77.0",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=22.12.0"
