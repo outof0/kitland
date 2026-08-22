@@ -29,7 +29,7 @@
     "lint": "oxlint src --vitest-plugin --deny-warnings"
   },
   "dependencies": {
-    "@codemirror/commands": "^6.10.2",
+    "@codemirror/commands": "^6.11.0",
     "@codemirror/lang-html": "^6.4.12",
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/lang-json": "^6.0.2",
@@ -40,7 +40,7 @@
     "@codemirror/language": "^6.12.4",
     "@codemirror/search": "^6.7.1",
     "@codemirror/state": "^6.7.1",
-    "@codemirror/view": "^6.43.8",
+    "@codemirror/view": "^6.43.9",
     "@kitland/core": "workspace:*",
     "@kitland/tools": "workspace:*",
     "@lezer/highlight": "^1.2.3",

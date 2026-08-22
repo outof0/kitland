@@ -48,7 +48,7 @@
     "@kitland/tools": "workspace:*",
     "@types/node": "^22.15.0",
     "esbuild": "^0.28.1",
-    "oxlint": "^1.77.0",
+    "oxlint": "^1.79.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },
