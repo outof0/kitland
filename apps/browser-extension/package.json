@@ -33,7 +33,7 @@
     "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.1.11",
     "@types/bcryptjs": "^3.0.0",
-    "@types/node": "^24.2.0",
+    "@types/node": "^26.2.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4.1.11",

@@ -46,7 +46,7 @@
   "devDependencies": {
     "@kitland/core": "workspace:*",
     "@kitland/tools": "workspace:*",
-    "@types/node": "^22.15.0",
+    "@types/node": "^26.2.0",
     "esbuild": "^0.28.1",
     "oxlint": "^1.77.0",
     "typescript": "^5.8.3",
