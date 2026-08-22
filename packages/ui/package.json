@@ -45,7 +45,7 @@
     "@kitland/tools": "workspace:*",
     "@lezer/highlight": "^1.2.3",
     "bcryptjs": "^3.0.3",
-    "lucide-react": "^0.539.0",
+    "lucide-react": "^1.33.0",
     "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
