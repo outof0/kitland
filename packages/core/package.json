@@ -23,7 +23,7 @@
     "lint": "oxlint src --vitest-plugin --deny-warnings"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
+    "typescript": "^7.0.2",
     "vitest": "^3.2.4"
   }
 }
