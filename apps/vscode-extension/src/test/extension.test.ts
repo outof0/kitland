@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 
 suite("Kitland Tools extension", () => {
   test("registers generic, Base64, and cURL commands", async () => {
-    const extension = vscode.extensions.getExtension("outof0.kitland-tools");
+    const extension = vscode.extensions.getExtension("kitland.kitland-tools");
     assert.ok(extension, "Extension under test was not discovered");
     await extension.activate();
 

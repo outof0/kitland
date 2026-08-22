@@ -497,7 +497,8 @@ function runRegexWorker(
         settled = true;
         clearTimeout(timer);
         void worker?.terminate();
-        resolve(err("INVALID_REGEX", workerErr.message));
+        const message = workerErr instanceof Error ? workerErr.message : "Regex worker failed.";
+        resolve(err("INVALID_REGEX", message));
       }
     });
 

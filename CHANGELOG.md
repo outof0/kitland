@@ -11,6 +11,9 @@ tagged release, changes remain under **Unreleased**.
 
 - JSON Escape now supports optional quote wrapping, forward-slash escaping, and
   ASCII-only Unicode escaping, while accepting quoted and unquoted escaped input.
+- Complete-release publishing now verifies every store credential, deploys the
+  verified landing to Cloudflare Pages, then creates the GitHub Release with all
+  distribution artifacts.
 
 ### Fixed
 
@@ -20,6 +23,9 @@ tagged release, changes remain under **Unreleased**.
   Command Palette launches keep only the focused sidebar-free workspace.
 - Keep tab indentation support consistent across editor hosts while preserving
   space-only indentation for YAML output.
+- Update the toolchain and CI actions, with TypeScript 6 compatibility checks
+  for WebCrypto adapters and static CodeMirror styles.
+- Publish the VS Code extension under the `kitland` Marketplace publisher.
 
 ## 0.1.0
 

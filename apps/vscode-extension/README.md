@@ -73,7 +73,7 @@ remain marketplace and compatibility work, not hidden product-scope gaps:
    1,000,000-character message ceiling.
 3. Expand the Linux Extension Host and web-bundle CI baseline into the final compatibility matrix;
    add VSIX artifact retention, signing/provenance, and Marketplace/Open VSX release promotion.
-4. Confirm ownership of the `outof0` Marketplace publisher, add store assets, and complete the
+4. Confirm ownership of the `kitland` Marketplace publisher, add store assets, and complete the
    marketplace release checklist.
 
 ## Packaging policy

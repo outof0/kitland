@@ -87,10 +87,9 @@ export function useEncodingTextTransform(
   });
 
   useEffect(() => {
-    if (!enabled || query.input.length === 0) {
-      setCompleted({ ...query, result: EMPTY_RESULT });
-      return;
-    }
+    // Empty and disabled output are derived from the current query below.
+    // Do not synchronously mirror them into state from an effect.
+    if (!enabled || query.input.length === 0) return;
 
     let worker: Worker | undefined;
     let active = true;

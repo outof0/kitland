@@ -43,7 +43,7 @@ function localTransformSeo(toolName: string, detail: string): ToolSeoContent {
 /**
  * Indexable tool copy lives beside the registry rather than inside a client
  * component. A new public tool must supply real explanatory content; this
- * prevents 64 thin, near-duplicate landing pages from entering the sitemap.
+ * prevents thin, near-duplicate landing pages from entering the sitemap.
  */
 export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
   "json-diff": localTransformSeo(

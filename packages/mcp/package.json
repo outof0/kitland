@@ -41,16 +41,16 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
-    "ajv": "^8.17.1"
+    "ajv": "^8.20.0"
   },
   "devDependencies": {
     "@kitland/core": "workspace:*",
     "@kitland/tools": "workspace:*",
-    "@types/node": "^22.15.0",
-    "esbuild": "^0.28.1",
-    "oxlint": "^1.77.0",
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "@types/node": "^26.2.0",
+    "esbuild": "^0.28.2",
+    "oxlint": "^1.79.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=22.12.0"

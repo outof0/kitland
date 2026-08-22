@@ -2,7 +2,15 @@ import { describe, expect, it } from "vitest";
 import { getRegistrySurfaceRolloutReadiness } from "./registry";
 import { parseSurfaceRolloutPlatform } from "./surface-rollout";
 
-const platform = parseSurfaceRolloutPlatform(process.env.KITLAND_RELEASE_PLATFORM);
+const releaseEnvironment = globalThis as typeof globalThis & {
+  readonly process?: {
+    readonly env: Readonly<Record<string, string | undefined>>;
+  };
+};
+
+const platform = parseSurfaceRolloutPlatform(
+  releaseEnvironment.process?.env.KITLAND_RELEASE_PLATFORM,
+);
 
 describe(`${platform} rollout release gate`, () => {
   it("allows deployment only after at least one canonical tool is certified for this surface", () => {

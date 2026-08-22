@@ -43,10 +43,14 @@ ZIP, a VS Code VSIX, or a package registry release.
    working tree and frozen lockfile.
 2. Update `CHANGELOG.md` with user-visible behavior, public contract changes,
    migrations, security impact, and rollback notes.
-3. Run `pnpm quality:check` using the pinned Node and pnpm versions. Review the
-   generated route set, extension package checks, and bundle-budget output
-   rather than only the exit code.
-4. Run `pnpm release:check`. Its registry gate must prove that exactly the
+3. Run `pnpm release:preflight` using the pinned Node and pnpm versions. It
+   runs the full local product gate, the pinned VS Code Extension Host
+   integration suite, and static validation of the release workflow: matching
+   versions, the `kitland` VS Code publisher, immutable action pins, complete
+   credentials, Pages production deployment, and GitHub Release ordering.
+   Review the generated route set, extension package checks, and bundle-budget
+   output rather than only the exit code.
+4. `pnpm release:check`, included in the preflight, must prove that exactly the
    canonical 65 identities are present, `release-ready`, web-available, have
    resolved Pencil design evidence, and have no unresolved `planned` platform
    contracts. The committed manifest
@@ -54,31 +58,32 @@ ZIP, a VS Code VSIX, or a package registry release.
    the single source of descriptive and platform metadata.
 5. Confirm dependency review, CodeQL, browser tests, capability/permission
    changes, and required ADRs are complete.
-6. Deploy the exact complete-suite artifact uploaded by CI. Production
-   deployment is enabled only when `CLOUDFLARE_PAGES_ENABLED=true`,
-   `CLOUDFLARE_PAGES_ROLLOUT_ENABLED` is unset, and the documented Cloudflare
-   credentials are configured.
-7. Smoke the canonical production origin, then create an annotated, signed
-   SemVer tag and a GitHub release pointing at the verified commit.
-8. Record known limitations and rollback instructions. Roll back to the prior
+6. Confirm all release secrets against the remote stores. This cannot be proved
+   locally because no credential value is read from a developer machine.
+7. Push an annotated, signed SemVer tag. The release workflow publishes every
+   surface, deploys the exact verified web build to Cloudflare Pages, then
+   creates the GitHub Release. Do not create a GitHub Release manually.
+8. Smoke the canonical production origin and each published store listing.
+9. Record known limitations and rollback instructions. Roll back to the prior
    verified artifact if production validation fails.
 
 ## Package & extension release pipeline
 
-`/.github/workflows/release.yml` is the unified, secret-gated publisher for all
+`.github/workflows/release.yml` is the unified, secret-gated publisher for all
 store surfaces. It mirrors:
 
-- **hotpug** (`anypick`) for npm trusted publishing with OIDC + provenance
-- **nexusdiff** (`gitview`) for VS Code Marketplace / Open VSX tag-driven flow
-- plus deterministic Chrome + Firefox browser artifacts
+- npm provenance
+- VS Code Marketplace / Open VSX tag-driven publishing
+- deterministic Chrome + Firefox browser artifacts
 
 ### Trigger
 
 ```bash
-# Local: bump version in all manifests, commit, tag, push
+# Local: run the exact preflight before creating the release tag.
 # package.json, packages/mcp/package.json, apps/browser-extension/package.json, apps/vscode-extension/package.json share one version
+pnpm release:preflight
 git tag v0.1.1 && git push origin v0.1.1
-# or manual dispatch from GitHub Actions with skip toggles
+# or manual dispatch from main with the same complete-release contract
 ```
 
 Pushing `v*` re-runs the reusable `ci.yml` quality gate (lint, typecheck, test, build, bundle/SEO, `package:check`), then `release` job builds and verifies every artifact.
@@ -95,30 +100,68 @@ Pushing `v*` re-runs the reusable `ci.yml` quality gate (lint, typecheck, test, 
 
 `pnpm artifacts:all` builds all three in one go. Browser zips are identical except Firefox adds the AMO-required `gecko.id`; both are created deterministically via `create-browser-artifacts.mjs` (DEFLATE level 9, fixed timestamps).
 
-### Publishing (all gated by secrets + duplicate detection)
+### Publishing (all gated by credentials + duplicate detection)
 
-- **npm (`@kitland/mcp`)** – `setup-node` with `registry-url`, `npm@11.6.0` for OIDC, `publishConfig.provenance`. Idempotent: compares `dist.integrity` sha512 before publishing; first publish needs `NPM_TOKEN` bootstrap (hotpug parity), subsequent uses trusted publishing (`id-token: write`).
-- **VS Code Marketplace** – `VSCE_PAT` (Azure DevOps PAT, Marketplace Manage). `vsce publish --skip-duplicate`.
+- **npm (`@kitland/mcp`)** – the workflow reads the raw granular token from
+  GCP Secret Manager secret **`npm-token`** and exports it at runtime as
+  **`NODE_AUTH_TOKEN`**. It does **not** read a GitHub secret or environment
+  variable named `NPM_TOKEN`. The token holder must have package-and-scope
+  **Read and write** access to `@kitland` and must enable **Bypass 2FA** for
+  non-interactive direct publishing. The workflow compares `dist.integrity`
+  before publishing and uses npm provenance. Configure npm trusted publishing
+  after the first successful package release, then remove this token path in a
+  dedicated security change.
+- **VS Code Marketplace** – publisher ID `kitland` and `VSCE_PAT` (Azure DevOps PAT, Marketplace Manage). `vsce publish --skip-duplicate`.
 - **Open VSX** – `OVSX_PAT`. `ovsx publish --skip-duplicate`.
 - **Chrome Web Store** – `CHROME_EXTENSION_ID`, `CHROME_CLIENT_ID`, `CHROME_CLIENT_SECRET`, `CHROME_REFRESH_TOKEN` via `chrome-webstore-upload-cli`.
-- **Firefox AMO** – `WEB_EXT_API_KEY`, `WEB_EXT_API_SECRET` via `web-ext sign`. If secrets absent, the step logs `::notice::` and leaves the zip as a GitHub Release asset for manual upload.
+- **Firefox AMO** – `WEB_EXT_API_KEY`, `WEB_EXT_API_SECRET` via `web-ext sign`.
+- **Cloudflare Pages** – `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`; deployment to the `main` production branch happens only after every store publish succeeds.
 
-Missing secrets never fail the job; the GitHub Release still contains the verified zips/vsix/tgz for manual store submission.
+Every credential is required for a complete release. Missing credentials, a rejected
+store submission, or a failed Cloudflare deployment fails the workflow before a
+GitHub Release is created. This prevents a green run from representing a partial
+release.
 
 ### GitHub Release
 
-On tag push, `gh release create vX.Y.Z` attaches all artifacts with `--generate-notes` (Conventional Commits). Manual `workflow_dispatch` uploads artifacts as workflow artifacts (`retention 30d`) without creating a Release. All store publishes happen _after_ artifact verification; reruns are idempotent thanks to integrity / `--skip-duplicate` checks.
+On tag push or manual dispatch from `main`, the workflow creates `gh release create
+vX.Y.Z` only after npm, both VS Code stores, both browser stores, and Cloudflare
+Pages succeed. It attaches the deterministic artifacts with `--generate-notes`.
+Artifact upload (`retention 30d`) runs even on failure to support diagnosis; it is
+not a release.
 
-Required secrets summary (set in repo Settings → Secrets and variables → Actions):
+### Credential setup
+
+1. In npm, create or verify the **`@kitland`** organization/scope and give the
+   token-owning user publish access. On npmjs.com → profile → **Access Tokens**
+   → **Generate New Token**, create a granular, short-lived release token:
+   packages and scopes **Read and write**, restricted to `@kitland`, with
+   **Bypass 2FA** enabled. Copy it once.
+2. Store that raw value in Google Cloud Secret Manager under the exact name
+   **`npm-token`**. Do not put it in `.npmrc`, a local shell profile, the Git
+   repository, or a GitHub `NPM_TOKEN` secret. The release job maps it to
+   `NODE_AUTH_TOKEN` only for the npm publish step.
+3. Keep publishing credentials in the following locations. The release job
+   checks that every value is present before it packages or contacts a store;
+   permission and ownership are then verified by the real store API.
 
 ```
-NPM_TOKEN          # bootstrap only, then trusted publishing
-VSCE_PAT
-OVSX_PAT           # optional
-CHROME_EXTENSION_ID, CHROME_CLIENT_ID, CHROME_CLIENT_SECRET, CHROME_REFRESH_TOKEN
-WEB_EXT_API_KEY, WEB_EXT_API_SECRET
-CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID  # for Pages, not store release
+GCP Secret Manager
+  npm-token                # raw npm granular token, mapped to NODE_AUTH_TOKEN
+  vscode-marketplace-pat   # belongs to the Kitland Marketplace publisher
+  openvsx-pat
+  chrome-extension-id, chrome-client-id, chrome-client-secret, chrome-refresh-token
+  firefox-api-key, firefox-api-secret
+
+GitHub Actions production environment secrets
+  GCP_WIF_PROVIDER, GCP_SA_EMAIL, GCP_PROJECT_ID
+  CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
 ```
+
+The `kitland` VS Code Marketplace publisher must already exist and the user
+who created `vscode-marketplace-pat` must have its Marketplace **Manage**
+permission. Renaming `publisher` in `package.json` does not create or transfer
+publisher ownership.
 
 ## Shared package publication
 

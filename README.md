@@ -2,13 +2,14 @@
 
 **Tools out. Work on.**
 
-Everyday developer tools, in one place — local-first, open source, no account.
+Local-first developer tools for the web, browser extensions, VS Code, and MCP.
+Inputs stay on the device; Kitland has no account requirement, telemetry, or
+default payload persistence.
 
-> **Pre-release development snapshot:** the coordinated product launch remains
-> gated on the exact, product-approved 65-tool registry across the repository's
-> platform contracts. Finished tools can be certified for rollout on a specific
-> surface without shrinking the public 65-tool registry or publishing an
-> extension marketplace artifact.
+> **Release status — 0.1.1 candidate.** A public release exists only after the
+> tagged release workflow has published every distribution, deployed the
+> verified web artifact, and created the GitHub Release. A merged branch, an
+> artifact, or a locally built extension is not a release.
 
 |             |                                   |
 | ----------- | --------------------------------- |
@@ -16,165 +17,98 @@ Everyday developer tools, in one place — local-first, open source, no account.
 | **License** | MIT                               |
 | **Version** | 0.1.1                             |
 
-## Layout
+## Repository layout
 
 ```text
-apps/web/                 Astro registry/landing + lazy React tool islands
-apps/browser-extension/   Permission-free MV3 registry + lazy tool adapters
-apps/vscode-extension/    Desktop/web extension host + secure tool panel
+apps/web/                 Astro landing, registry, and lazy React tool islands
+apps/browser-extension/   Permission-free MV3 registry and local adapters
+apps/vscode-extension/    Desktop/web extension host and secure tool panel
 packages/core/            Pure bounded tool logic (no platform APIs)
-packages/tools/    Identity, platform contracts, release readiness
-brand/                    Logos, tokens, voice, and handoff rules
-design/                   Pencil source + committed export evidence
-docs/                     ADRs, architecture contracts, UX audit, rollout
+packages/tools/           Tool identity, platform contracts, release readiness
+packages/ui/              Shared shell, editor primitives, and visual tokens
+docs/                     ADRs, architecture contracts, UX evidence, rollout
 ```
 
-## Develop
+## Develop and verify locally
 
-Node **≥ 22.12.0**, pnpm **9**.
+Requires Node **22.12.0+** and pnpm **9.12.0**.
 
 ```bash
-pnpm install
-pnpm dev                   # web: http://localhost:4321
+pnpm install --frozen-lockfile
+pnpm dev                   # http://localhost:4321
 pnpm dev:browser-extension # popup development host
-pnpm test
-pnpm typecheck
-pnpm build                 # all three product surfaces
-pnpm quality:check         # normal incremental CI gate
+pnpm quality:check         # format, lint, types, tests, builds, packages, e2e
+pnpm release:preflight     # full local release gate plus workflow/config checks
 ```
 
-`pnpm release:verify` is deliberately stricter than normal CI. It stays red
-until all 65 tools are release-ready with resolved Pencil and platform
-contracts. `pnpm release:verify:rollout` is separate and certifies only the
-tools explicitly declared for the web surface in `releasePlatforms`. Each
-target must be canonical, `release-ready`, and available on that surface.
-Certification never changes the 65-tool landing page, Explore registry, or
-which registry-available editor routes ship in the web artifact.
+`release:preflight` is the command to run before pushing a release branch or
+tag. It runs the full quality/artifact gate, the pinned VS Code Extension Host
+integration suite, and release-configuration validation: four synchronized
+package versions, `kitland` VS Code publisher, immutable action pins, required
+credential gates, Pages production deployment, and GitHub Release ordering. It
+does not read or print store credentials; real ownership/permission checks
+happen in the protected release job.
 
-Start with the [65-tool rollout playbook](docs/product/tool-rollout.md),
-[interaction pattern contracts](docs/architecture/tool-patterns.md), and
-[platform capability contract](docs/architecture/platform-capabilities.md).
-Each rollout target follows the same registry and surface contract; no one tool
-defines the public registry scope.
-
-## Platform checks
+For focused host work:
 
 ```bash
 pnpm --filter @kitland/web test:e2e
-pnpm --filter @kitland/browser-extension check
-pnpm --filter kitland-tools package:smoke
-pnpm test:integration:vscode # downloads the pinned VS Code test host
+pnpm --filter @kitland/browser-extension test:smoke
+pnpm test:integration:vscode
+pnpm artifacts:all
 ```
 
-Use the coordinated release gate for the complete product launch:
+The coordinated product gate requires the exact 65-tool registry. A smaller
+web-only certification remains available for explicitly approved rollout
+targets with `pnpm release:check:rollout`; it does not authorize extension or
+npm publication. Read the [rollout playbook](docs/product/tool-rollout.md) and
+[platform capability contract](docs/architecture/platform-capabilities.md)
+before changing a tool surface.
+
+## Distribution and release
+
+| Surface | Public destination                           | Release guard                                                              |
+| ------- | -------------------------------------------- | -------------------------------------------------------------------------- |
+| Web     | Cloudflare Pages (`kitland.dev`)             | deploy verified `apps/web/dist` to `main` only after stores succeed        |
+| MCP     | npm `@kitland/mcp`                           | package allowlist, live stdio smoke, provenance, immutable integrity check |
+| VS Code | Marketplace publisher `kitland` and Open VSX | VSIX smoke/package checks and both store APIs                              |
+| Browser | Chrome Web Store and Firefox AMO             | deterministic ZIPs, manifest/CSP checks, both store APIs                   |
+
+The full release workflow is deliberately all-or-nothing: a missing token,
+rejected store submission, or failed Pages deployment stops before the GitHub
+Release is created. The workflow attaches the produced VSIX, browser ZIPs, and
+MCP tarball to that release.
+
+Follow the exact setup and release checklist in [RELEASING.md](RELEASING.md).
+It explains where the npm token belongs: its Secret Manager key is `npm-token`
+and the job exposes it only as `NODE_AUTH_TOKEN`; there is no `NPM_TOKEN`
+GitHub secret in this repository.
+
+## Cloudflare Pages setup
+
+Create the Pages project once (project name `kitland`, production branch
+`main`), then configure the two production-environment secrets documented in
+[RELEASING.md](RELEASING.md): `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID`.
 
 ```bash
-pnpm artifacts:check # browser ZIP + VSIX package validation
-pnpm release:check   # quality + exact registry gate + artifacts
-```
-
-For a certified public web rollout, use the separate gate. It runs the normal
-quality suite first, then certifies the web targets against their host
-contracts. It deploys the normal full web artifact: every registry-available
-tool keeps its editor route, while planned tools remain visible as planned:
-
-```bash
-pnpm release:check:rollout
-```
-
-This command does not publish the browser extension or VS Code extension.
-
-## Deploy — Cloudflare Pages
-
-Two options (pick one).
-
-### A. Git integration (dashboard, complete-suite launch only)
-
-1. [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages** → **Create** → **Pages** → connect GitHub repo.
-2. Build settings:
-
-| Field                  | Value                                   |
-| ---------------------- | --------------------------------------- |
-| Framework preset       | None (static Astro output)              |
-| Root directory         | `/` (repo root)                         |
-| Build command          | `pnpm release:verify && pnpm build:web` |
-| Build output directory | `apps/web/dist`                         |
-
-3. Environment variables (build):
-
-| Name           | Value     |
-| -------------- | --------- |
-| `NODE_VERSION` | `22.12.0` |
-
-Cloudflare detects pnpm via `packageManager` in root `package.json`.
-
-4. Custom domain: project **Custom domains** → add `kitland.dev` (DNS on Cloudflare).
-
-### B. GitHub Actions (complete suite or certified web rollout)
-
-Workflow: `.github/workflows/ci.yml`  
-On push to `main`: formatting → lint → typecheck → unit tests → dependency
-audit → all-surface builds → web/extension package budgets → web and browser
-extension smoke tests → pinned VS Code Extension Host tests → static SEO and
-delivery verification. The `web-rollout` job downloads that same normal web
-artifact, verifies the web certification contract and full public route set,
-then smoke-tests it before it is eligible for deployment. The complete-suite
-deploy continues to run the separate exact-suite gate against the same normal
-web artifact.
-
-Run the normal development gate locally with `pnpm quality:check`. It expects
-the Playwright Chromium runtime installed; `pnpm --filter @kitland/web exec
-playwright install chromium` installs it once. `pnpm release:check` additionally
-enforces the intentionally incomplete product-release contract.
-
-Add repository secrets:
-
-| Secret                  | Where to get it                                                                     |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`  | Cloudflare → My Profile → API Tokens → create token with **Cloudflare Pages: Edit** |
-| `CLOUDFLARE_ACCOUNT_ID` | Workers & Pages right sidebar / Overview                                            |
-
-For a certified web rollout, leave `CLOUDFLARE_PAGES_ENABLED` unset and add
-the repository variable `CLOUDFLARE_PAGES_ROLLOUT_ENABLED=true`. GitHub
-Actions then deploys the normal full-registry web artifact after validating the
-web rollout targets. It never uploads the browser extension ZIP or VS Code
-VSIX to a marketplace.
-
-For the coordinated 65-tool product launch, unset
-`CLOUDFLARE_PAGES_ROLLOUT_ENABLED` and set `CLOUDFLARE_PAGES_ENABLED=true`.
-That deploy remains blocked until the machine-readable complete-suite registry
-gate passes. Keeping both variables unset leaves all deploy jobs skipped.
-
-Create the Pages project once (name must match `kitland`):
-
-```bash
-pnpm install
 pnpm exec wrangler login
 pnpm exec wrangler pages project create kitland --production-branch=main
-pnpm pages:deploy
+pnpm pages:dev # local preview of the production build
 ```
 
-For a local web deployment after the rollout gate passes:
+Do not manually deploy a public release from a local directory. The tagged
+workflow deploys the exact artifact that passed the release gate and pins it to
+the Pages production branch.
 
-```bash
-pnpm pages:deploy:rollout
-```
+## Project policies
 
-Local preview of the production build:
-
-```bash
-pnpm pages:dev
-```
-
-## Community, security, and release process
-
-- [Contributing guide](CONTRIBUTING.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security reporting](SECURITY.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)
-- [Security policy](SECURITY.md)
 - [Support](SUPPORT.md)
 - [Changelog](CHANGELOG.md)
-- [Architecture index](docs/architecture/README.md), including the
-  [SEO and prerender decision record](docs/architecture/seo-prerender.md)
+- [Architecture](docs/architecture/README.md)
 
 ## License
 

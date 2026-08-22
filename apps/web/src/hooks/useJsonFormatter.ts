@@ -39,22 +39,10 @@ export function useJsonFormatter(
 
   useEffect(() => {
     const immediate = immediateState(query.source);
-    if (immediate.status !== "processing") {
-      setCompleted((prev) => {
-        if (
-          prev.source === query.source &&
-          prev.indent === query.indent &&
-          prev.mode === query.mode &&
-          prev.state.status === immediate.status
-        ) {
-          return prev;
-        }
-        return { ...query, state: immediate };
-      });
-      return;
-    }
+    // Empty and over-limit states are derived below. Updating completed state
+    // here would make a render-derived state trigger a second render.
+    if (immediate.status !== "processing") return;
 
-    setCompleted({ ...query, state: { status: "processing" } });
     let worker: Worker | undefined;
     let active = true;
     const timer = window.setTimeout(() => {

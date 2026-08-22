@@ -23,7 +23,6 @@
     "noUncheckedSideEffectImports": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "@kitland/ui/tools/*": ["../../packages/ui/src/tools/*"],

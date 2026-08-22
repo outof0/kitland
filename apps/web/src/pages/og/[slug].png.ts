@@ -3,7 +3,9 @@ import { listTools } from "@kitland/tools";
 import { generateOgImage, type OgImageOptions } from "@/lib/og-generator";
 
 export const getStaticPaths: GetStaticPaths = () => {
-  const tools = listTools().filter((t) => t.status === "available");
+  const allTools = listTools();
+  const tools = allTools.filter((tool) => tool.status === "available");
+  const toolCount = allTools.length;
   const toolPaths = tools.map((tool) => ({
     params: { slug: tool.slug },
     props: {
@@ -28,9 +30,9 @@ export const getStaticPaths: GetStaticPaths = () => {
       params: { slug: "explore" },
       props: {
         title: "Explore Developer Tools",
-        description: "64 local-first utilities that run in your browser with zero payload uploads.",
+        description: `${toolCount} local-first utilities that run in your browser with zero payload uploads.`,
         family: "developer-tools",
-        badge: "REGISTRY · 64 TOOLS",
+        badge: `REGISTRY · ${toolCount} TOOLS`,
       },
     },
     ...toolPaths,

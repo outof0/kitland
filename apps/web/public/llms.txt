@@ -37,7 +37,7 @@ Full registry and live status: https://kitland.dev/explore
 
 - **MCP server:** `npx -y @kitland/mcp@0.1.1` (stdio, 79 operations, readOnly+idempotent). See `packages/mcp/README.md`.
 - **Browser extension:** Chrome `kitland-chrome-v*.zip` / Firefox `kitland-firefox-v*.zip` (MV3, `permissions:[]`), same WorkspaceShell as web.
-- **VS Code extension:** `kitland-tools.vsix` (publisher `outof0`), secure webview with per-session nonce.
+- **VS Code extension:** `kitland-tools.vsix` (publisher `kitland`), secure webview with per-session nonce.
 
 ## Contact & policy
 
