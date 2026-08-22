@@ -65,12 +65,12 @@ export class KitlandViewProvider implements vscode.WebviewViewProvider {
       });
     });
 
-    // An Activity Bar view is constrained to the VS Code sidebar. Treat it
-    // as a launcher and move the real workbench to an editor tab so the tool
-    // receives the full editor width and behaves like an opened file.
-    this.openInEditor();
+    // The Activity Bar is an entry point to the full Kitland workbench. The
+    // workbench itself owns the navigation sidebar, so hide VS Code's narrow
+    // view before revealing the editor panel.
+    void this.openInEditor();
     webviewView.onDidChangeVisibility(() => {
-      if (webviewView.visible) this.openInEditor();
+      if (webviewView.visible) void this.openInEditor();
     });
   }
 
@@ -84,17 +84,18 @@ export class KitlandViewProvider implements vscode.WebviewViewProvider {
     if (this.ready) {
       this.postToolsList();
     }
-    this.openInEditor();
+    void this.openInEditor();
   }
 
   public getActiveAdapter(): ToolAdapter {
     return this.adapter;
   }
 
-  private openInEditor(): void {
-    ToolPanel.show(this.extensionUri, this.adapter, this.initialInput, true);
-    // The Activity Bar is navigation: retain VS Code's Primary Sidebar while
-    // moving the constrained view content into a full editor tab.
+  private async openInEditor(): Promise<void> {
+    await vscode.commands.executeCommand("workbench.action.closeSidebar");
+    // Activity Bar launches keep the shared Kitland navigation visible in the
+    // editor panel, matching the web and browser-extension workbench.
+    ToolPanel.show(this.extensionUri, this.adapter, this.initialInput, false);
   }
 
   private post(message: HostMessage): void {
@@ -118,9 +119,7 @@ export class KitlandViewProvider implements vscode.WebviewViewProvider {
       tools: this.registryEntries(),
       activeToolId: this.adapter.descriptor.id,
       initialInput: this.initialInput,
-      // This webview already lives in VS Code's Activity Bar sidebar. Avoid
-      // rendering a second desktop registry beside the active tool.
-      collapseSidebar: true,
+      collapseSidebar: false,
     });
   }
 
@@ -137,9 +136,7 @@ export class KitlandViewProvider implements vscode.WebviewViewProvider {
     if (message.type === "selectTool") {
       const adapter = getToolAdapter(message.toolId);
       if (!adapter) return;
-      // The activity-bar view is the workbench: switch the tool in place.
-      // Opening a second ToolPanel editor would duplicate the React tree and
-      // leak the previous tool's initialInput.
+      // Keep the full Kitland navigation and content workbench in the editor.
       this.selectTool(adapter, undefined);
       return;
     }

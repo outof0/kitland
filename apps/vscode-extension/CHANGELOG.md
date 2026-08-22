@@ -4,8 +4,8 @@
 
 - Fix the shared-tool registry loading in VS Code by acquiring the webview API
   once, so CodeMirror tools such as JSON Formatter render correctly.
-- Open Kitland workbenches in a full-width editor tab. The Activity Bar keeps
-  the Primary Sidebar visible, while Command Palette launches hide it.
+- The Activity Bar opens the full Kitland workbench (navigation plus tool);
+  Command Palette launches present only the focused editor tool.
 
 ## 0.1.0 — Unreleased
 

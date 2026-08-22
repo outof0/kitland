@@ -16,8 +16,8 @@ tagged release, changes remain under **Unreleased**.
 
 - Make CodeMirror-backed tools load reliably in the VS Code webview and open
   the workbench in a full-width editor tab.
-- Keep the Primary Sidebar visible when Kitland opens from the Activity Bar;
-  Command Palette launches retain their focused, sidebar-free workspace.
+- Activity Bar opens the full Kitland navigation and tool workbench;
+  Command Palette launches keep only the focused sidebar-free workspace.
 - Keep tab indentation support consistent across editor hosts while preserving
   space-only indentation for YAML output.
 
