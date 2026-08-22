@@ -56,6 +56,10 @@ describe("formatXml", () => {
       ok: false,
       error: { code: "INPUT_TOO_LARGE" },
     });
+    expect(formatXml("<" + "!".repeat(50_000))).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_XML" },
+    });
   });
 
   it("supports tab indentation", () => {

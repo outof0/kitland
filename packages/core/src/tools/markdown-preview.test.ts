@@ -22,6 +22,12 @@ describe("renderMarkdown", () => {
     expect(result.value.html).not.toContain("javascript:");
   });
 
+  it("keeps already-escaped URL query delimiters without decoding them twice", () => {
+    const result = renderMarkdown("[Docs](https://example.com/?one=1&two=2)");
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.value.html).toContain('href="https://example.com/?one=1&amp;two=2"');
+  });
+
   it("renders fenced code and validates empty input", () => {
     expect(renderMarkdown(" ").ok).toBe(false);
     const result = renderMarkdown("```ts\nconst answer = 42;\n```");

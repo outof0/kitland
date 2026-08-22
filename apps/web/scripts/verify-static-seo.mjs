@@ -24,19 +24,21 @@ function readText(relativePath) {
   return readFileSync(path, "utf8");
 }
 
-function decodeXml(value) {
-  return value
-    .trim()
-    .replace(/^<!\[CDATA\[([\s\S]*)\]\]>$/, "$1")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'");
+function unwrapCdata(value) {
+  const trimmed = value.trim();
+  return trimmed.startsWith("<![CDATA[") && trimmed.endsWith("]]>")
+    ? trimmed.slice("<![CDATA[".length, -"]]>".length)
+    : trimmed;
 }
 
 function getXmlLocations(xml) {
-  return [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) => decodeXml(match[1]));
+  return [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) => {
+    const value = unwrapCdata(match[1]);
+    if (value.includes("&")) {
+      fail(`Sitemap location must not contain XML entities: ${value}`);
+    }
+    return value;
+  });
 }
 
 function getTags(html, tagName) {
@@ -152,12 +154,12 @@ function hasSchemaType(value, type) {
 }
 
 function hasJsonLdType(html, type, pageLabel) {
-  const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].filter(
-    ([, attributes]) => getAttribute(attributes, "type")?.toLowerCase() === "application/ld+json",
+  const scripts = findScriptElements(html).filter(
+    ({ attributes }) => getAttribute(attributes, "type")?.toLowerCase() === "application/ld+json",
   );
 
   let found = false;
-  for (const [, , content] of scripts) {
+  for (const { content } of scripts) {
     try {
       found ||= hasSchemaType(JSON.parse(content), type);
     } catch {
@@ -166,6 +168,65 @@ function hasJsonLdType(html, type, pageLabel) {
   }
 
   return found;
+}
+
+function findScriptElements(html) {
+  const lower = html.toLowerCase();
+  const scripts = [];
+  let cursor = 0;
+
+  while (cursor < html.length) {
+    const start = findHtmlTagStart(lower, "script", cursor);
+    if (start === -1) return scripts;
+    const openingEnd = findHtmlTagEnd(html, start);
+    if (openingEnd === -1) return scripts;
+
+    const closingStart = findHtmlEndTagStart(lower, "script", openingEnd + 1);
+    if (closingStart === -1) return scripts;
+    const closingEnd = findHtmlTagEnd(html, closingStart);
+    if (closingEnd === -1) return scripts;
+
+    scripts.push({
+      attributes: html.slice(start + "<script".length, openingEnd),
+      content: html.slice(openingEnd + 1, closingStart),
+    });
+    cursor = closingEnd + 1;
+  }
+
+  return scripts;
+}
+
+function findHtmlTagStart(lowerHtml, name, cursor) {
+  return findHtmlTagPrefix(lowerHtml, `<${name}`, cursor);
+}
+
+function findHtmlEndTagStart(lowerHtml, name, cursor) {
+  return findHtmlTagPrefix(lowerHtml, `</${name}`, cursor);
+}
+
+function findHtmlTagPrefix(lowerHtml, prefix, cursor) {
+  let start = lowerHtml.indexOf(prefix, cursor);
+  while (start !== -1) {
+    const next = lowerHtml[start + prefix.length] ?? "";
+    if (next === ">" || next === "/" || /\s/u.test(next)) return start;
+    start = lowerHtml.indexOf(prefix, start + prefix.length);
+  }
+  return -1;
+}
+
+function findHtmlTagEnd(html, start) {
+  let quote = null;
+  for (let index = start + 1; index < html.length; index += 1) {
+    const character = html[index];
+    if (quote) {
+      if (character === quote) quote = null;
+    } else if (character === '"' || character === "'") {
+      quote = character;
+    } else if (character === ">") {
+      return index;
+    }
+  }
+  return -1;
 }
 
 function visibleText(value) {

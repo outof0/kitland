@@ -132,7 +132,7 @@ function inlineMarkdown(source: string): string {
   value = value.replace(
     /\[([^\]]+)\]\(([^\s)]+)(?:\s+&quot;[^\n]*&quot;)?\)/gu,
     (_match, label: string, href: string) => {
-      const safeHref = isSafeHref(unescapeHtml(href)) ? href : "#";
+      const safeHref = isSafeHref(href) ? href : "#";
       return `<a href="${safeHref}" rel="noreferrer noopener">${label}</a>`;
     },
   );
@@ -154,10 +154,6 @@ function escapeHtml(value: string): string {
 
 function escapeAttribute(value: string): string {
   return escapeHtml(value).replace(/[^\w-]/gu, "");
-}
-
-function unescapeHtml(value: string): string {
-  return value.replace(/&amp;/gu, "&").replace(/&quot;/gu, '"');
 }
 
 function countWords(value: string): number {

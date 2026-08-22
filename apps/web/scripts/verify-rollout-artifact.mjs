@@ -75,7 +75,7 @@ function verifySitemap(expectedTools) {
   const urls = sitemapFiles.flatMap((file) =>
     getXmlLocations(readFileSync(resolve(distDirectory, file), "utf8")),
   );
-  if (!urls.includes("https://kitland.dev/explore")) {
+  if (!hasExactSitePath(urls, "/explore")) {
     fail("The sitemap is missing /explore.");
   }
   const toolPaths = urls
@@ -84,6 +84,22 @@ function verifySitemap(expectedTools) {
     .map((pathname) => pathname.slice("/explore/".length))
     .sort();
   compareExact("sitemap available-tool routes", toolPaths, [...expectedTools].sort());
+}
+
+function hasExactSitePath(urls, expectedPath) {
+  return urls.some((value) => {
+    try {
+      const url = new URL(value);
+      return (
+        url.origin === "https://kitland.dev" &&
+        url.pathname === expectedPath &&
+        !url.search &&
+        !url.hash
+      );
+    } catch {
+      return false;
+    }
+  });
 }
 
 function verifyLandingLinks(html, availableSlugs) {

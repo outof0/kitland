@@ -93,6 +93,10 @@ describe("formatCode multi-language support", () => {
     expect(minified).toEqual(
       expect.objectContaining({ ok: true, value: "<div><p> Hello </p></div>" }),
     );
+
+    expect(formatHtml("<div>safe</div><!-- incomplete comment", "minify")).toEqual(
+      expect.objectContaining({ ok: true, value: "<div>safe</div>" }),
+    );
   });
 
   it("formats and minifies JavaScript", () => {

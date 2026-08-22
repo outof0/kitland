@@ -64,7 +64,7 @@ export function detectCodeLanguage(
 
   // CSS
   if (
-    /([a-zA-Z0-9_\-#.:>\s]+)\s*\{[^}]*\}/.test(trimmed) &&
+    looksLikeCss(trimmed) &&
     !/\b(function|class|interface|var|let|const|if|for|while)\b/.test(trimmed)
   ) {
     return "css";
@@ -210,8 +210,7 @@ export function formatHtml(
   if (source.trim().length === 0) return err("EMPTY_INPUT", "Enter HTML markup to format.");
 
   if (mode === "minify") {
-    const minified = source
-      .replace(/<!--[\s\S]*?-->/g, "") // remove comments
+    const minified = stripHtmlComments(source)
       .replace(/>\s+</g, "><") // remove space between tags
       .replace(/\s+/g, " ") // collapse internal whitespace
       .trim();
@@ -242,8 +241,7 @@ export function formatHtml(
     "!doctype",
   ]);
 
-  const tokens = source
-    .replace(/<!--[\s\S]*?-->/g, "")
+  const tokens = stripHtmlComments(source)
     .replace(/>\s+</g, "><")
     .split(/(<[^>]+>)/g)
     .filter((t) => t.trim().length > 0);
@@ -270,6 +268,41 @@ export function formatHtml(
   }
 
   return ok(lines.join("\n").trim());
+}
+
+function looksLikeCss(source: string): boolean {
+  const openingBrace = source.indexOf("{");
+  const closingBrace = source.indexOf("}", openingBrace + 1);
+  if (openingBrace <= 0 || closingBrace === -1) {
+    return false;
+  }
+
+  for (let index = 0; index < openingBrace; index += 1) {
+    const code = source.charCodeAt(index);
+    const isLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+    const isDigit = code >= 48 && code <= 57;
+    const isWhitespace = code === 9 || code === 10 || code === 13 || code === 32;
+    const isSelectorPunctuation = "_-#.:>".includes(source[index] ?? "");
+    if (!isLetter && !isDigit && !isWhitespace && !isSelectorPunctuation) return false;
+  }
+  return true;
+}
+
+/** Remove complete comments and discard an unterminated comment through end-of-input. */
+function stripHtmlComments(source: string): string {
+  let output = "";
+  let cursor = 0;
+
+  while (cursor < source.length) {
+    const start = source.indexOf("<!--", cursor);
+    if (start === -1) return output + source.slice(cursor);
+    output += source.slice(cursor, start);
+    const end = source.indexOf("-->", start + "<!--".length);
+    if (end === -1) return output;
+    cursor = end + "-->".length;
+  }
+
+  return output;
 }
 
 /** Format or minify JavaScript / TypeScript code */

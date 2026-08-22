@@ -87,5 +87,6 @@ describe("parseUserAgent", () => {
       ok: false,
       error: { code: "INPUT_TOO_LARGE" },
     });
+    expect(parseUserAgent("Mozilla/5.0\nChrome/120.0.0.0")).toMatchObject({ ok: true });
   });
 });

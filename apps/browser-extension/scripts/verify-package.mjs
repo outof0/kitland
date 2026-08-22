@@ -88,8 +88,7 @@ function verifyDistribution() {
 
   const popup = readText("popup.html");
   if (popup) {
-    const scriptTags = [...popup.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
-    if (scriptTags.some((match) => match[1].trim().length > 0)) {
+    if (findScriptBodies(popup).some((body) => body.trim().length > 0)) {
       fail("popup.html contains an inline script blocked by extension CSP.");
     }
     if (/\b(?:src|href)=["']https?:/i.test(popup)) {
@@ -149,6 +148,62 @@ function verifyDistribution() {
   console.log(
     `Total packaged JavaScript (informational): ${formatBytes(totalScriptGzipBytes)} gzip`,
   );
+}
+
+function findScriptBodies(html) {
+  const lower = html.toLowerCase();
+  const bodies = [];
+  let cursor = 0;
+
+  while (cursor < html.length) {
+    const start = findElementStart(lower, "script", cursor);
+    if (start === -1) return bodies;
+    const openingEnd = findHtmlTagEnd(html, start);
+    if (openingEnd === -1) return [...bodies, html.slice(start)];
+
+    const closingStart = findEndTagStart(lower, "script", openingEnd + 1);
+    if (closingStart === -1) return [...bodies, html.slice(openingEnd + 1)];
+    bodies.push(html.slice(openingEnd + 1, closingStart));
+
+    const closingEnd = findHtmlTagEnd(html, closingStart);
+    if (closingEnd === -1) return bodies;
+    cursor = closingEnd + 1;
+  }
+
+  return bodies;
+}
+
+function findElementStart(lowerHtml, name, cursor) {
+  return findTagStart(lowerHtml, `<${name}`, cursor);
+}
+
+function findEndTagStart(lowerHtml, name, cursor) {
+  return findTagStart(lowerHtml, `</${name}`, cursor);
+}
+
+function findTagStart(lowerHtml, prefix, cursor) {
+  let start = lowerHtml.indexOf(prefix, cursor);
+  while (start !== -1) {
+    const next = lowerHtml[start + prefix.length] ?? "";
+    if (next === ">" || next === "/" || /\s/u.test(next)) return start;
+    start = lowerHtml.indexOf(prefix, start + prefix.length);
+  }
+  return -1;
+}
+
+function findHtmlTagEnd(html, start) {
+  let quote = null;
+  for (let index = start + 1; index < html.length; index += 1) {
+    const character = html[index];
+    if (quote) {
+      if (character === quote) quote = null;
+    } else if (character === '"' || character === "'") {
+      quote = character;
+    } else if (character === ">") {
+      return index;
+    }
+  }
+  return -1;
 }
 
 /** Per-entry budgets scale with a lazy 64-tool registry; total package size does not equal startup cost. */

@@ -60,17 +60,13 @@ function tokenizeXml(
 ): ToolResult<{ tokens: XmlToken[]; elementCount: number; maxDepth: number }> {
   const tokens: XmlToken[] = [];
   const open: Array<{ readonly name: string; readonly index: number }> = [];
-  // Quoted attribute values may legally contain `>`, so a plain `<[^>]*>`
-  // matcher incorrectly splits otherwise valid XML tags.
-  const pattern =
-    /<!\[CDATA\[[\s\S]*?\]\]>|<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<\/[^>]*>|<(?:[^<>"']+|"[^"]*"|'[^']*')*>/g;
   let cursor = 0;
   let elementCount = 0;
   let maxDepth = 0;
   let documentElementCount = 0;
 
-  for (const match of source.matchAll(pattern)) {
-    const index = match.index ?? 0;
+  for (const match of scanXmlMarkup(source)) {
+    const index = match.index;
     const before = source.slice(cursor, index);
     if (before) {
       const text = validateText(before, lineAt(source, cursor));
@@ -85,7 +81,7 @@ function tokenizeXml(
         if (start?.type === "start") start.directText = true;
       }
     }
-    const raw = match[0];
+    const raw = match.raw;
     const line = lineAt(source, index);
     const parsed = parseMarkup(raw, line, open);
     if (!parsed.ok) return parsed;
@@ -143,19 +139,64 @@ function tokenizeXml(
   return ok({ tokens, elementCount, maxDepth });
 }
 
+/**
+ * Scan markup in one pass so hostile input cannot trigger regex backtracking.
+ * The scanner respects quoted attribute values, where `>` is legal text.
+ */
+function* scanXmlMarkup(source: string): Generator<{ index: number; raw: string }> {
+  let cursor = 0;
+
+  while (cursor < source.length) {
+    const index = source.indexOf("<", cursor);
+    if (index === -1) return;
+
+    let end = -1;
+    if (source.startsWith("<![CDATA[", index)) {
+      const close = source.indexOf("]]>", index + "<![CDATA[".length);
+      end = close === -1 ? source.length : close + `]]>`.length;
+    } else if (source.startsWith("<!--", index)) {
+      const close = source.indexOf("-->", index + "<!--".length);
+      end = close === -1 ? source.length : close + "-->".length;
+    } else if (source.startsWith("<?", index)) {
+      const close = source.indexOf("?>", index + 2);
+      end = close === -1 ? source.length : close + "?>".length;
+    } else {
+      let quote: '"' | "'" | null = null;
+      for (let offset = index + 1; offset < source.length; offset += 1) {
+        const character = source[offset];
+        if (quote) {
+          if (character === quote) quote = null;
+        } else if (character === '"' || character === "'") {
+          quote = character;
+        } else if (character === ">") {
+          end = offset + 1;
+          break;
+        }
+      }
+      if (end === -1) end = source.length;
+    }
+
+    yield { index, raw: source.slice(index, end) };
+    cursor = end;
+  }
+}
+
 function parseMarkup(
   raw: string,
   line: number,
   open: Array<{ readonly name: string; readonly index: number }>,
 ): ToolResult<XmlToken | null> {
   if (raw.startsWith("<!--")) {
+    if (!raw.endsWith("-->")) return xmlError(line, "unterminated comment");
     const body = raw.slice(4, -3);
     return body.includes("--") || body.endsWith("-")
       ? xmlError(line, "invalid comment")
       : ok({ type: "misc", raw });
   }
-  if (raw.startsWith("<![CDATA["))
+  if (raw.startsWith("<![CDATA[")) {
+    if (!raw.endsWith("]]>")) return xmlError(line, "unterminated CDATA section");
     return ok({ type: "text", raw, openIndex: open.at(-1)?.index ?? null });
+  }
   if (raw.startsWith("<?"))
     return raw.endsWith("?>")
       ? ok({ type: "misc", raw })
