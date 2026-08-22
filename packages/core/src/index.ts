@@ -349,6 +349,8 @@ export {
   JSON_ESCAPE_MAX_INPUT_CHARS,
   JSON_ESCAPE_MAX_ENCODED_CHARS,
   type JsonEscapeMode,
+  type JsonEscapeOptions,
+  type JsonUnescapeOptions,
 } from "./tools/json-escape";
 export {
   formatSql,

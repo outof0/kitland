@@ -14,6 +14,7 @@ import {
   type CaseFormat,
   type DedupeLinesOptions,
   type JsonEscapeMode,
+  type JsonEscapeOptions,
   type SortLinesOptions,
   type TextReverseOptions,
 } from "@kitland/core";
@@ -52,9 +53,17 @@ export function useTextReverser(
   return useDeferredTextTransform(input, key, transform);
 }
 
-export function useJsonEscape(input: string, mode: JsonEscapeMode): DeferredTextTransformState {
-  const transform = useCallback((value: string) => runJsonEscape(mode, value), [mode]);
-  return useDeferredTextTransform(input, mode, transform);
+export function useJsonEscape(
+  input: string,
+  mode: JsonEscapeMode,
+  options?: JsonEscapeOptions,
+): DeferredTextTransformState {
+  const key = `${mode}:${String(options?.wrapQuotes ?? true)}:${String(options?.escapeSlashes ?? false)}:${String(options?.escapeUnicode ?? false)}`;
+  const transform = useCallback(
+    (value: string) => runJsonEscape(mode, value, options),
+    [mode, options],
+  );
+  return useDeferredTextTransform(input, key, transform);
 }
 
 export function useSqlFormatter(

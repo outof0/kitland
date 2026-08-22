@@ -744,20 +744,53 @@ export const kitlandHtmlToJsxExposure: McpExposure<TextOnlyInput, TextOnlyOutput
 // JSON Escape / Unescape
 // ---------------------------------------------------------------------------
 
-export const kitlandJsonEscapeExposure: McpExposure<TextOnlyInput, TextOnlyOutput> = {
+type JsonEscapeMcpInput = {
+  readonly input: string;
+  readonly wrapQuotes?: boolean;
+  readonly escapeSlashes?: boolean;
+  readonly escapeUnicode?: boolean;
+};
+
+const JSON_ESCAPE_MCP_INPUT_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["input"],
+  properties: {
+    input: { type: "string", description: "Text or JSON content to escape." },
+    wrapQuotes: {
+      type: "boolean",
+      description: "Whether to wrap the output in double quotes (default true).",
+    },
+    escapeSlashes: {
+      type: "boolean",
+      description: "Whether to escape forward slashes as \\/ (default false).",
+    },
+    escapeUnicode: {
+      type: "boolean",
+      description: "Whether to escape non-ASCII characters to \\uXXXX (default false).",
+    },
+  },
+} as const;
+
+export const kitlandJsonEscapeExposure: McpExposure<JsonEscapeMcpInput, TextOnlyOutput> = {
   mcpName: "kitland_json_escape",
   operationId: "json_escape",
   contractVersion: 1,
   registryToolId: "json-escape",
   title: "JSON Escape",
-  description: "Escape plain text into a JSON string literal with quotes.",
-  inputSchema: TEXT_ONLY_INPUT_SCHEMA,
+  description:
+    "Escape plain text or JSON into a JSON string literal with quotes and escape options.",
+  inputSchema: JSON_ESCAPE_MCP_INPUT_SCHEMA,
   outputSchema: buildAdvertisedOutputSchema(TEXT_ONLY_SUCCESS_SCHEMA),
   successSchema: TEXT_ONLY_SUCCESS_SCHEMA,
   limits: DEFAULT_MCP_LIMITS,
   safety: DEFAULT_MCP_SAFETY,
-  invoke: (args: TextOnlyInput): ToolResult<TextOnlyOutput> => {
-    const res = escapeJson(args.input);
+  invoke: (args: JsonEscapeMcpInput): ToolResult<TextOnlyOutput> => {
+    const res = escapeJson(args.input, {
+      ...(args.wrapQuotes === undefined ? {} : { wrapQuotes: args.wrapQuotes }),
+      ...(args.escapeSlashes === undefined ? {} : { escapeSlashes: args.escapeSlashes }),
+      ...(args.escapeUnicode === undefined ? {} : { escapeUnicode: args.escapeUnicode }),
+    });
     if (!res.ok) return res;
     return ok({ output: res.value });
   },

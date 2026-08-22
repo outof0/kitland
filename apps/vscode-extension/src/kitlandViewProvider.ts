@@ -93,10 +93,8 @@ export class KitlandViewProvider implements vscode.WebviewViewProvider {
 
   private openInEditor(): void {
     ToolPanel.show(this.extensionUri, this.adapter, this.initialInput, true);
-    // The Activity Bar view only launches the editor workbench. Closing the
-    // primary sidebar afterwards gives the tool the same full-width canvas as
-    // an editor file; a later click on the Kitland icon opens it again.
-    void vscode.commands.executeCommand("workbench.action.closeSidebar");
+    // The Activity Bar is navigation: retain VS Code's Primary Sidebar while
+    // moving the constrained view content into a full editor tab.
   }
 
   private post(message: HostMessage): void {

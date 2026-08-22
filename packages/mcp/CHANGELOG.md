@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Keep the release version and published MCP build metadata aligned at `0.1.1`.
 
+### Added
+
+- Add `wrapQuotes`, `escapeSlashes`, and `escapeUnicode` options to the local
+  `kitland_json_escape` operation.
+
 ## [0.1.0] - 2026-08-22
 
 ### Added

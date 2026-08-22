@@ -7,10 +7,17 @@ tagged release, changes remain under **Unreleased**.
 
 ## 0.1.1 — Unreleased
 
+### Added
+
+- JSON Escape now supports optional quote wrapping, forward-slash escaping, and
+  ASCII-only Unicode escaping, while accepting quoted and unquoted escaped input.
+
 ### Fixed
 
 - Make CodeMirror-backed tools load reliably in the VS Code webview and open
   the workbench in a full-width editor tab.
+- Keep the Primary Sidebar visible when Kitland opens from the Activity Bar;
+  Command Palette launches retain their focused, sidebar-free workspace.
 - Keep tab indentation support consistent across editor hosts while preserving
   space-only indentation for YAML output.
 

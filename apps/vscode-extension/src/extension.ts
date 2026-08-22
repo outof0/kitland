@@ -109,6 +109,10 @@ async function openTool(extensionUri: vscode.Uri, requestedToolId?: unknown): Pr
   // Editor-area panels behave like files: they use the full editor width and
   // rely on VS Code's own navigation instead of rendering a second registry.
   ToolPanel.show(extensionUri, adapter, initialInput, true);
+  // The Command Palette opens a focused tool surface, so remove the primary
+  // sidebar after the panel is revealed. The Activity Bar uses its separate
+  // view provider and intentionally keeps the sidebar visible.
+  void vscode.commands.executeCommand("workbench.action.closeSidebar");
 }
 
 async function chooseAdapter(requestedToolId?: unknown): Promise<ToolAdapter | undefined> {

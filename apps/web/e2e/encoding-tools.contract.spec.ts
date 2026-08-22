@@ -211,20 +211,30 @@ test.describe("encoding tool contracts", () => {
     await expect(page.getByRole("alert")).toContainText('Unknown Morse sequence "......"');
   });
 
-  test("JSON Escape round-trips one JSON string literal and rejects other JSON values", async ({
+  test("JSON Escape escapes text and unescapes both quoted and unquoted strings", async ({
     page,
   }) => {
     await page.goto("/explore/json-escape");
 
-    const input = page.getByRole("textbox", { name: "Plain text" });
-    const output = page.getByRole("textbox", { name: "JSON string literal" });
+    const input = page.getByRole("textbox", { name: /Plain text/i });
+    const output = page.getByRole("textbox", { name: /JSON string literal/i });
     await fillPane(input, 'A\n"🍵"');
     await expectPaneText(output, '"A\\n\\"🍵\\""');
 
-    await page.getByRole("button", { name: "Unescape" }).click();
-    await expectPaneText(input, 'A\n"🍵"');
+    await page.getByRole("button", { name: "Unescape", exact: true }).click();
+    const unescapeInput = page.getByRole("textbox", {
+      name: "Escaped text / JSON",
+      exact: true,
+    });
+    const unescapeOutput = page.getByRole("textbox", {
+      name: "Unescaped text / JSON",
+      exact: true,
+    });
+    await expectPaneText(unescapeInput, '"A\\n\\"🍵\\""');
+    await expectPaneText(unescapeOutput, 'A\n"🍵"');
 
-    await fillPane(output, "42");
-    await expect(page.getByRole("alert")).toContainText("must be a JSON string literal");
+    // Test unquoted escaped JSON
+    await fillPane(unescapeInput, '{\\"name\\": \\"Alice\\", \\"count\\": 42}');
+    await expectPaneText(unescapeOutput, '{"name": "Alice", "count": 42}');
   });
 });
