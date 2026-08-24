@@ -7,7 +7,7 @@ Inputs stay on the device; Kitland has no account requirement, telemetry, or
 default payload persistence.
 
 > **Release status — 0.1.1 candidate.** A public release exists only after the
-> tagged release workflow has published every distribution, deployed the
+> tagged release workflow has published every required distribution, deployed the
 > verified web artifact, and created the GitHub Release. A merged branch, an
 > artifact, or a locally built extension is not a release.
 
@@ -74,20 +74,21 @@ before changing a tool surface.
 | VS Code | Marketplace publisher `kitland` and Open VSX | VSIX smoke/package checks and both store APIs                              |
 | Browser | Chrome Web Store and Firefox AMO             | deterministic ZIPs, manifest/CSP checks, both store APIs                   |
 
-The full release workflow is deliberately all-or-nothing: a missing token,
-rejected store submission, or failed Pages deployment stops before the GitHub
-Release is created. The workflow attaches the produced VSIX, browser ZIPs, and
-MCP tarball to that release.
+The release workflow is all-or-nothing for npm, both browser stores, and the
+web deployment. VS Code Marketplace and Open VSX publish only when their PAT is
+configured; otherwise the workflow warns and continues with the verified VSIX
+attached to the GitHub Release. A rejected configured-store submission still
+stops the release.
 
 Follow the exact setup and release checklist in [RELEASING.md](RELEASING.md).
-It explains where the npm token belongs: its Secret Manager key is `npm-token`
-and the job exposes it only as `NODE_AUTH_TOKEN`; there is no `NPM_TOKEN`
-GitHub secret in this repository.
+The release workflow reads publishing credentials directly from GitHub Actions
+repository secrets. `NPM_TOKEN` is the single npm secret; the job maps it to
+the runtime variable `NODE_AUTH_TOKEN` expected by npm.
 
 ## Cloudflare Pages setup
 
 Create the Pages project once (project name `kitland`, production branch
-`main`), then configure the two production-environment secrets documented in
+`main`), then configure the two repository secrets documented in
 [RELEASING.md](RELEASING.md): `CLOUDFLARE_API_TOKEN` and
 `CLOUDFLARE_ACCOUNT_ID`.
 

@@ -1,13 +1,12 @@
 name: Release
 
 # Unified release pipeline for all Kitland distribution surfaces.
-# - Auth: GitHub OIDC -> Google Cloud Workload Identity Federation (no long-lived keys)
-# - Secrets: store publishing credentials live in GCP Secret Manager, pulled at runtime
+# - Secrets: GitHub Actions repository secrets
 # - npm (MCP): granular-token publishing + provenance
-# - VS Code Marketplace + Open VSX: PATs from Secret Manager
-# - Chrome Web Store + Firefox AMO: deterministic browser artifacts, creds from Secret Manager
+# - VS Code Marketplace + Open VSX: publish when their optional PAT is configured
+# - Chrome Web Store + Firefox AMO: deterministic browser artifacts, creds from GitHub Actions secrets
 # - Cloudflare Pages: deploy the verified static web artifact to production
-# - GitHub: publish an immutable release only after every distribution succeeds
+# - GitHub: publish an immutable release only after every required distribution succeeds
 # Trigger via explicit tag push (Conventional Commits) or manual dispatch.
 
 permissions:
@@ -17,7 +16,6 @@ permissions:
   # though their branch-only conditions skip them for a release tag. GitHub
   # validates those nested job permissions before evaluating conditions.
   deployments: write
-  id-token: write
 
 on:
   push:
@@ -48,9 +46,20 @@ jobs:
       && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    environment:
-      name: production
-      url: https://kitland.dev
+    # Settings -> Secrets and variables -> Actions -> Repository secrets.
+    # GitHub masks these values; only their stable environment names are used below.
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      OVSX_PAT: ${{ secrets.OVSX_PAT }}
+      CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+      CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+      CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+      CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+      WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
+      WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
     steps:
       - name: Checkout
@@ -58,63 +67,37 @@ jobs:
         with:
           fetch-depth: 0
 
-      # --- OIDC -> Google Cloud Workload Identity Federation (no static keys) ---
-      - id: auth
-        name: Authenticate to Google Cloud (WIF)
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-          service_account: ${{ secrets.GCP_SA_EMAIL }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          token_format: access_token
-
-      - name: Set up gcloud CLI
-        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-      # --- Pull all publishing credentials from Secret Manager into the job env ---
-      # Required GCP Secret Manager secrets (per environment):
-      #   chrome-extension-id, chrome-client-id, chrome-client-secret, chrome-refresh-token
-      #   firefox-api-key, firefox-api-secret
-      #   vscode-marketplace-pat, openvsx-pat
-      #   npm-token
-      - name: Pull publishing credentials from Secret Manager
-        run: |
-          sm() { gcloud secrets versions access latest --secret="$1" --project="${{ secrets.GCP_PROJECT_ID }}" 2>/dev/null; }
-          {
-            echo "CHROME_EXTENSION_ID=$(sm chrome-extension-id)"
-            echo "CHROME_CLIENT_ID=$(sm chrome-client-id)"
-            echo "CHROME_CLIENT_SECRET=$(sm chrome-client-secret)"
-            echo "CHROME_REFRESH_TOKEN=$(sm chrome-refresh-token)"
-            echo "WEB_EXT_API_KEY=$(sm firefox-api-key)"
-            echo "WEB_EXT_API_SECRET=$(sm firefox-api-secret)"
-            echo "VSCE_PAT=$(sm vscode-marketplace-pat)"
-            echo "OVSX_PAT=$(sm openvsx-pat)"
-            echo "NODE_AUTH_TOKEN=$(sm npm-token)"
-          } >> "$GITHUB_ENV"
-
-      - name: Require credentials for every public distribution
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Require credentials for required distributions
         run: |
           required=(
-            NODE_AUTH_TOKEN
-            VSCE_PAT OVSX_PAT
-            CHROME_EXTENSION_ID CHROME_CLIENT_ID CHROME_CLIENT_SECRET CHROME_REFRESH_TOKEN
-            WEB_EXT_API_KEY WEB_EXT_API_SECRET
-            CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID
+            NPM_TOKEN:NODE_AUTH_TOKEN
+            CHROME_EXTENSION_ID:CHROME_EXTENSION_ID
+            CHROME_CLIENT_ID:CHROME_CLIENT_ID
+            CHROME_CLIENT_SECRET:CHROME_CLIENT_SECRET
+            CHROME_REFRESH_TOKEN:CHROME_REFRESH_TOKEN
+            WEB_EXT_API_KEY:WEB_EXT_API_KEY WEB_EXT_API_SECRET:WEB_EXT_API_SECRET
+            CLOUDFLARE_API_TOKEN:CLOUDFLARE_API_TOKEN
+            CLOUDFLARE_ACCOUNT_ID:CLOUDFLARE_ACCOUNT_ID
           )
           missing=()
-          for credential in "${required[@]}"; do
-            if [ -z "${!credential:-}" ]; then
-              missing+=("$credential")
+          for mapping in "${required[@]}"; do
+            secret_name="${mapping%%:*}"
+            env_name="${mapping#*:}"
+            if [ -z "${!env_name:-}" ]; then
+              missing+=("$secret_name")
             fi
           done
           if [ "${#missing[@]}" -gt 0 ]; then
-            echo "::error::Full release blocked: missing ${missing[*]}"
+            echo "::error::Full release blocked: missing GitHub repository secrets: ${missing[*]}"
+            echo "::error::Configure them under Settings > Secrets and variables > Actions > Repository secrets."
             exit 1
+          fi
+
+          if [ -z "${VSCE_PAT:-}" ]; then
+            echo "::warning::VSCE_PAT is not configured; skipping VS Code Marketplace publication. The VSIX will still be attached to the GitHub Release."
+          fi
+          if [ -z "${OVSX_PAT:-}" ]; then
+            echo "::warning::OVSX_PAT is not configured; skipping Open VSX publication. The VSIX will still be attached to the GitHub Release."
           fi
 
       - name: Validate release tag and package versions
@@ -216,12 +199,14 @@ jobs:
 
       # --- Publish: VS Code Marketplace + Open VSX ---
       - name: Publish VS Code extension to Marketplace
+        if: env.VSCE_PAT != ''
         run: |
           VSIX="$(ls apps/vscode-extension/artifacts/*.vsix | head -1)"
           echo "Publishing $VSIX to VS Code Marketplace…"
           pnpm exec vsce publish --packagePath "$VSIX" --skip-duplicate
 
       - name: Publish VS Code extension to Open VSX
+        if: env.OVSX_PAT != ''
         run: |
           VSIX="$(ls apps/vscode-extension/artifacts/*.vsix | head -1)"
           echo "Publishing $VSIX to Open VSX…"
@@ -254,9 +239,6 @@ jobs:
 
       # Deploy last: production never advertises a version that failed to publish.
       - name: Deploy verified landing to Cloudflare Pages
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: pnpm exec wrangler pages deploy apps/web/dist --project-name=kitland --branch=main
 
       - name: Create GitHub Release

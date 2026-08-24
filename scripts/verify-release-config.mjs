@@ -47,13 +47,54 @@ requireExact(
 const release = read(".github/workflows/release.yml");
 requireMatch(
   release,
-  /NODE_AUTH_TOKEN=\$\(sm npm-token\)/,
-  "The npm token must be read from the GCP Secret Manager secret named npm-token",
+  /NODE_AUTH_TOKEN:\s*\$\{\{\s*secrets\.NPM_TOKEN\s*\}\}/,
+  "The npm runtime token must be sourced from the NPM_TOKEN GitHub secret",
+);
+const referencedRepositorySecrets = [
+  "NPM_TOKEN",
+  "VSCE_PAT",
+  "OVSX_PAT",
+  "CHROME_EXTENSION_ID",
+  "CHROME_CLIENT_ID",
+  "CHROME_CLIENT_SECRET",
+  "CHROME_REFRESH_TOKEN",
+  "WEB_EXT_API_KEY",
+  "WEB_EXT_API_SECRET",
+  "CLOUDFLARE_API_TOKEN",
+  "CLOUDFLARE_ACCOUNT_ID",
+];
+for (const secret of referencedRepositorySecrets) {
+  requireMatch(
+    release,
+    new RegExp(`secrets\\.${secret}\\b`),
+    `The release workflow must read the ${secret} GitHub repository secret`,
+  );
+}
+if (/Secret Manager|GCP_WIF_PROVIDER|gcloud secrets/.test(release)) {
+  failures.push("The release workflow must not depend on GCP Secret Manager.");
+}
+requireMatch(
+  release,
+  /NPM_TOKEN:NODE_AUTH_TOKEN[\s\S]*CHROME_EXTENSION_ID:CHROME_EXTENSION_ID[\s\S]*WEB_EXT_API_KEY:WEB_EXT_API_KEY[\s\S]*CLOUDFLARE_API_TOKEN:CLOUDFLARE_API_TOKEN/,
+  "The release preflight must require credentials for every required distribution",
+);
+if (/VSCE_PAT:VSCE_PAT|OVSX_PAT:OVSX_PAT/.test(release)) {
+  failures.push("VSCE_PAT and OVSX_PAT must not block the coordinated release.");
+}
+requireMatch(
+  release,
+  /if:\s*env\.VSCE_PAT != ''[\s\S]*if:\s*env\.OVSX_PAT != ''/,
+  "VS Code store publication must run only when its corresponding optional PAT exists",
 );
 requireMatch(
   release,
-  /NODE_AUTH_TOKEN[\s\S]*VSCE_PAT[\s\S]*OVSX_PAT[\s\S]*CHROME_EXTENSION_ID[\s\S]*WEB_EXT_API_KEY[\s\S]*CLOUDFLARE_API_TOKEN/,
-  "The release preflight must require credentials for every public distribution",
+  /VSCE_PAT is not configured; skipping VS Code Marketplace publication[\s\S]*OVSX_PAT is not configured; skipping Open VSX publication/,
+  "Missing optional VS Code store PATs must produce actionable warnings",
+);
+requireMatch(
+  release,
+  /missing GitHub repository secrets:[\s\S]*Settings > Secrets and variables > Actions > Repository secrets/,
+  "The release preflight must report the canonical GitHub secret names and setup location",
 );
 requireMatch(
   release,
