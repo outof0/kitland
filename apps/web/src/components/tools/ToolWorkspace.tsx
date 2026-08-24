@@ -8,7 +8,15 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { CodeEditorProvider } from "@/components/tools/CodeEditorProvider";
 import { navigate } from "astro:transitions/client";
-import { Component, Suspense, useEffect, useCallback, useState, type ReactNode } from "react";
+import {
+  Component,
+  Suspense,
+  createElement,
+  useEffect,
+  useCallback,
+  useState,
+  type ReactNode,
+} from "react";
 
 type ToolWorkspaceProps = {
   slug: string;
@@ -136,7 +144,7 @@ function ToolBySlug({ slug }: { slug: string }) {
 
   return (
     <div className="contents" data-tool-renderer={slug}>
-      <ToolRenderer />
+      {createElement(ToolRenderer)}
     </div>
   );
 }

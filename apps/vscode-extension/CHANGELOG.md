@@ -6,6 +6,8 @@
   once, so CodeMirror tools such as JSON Formatter render correctly.
 - The Activity Bar opens the full Kitland workbench (navigation plus tool);
   Command Palette launches present only the focused editor tool.
+- Publish under the `kitland` Marketplace publisher rather than the owner
+  account namespace.
 
 ## 0.1.0 — Unreleased
 

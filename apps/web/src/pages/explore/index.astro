@@ -8,7 +8,7 @@ const tools = listWebTools();
 const availableToolCount = tools.filter((tool) => tool.status === "available").length;
 const plannedToolCount = tools.length - availableToolCount;
 const description =
-  "Explore Kitland's 64 local-first developer tools. Open every available tool or browse the committed roadmap.";
+  `Explore Kitland's ${tools.length} local-first developer tools. Open every available tool or browse the committed roadmap.`;
 const normalizedSearchValue = (value: string) => value.toLocaleLowerCase();
 const familyGroups = REGISTRY_FAMILIES.map((family) => ({
   ...family,
@@ -105,7 +105,7 @@ const familyGroups = REGISTRY_FAMILIES.map((family) => ({
               Pick the smallest tool that gets the job done.
             </h2>
             <p class="mt-4 text-base leading-7 text-marketing-text-secondary">
-              Search all 65 tools, then filter by family or availability. Available means the tool
+              Search all {tools.length} tools, then filter by family or availability. Available means the tool
               opens a working local editor now. Planned tools remain visible so the product scope
               stays explicit.
             </p>

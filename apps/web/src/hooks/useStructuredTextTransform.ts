@@ -82,13 +82,9 @@ export function useStructuredTextTransform(
   });
 
   useEffect(() => {
-    if (!enabled || query.input.length === 0) {
-      setCompleted((prev) => {
-        if (sameQuery(prev, query) && prev.result === EMPTY_RESULT) return prev;
-        return { ...query, result: EMPTY_RESULT };
-      });
-      return;
-    }
+    // The render path owns empty/disabled state. Mirroring it synchronously in
+    // an effect can turn a stable input into a render loop.
+    if (!enabled || query.input.length === 0) return;
 
     let worker: Worker | undefined;
     let active = true;

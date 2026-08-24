@@ -13,6 +13,7 @@ const UNAVAILABLE_ERROR = {
 
 type Query = { pattern: string; input: string; flags: string };
 type State = { result: ToolResult<RegexTestResult>; isProcessing: boolean };
+type Completed = Query & { state: State };
 
 const EMPTY_MATCHES: RegexTestResult = { matches: [], truncated: false };
 
@@ -25,25 +26,28 @@ const EMPTY_MATCHES: RegexTestResult = { matches: [], truncated: false };
 export function useRegexTester(pattern: string, input: string, flags: string): State {
   const query = useMemo<Query>(() => ({ pattern, input, flags }), [pattern, input, flags]);
   const requestId = useRef(0);
-  const [state, setState] = useState<State>(() => immediateState(query));
+  const [completed, setCompleted] = useState<Completed>(() => ({
+    ...query,
+    state: immediateState(query),
+  }));
 
   useEffect(() => {
     const immediate = immediateState(query);
-    if (!immediate.isProcessing) {
-      setState(immediate);
-      return;
-    }
-
-    setState({ result: { ok: true, value: EMPTY_MATCHES }, isProcessing: true });
+    // Empty inputs are derived when rendering. Storing the same value from an
+    // effect creates a needless render cascade when users clear the editor.
+    if (!immediate.isProcessing) return;
 
     let worker: Worker | undefined;
     let active = true;
     const timer = window.setTimeout(() => {
       if (!active) return;
       if (typeof Worker === "undefined") {
-        setState({
-          result: testRegex(query.pattern, query.input, { flags: query.flags }),
-          isProcessing: false,
+        setCompleted({
+          ...query,
+          state: {
+            result: testRegex(query.pattern, query.input, { flags: query.flags }),
+            isProcessing: false,
+          },
         });
         return;
       }
@@ -52,9 +56,12 @@ export function useRegexTester(pattern: string, input: string, flags: string): S
           type: "module",
         });
       } catch {
-        setState({
-          result: err(UNAVAILABLE_ERROR.code, UNAVAILABLE_ERROR.message),
-          isProcessing: false,
+        setCompleted({
+          ...query,
+          state: {
+            result: err(UNAVAILABLE_ERROR.code, UNAVAILABLE_ERROR.message),
+            isProcessing: false,
+          },
         });
         return;
       }
@@ -65,9 +72,12 @@ export function useRegexTester(pattern: string, input: string, flags: string): S
         if (!active) return;
         active = false;
         worker?.terminate();
-        setState({
-          result: err(UNAVAILABLE_ERROR.code, UNAVAILABLE_ERROR.message),
-          isProcessing: false,
+        setCompleted({
+          ...query,
+          state: {
+            result: err(UNAVAILABLE_ERROR.code, UNAVAILABLE_ERROR.message),
+            isProcessing: false,
+          },
         });
       };
       worker.addEventListener("message", (event: MessageEvent<unknown>) => {
@@ -79,7 +89,7 @@ export function useRegexTester(pattern: string, input: string, flags: string): S
         if (event.data.id !== id) return;
         active = false;
         worker?.terminate();
-        setState({ result: event.data.result, isProcessing: false });
+        setCompleted({ ...query, state: { result: event.data.result, isProcessing: false } });
       });
       worker.addEventListener("error", fail);
       worker.addEventListener("messageerror", fail);
@@ -105,7 +115,11 @@ export function useRegexTester(pattern: string, input: string, flags: string): S
     };
   }, [query]);
 
-  return state;
+  return sameQuery(completed, query) ? completed.state : immediateState(query);
+}
+
+function sameQuery(left: Query, right: Query): boolean {
+  return left.pattern === right.pattern && left.input === right.input && left.flags === right.flags;
 }
 
 function immediateState(query: Query): State {

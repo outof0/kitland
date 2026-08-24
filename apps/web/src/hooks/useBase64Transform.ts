@@ -22,10 +22,6 @@ type CompletedTransform = TransformQuery &
     result: ToolResult<string>;
   };
 
-type PendingTransform = TransformQuery & {
-  id: number;
-};
-
 export type Base64TransformState = {
   result: ToolResult<string>;
   outputByteLength: number;
@@ -61,16 +57,17 @@ const TRANSFORM_DEBOUNCE_MS = 100;
 const EMPTY_RESULT: ToolResult<string> = { ok: true, value: "" };
 const EMPTY_METADATA: TransformMetadata = { outputByteLength: 0, inputLineCount: null };
 
-/** Replace a busy worker because its synchronous codec cannot process cancellation messages. */
+/**
+ * Runs a worker per settled edit. Cleanup terminates the previous worker, so a
+ * stale result can never replace the current query and React state changes are
+ * only made by timer or worker callbacks.
+ */
 export function useBase64Transform(
   mode: Base64Mode,
   input: string,
   { enabled, urlSafe }: Base64TransformOptions,
 ): Base64TransformState {
   const query = useMemo<TransformQuery>(() => ({ mode, input, urlSafe }), [input, mode, urlSafe]);
-  const queryRef = useRef(query);
-  queryRef.current = query;
-
   const [completed, setCompleted] = useState<CompletedTransform>(() => {
     const result = initialResult(mode, input, urlSafe);
     return {
@@ -80,146 +77,57 @@ export function useBase64Transform(
       inputLineCount: countBase64InputLines(input),
     };
   });
-  const [workerState, setWorkerState] = useState<"idle" | "starting" | "ready" | "failed">(
-    "starting",
-  );
-  const [workerGeneration, setWorkerGeneration] = useState(0);
-  const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
-  const latestRequestRef = useRef<PendingTransform | null>(null);
-  const debounceRef = useRef<number | null>(null);
 
   useEffect(() => {
-    setWorkerState("starting");
-    if (typeof Worker === "undefined") {
-      setWorkerState("failed");
-      return;
-    }
-
-    let worker: Worker;
-    try {
-      worker = new Worker(new URL("../workers/base64.worker.ts", import.meta.url), {
-        type: "module",
-      });
-    } catch {
-      setWorkerState("failed");
-      return;
-    }
-
-    const failWorker = (failure: WorkerFailure) => {
-      if (workerRef.current !== worker) return;
-
-      worker.terminate();
-      workerRef.current = null;
-      setWorkerState("failed");
-
-      const pending = latestRequestRef.current;
-      latestRequestRef.current = null;
-      if (pending && sameQuery(pending, queryRef.current)) {
-        setCompleted(toCompleted(pending, err(failure.code, failure.message)));
-      }
-    };
-
-    worker.addEventListener("message", (event: MessageEvent<unknown>) => {
-      if (!isBase64WorkerResponse(event.data)) {
-        failWorker(WORKER_FAILURES.protocol);
-        return;
-      }
-
-      const pending = latestRequestRef.current;
-      if (!pending || pending.id !== event.data.id || !sameQuery(pending, queryRef.current)) {
-        return;
-      }
-
-      latestRequestRef.current = null;
-      setCompleted(
-        toCompleted(pending, event.data.result, {
-          outputByteLength: event.data.outputByteLength,
-          inputLineCount: event.data.inputLineCount,
-        }),
-      );
-    });
-    worker.addEventListener("error", () => failWorker(WORKER_FAILURES.runtime));
-    worker.addEventListener("messageerror", () => failWorker(WORKER_FAILURES.message));
-
-    workerRef.current = worker;
-    setWorkerState("ready");
-
-    return () => {
-      if (workerRef.current === worker) {
-        workerRef.current = null;
-      }
-      worker.terminate();
-    };
-  }, [workerGeneration]);
-
-  useEffect(() => {
-    const pending = latestRequestRef.current;
-    if (pending && !sameQuery(pending, query)) {
-      latestRequestRef.current = null;
-      const worker = workerRef.current;
-      if (worker) {
-        workerRef.current = null;
-        worker.terminate();
-      }
-      if (debounceRef.current !== null) {
-        window.clearTimeout(debounceRef.current);
-        debounceRef.current = null;
-      }
-      if (!enabled || query.input.length === 0) {
-        setWorkerState("idle");
-        return;
-      }
-      setWorkerState("starting");
-      setWorkerGeneration((generation) => generation + 1);
-      return;
-    }
-
-    // Handle rapid edits that arrive before debounce fires (pending is still null)
-    // but completed is already stale. Must still replace the worker so stale work
-    // never becomes current and terminations are observable in e2e.
-    if (!pending && !sameQuery(completed, query) && enabled && query.input.length > 0) {
-      const hasDebounce = debounceRef.current !== null;
-      if (hasDebounce) {
-        window.clearTimeout(debounceRef.current!);
-        debounceRef.current = null;
-        const worker = workerRef.current;
-        if (worker) {
-          workerRef.current = null;
-          worker.terminate();
-        }
-        setWorkerState("starting");
-        setWorkerGeneration((generation) => generation + 1);
-        return;
-      }
-    }
-
     if (!enabled || query.input.length === 0 || sameQuery(completed, query)) {
       return;
     }
 
-    if (workerState === "idle") {
-      setWorkerState("starting");
-      setWorkerGeneration((generation) => generation + 1);
-      return;
-    }
-
-    if (workerState === "failed") {
-      setCompleted(toCompleted(query, err("WORKER_UNAVAILABLE", WORKER_UNAVAILABLE_MESSAGE)));
-      return;
-    }
-
-    const worker = workerRef.current;
-    if (workerState !== "ready" || !worker) return;
-
-    const timeout = window.setTimeout(() => {
-      debounceRef.current = null;
-      if (workerRef.current !== worker || !sameQuery(queryRef.current, query)) {
+    let worker: Worker | undefined;
+    let active = true;
+    const timer = window.setTimeout(() => {
+      if (!active) return;
+      if (typeof Worker === "undefined") {
+        setCompleted(toCompleted(query, err("WORKER_UNAVAILABLE", WORKER_UNAVAILABLE_MESSAGE)));
+        return;
+      }
+      try {
+        worker = new Worker(new URL("../workers/base64.worker.ts", import.meta.url), {
+          type: "module",
+        });
+      } catch {
+        setCompleted(toCompleted(query, err("WORKER_UNAVAILABLE", WORKER_UNAVAILABLE_MESSAGE)));
         return;
       }
 
-      const id = requestIdRef.current + 1;
+      const id = requestIdRef.current === Number.MAX_SAFE_INTEGER ? 1 : requestIdRef.current + 1;
       requestIdRef.current = id;
+      const fail = (failure: WorkerFailure) => {
+        if (!active) return;
+        active = false;
+        worker?.terminate();
+        setCompleted(toCompleted(query, err(failure.code, failure.message)));
+      };
+      worker.addEventListener("message", (event: MessageEvent<unknown>) => {
+        if (!active) return;
+        if (!isBase64WorkerResponse(event.data) || event.data.id !== id) {
+          fail(WORKER_FAILURES.protocol);
+          return;
+        }
+
+        active = false;
+        worker?.terminate();
+        setCompleted(
+          toCompleted(query, event.data.result, {
+            outputByteLength: event.data.outputByteLength,
+            inputLineCount: event.data.inputLineCount,
+          }),
+        );
+      });
+      worker.addEventListener("error", () => fail(WORKER_FAILURES.runtime));
+      worker.addEventListener("messageerror", () => fail(WORKER_FAILURES.message));
+
       const request: Base64WorkerRequest = {
         type: "transform",
         id,
@@ -227,23 +135,19 @@ export function useBase64Transform(
         input: query.input,
         urlSafe: query.urlSafe,
       };
-      const nextPending: PendingTransform = { ...query, id };
-      latestRequestRef.current = nextPending;
-
       try {
         worker.postMessage(request);
       } catch {
-        latestRequestRef.current = null;
-        setCompleted(toCompleted(query, err("WORKER_POST_FAILED", WORKER_UNAVAILABLE_MESSAGE)));
+        fail(WORKER_FAILURES.message);
       }
     }, TRANSFORM_DEBOUNCE_MS);
-    debounceRef.current = timeout;
 
     return () => {
-      window.clearTimeout(timeout);
-      if (debounceRef.current === timeout) debounceRef.current = null;
+      active = false;
+      window.clearTimeout(timer);
+      worker?.terminate();
     };
-  }, [completed, enabled, query, workerState]);
+  }, [completed, enabled, query]);
 
   if (query.input.length === 0) {
     return {

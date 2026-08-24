@@ -37,7 +37,9 @@
     "quality:check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm audit --audit-level=high && pnpm build && pnpm --filter @kitland/web bundle:check && pnpm --filter @kitland/web seo:check && pnpm package:check && pnpm test:e2e",
     "release:verify": "pnpm --filter @kitland/tools release:verify",
     "release:verify:rollout": "KITLAND_RELEASE_PLATFORM=web pnpm --filter @kitland/tools release:verify:rollout",
+    "release:config:check": "node ./scripts/verify-release-config.mjs",
     "release:check": "pnpm quality:check && pnpm release:verify && pnpm artifacts:check",
+    "release:preflight": "pnpm release:check && pnpm test:integration:vscode && pnpm release:config:check",
     "release:check:rollout": "pnpm quality:check && pnpm release:verify:rollout && pnpm --filter @kitland/web rollout:artifact:check && pnpm --filter @kitland/web test:e2e:rollout",
     "preview": "pnpm --filter @kitland/web preview",
     "pages:deploy": "pnpm release:check && wrangler pages deploy apps/web/dist --project-name=kitland",
@@ -45,9 +47,9 @@
     "pages:dev": "pnpm build:web && wrangler pages dev apps/web/dist"
   },
   "devDependencies": {
-    "oxfmt": "^0.62.0",
-    "oxlint": "^1.77.0",
-    "wrangler": "^4.28.0"
+    "oxfmt": "^0.64.0",
+    "oxlint": "^1.79.0",
+    "wrangler": "^4.125.0"
   },
   "engines": {
     "node": ">=22.12.0"

@@ -20,7 +20,6 @@
     "noUncheckedSideEffectImports": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
       "@kitland/core": ["../../packages/core/src/index.ts"],
       "@kitland/ui/registry": ["../../packages/ui/src/tools/shared-registry-tools.tsx"],

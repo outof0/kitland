@@ -41,6 +41,17 @@ function getRandomBytes(length: number): Uint8Array {
   return bytes;
 }
 
+/**
+ * WebCrypto does not accept a view backed by SharedArrayBuffer. The bounded
+ * core contracts intentionally use general Uint8Array values, so copy them
+ * into an ordinary ArrayBuffer at this host boundary.
+ */
+function toWebCryptoBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer;
+}
+
 // ---------------------------------------------------------------------------
 // SHA Hash
 // ---------------------------------------------------------------------------
@@ -97,7 +108,8 @@ export const kitlandShaHashExposure: McpExposure<ShaHashInput, ShaHashOutput> = 
     const encoding: ShaHashEncoding = args.encoding ?? "hex";
     const res = await hashSha256(
       args.input,
-      async (_alg, data) => new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", data)),
+      async (_alg, data) =>
+        new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", toWebCryptoBuffer(data))),
       { encoding },
     );
     if (!res.ok) return res;
@@ -160,12 +172,16 @@ export const kitlandHmacGenerateExposure: McpExposure<HmacInput, HmacOutput> = {
     const res = await signHmacSha256(args.secret, args.message, async (key, msg) => {
       const cryptoKey = await globalThis.crypto.subtle.importKey(
         "raw",
-        key,
+        toWebCryptoBuffer(key),
         { name: "HMAC", hash: "SHA-256" },
         false,
         ["sign"],
       );
-      const signature = await globalThis.crypto.subtle.sign("HMAC", cryptoKey, msg);
+      const signature = await globalThis.crypto.subtle.sign(
+        "HMAC",
+        cryptoKey,
+        toWebCryptoBuffer(msg),
+      );
       return new Uint8Array(signature);
     });
     if (!res.ok) return res;
@@ -180,24 +196,32 @@ export const kitlandHmacGenerateExposure: McpExposure<HmacInput, HmacOutput> = {
 
 const hostAes = {
   async encrypt(key: Uint8Array, nonce: Uint8Array, text: Uint8Array): Promise<Uint8Array> {
-    const cryptoKey = await globalThis.crypto.subtle.importKey("raw", key, "AES-GCM", false, [
-      "encrypt",
-    ]);
+    const cryptoKey = await globalThis.crypto.subtle.importKey(
+      "raw",
+      toWebCryptoBuffer(key),
+      "AES-GCM",
+      false,
+      ["encrypt"],
+    );
     const encrypted = await globalThis.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: nonce },
+      { name: "AES-GCM", iv: toWebCryptoBuffer(nonce) },
       cryptoKey,
-      text,
+      toWebCryptoBuffer(text),
     );
     return new Uint8Array(encrypted);
   },
   async decrypt(key: Uint8Array, nonce: Uint8Array, ciphertext: Uint8Array): Promise<Uint8Array> {
-    const cryptoKey = await globalThis.crypto.subtle.importKey("raw", key, "AES-GCM", false, [
-      "decrypt",
-    ]);
+    const cryptoKey = await globalThis.crypto.subtle.importKey(
+      "raw",
+      toWebCryptoBuffer(key),
+      "AES-GCM",
+      false,
+      ["decrypt"],
+    );
     const decrypted = await globalThis.crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: nonce },
+      { name: "AES-GCM", iv: toWebCryptoBuffer(nonce) },
       cryptoKey,
-      ciphertext,
+      toWebCryptoBuffer(ciphertext),
     );
     return new Uint8Array(decrypted);
   },
