@@ -12,6 +12,9 @@ name: Release
 permissions:
   # Create the GitHub Release only after every external distribution has passed.
   contents: write
+  # npm provenance exchanges GitHub's OIDC token for a signed registry attestation.
+  # This permission does not restore the removed external secret-store integration.
+  id-token: write
   # The reusable CI contract declares its Cloudflare deployment jobs even
   # though their branch-only conditions skip them for a release tag. GitHub
   # validates those nested job permissions before evaluating conditions.

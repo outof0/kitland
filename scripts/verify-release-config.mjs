@@ -47,6 +47,11 @@ requireExact(
 const release = read(".github/workflows/release.yml");
 requireMatch(
   release,
+  /permissions:\s*[\s\S]*?id-token:\s*write/,
+  "The release workflow must grant id-token write for npm provenance",
+);
+requireMatch(
+  release,
   /NODE_AUTH_TOKEN:\s*\$\{\{\s*secrets\.NPM_TOKEN\s*\}\}/,
   "The npm runtime token must be sourced from the NPM_TOKEN GitHub secret",
 );
