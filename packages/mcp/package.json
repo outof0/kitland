@@ -4,13 +4,13 @@
   "description": "Local-only Model Context Protocol (MCP) server for Kitland developer tools, with deterministic transforms and explicit generators.",
   "homepage": "https://kitland.dev",
   "bugs": {
-    "url": "https://github.com/OutOf0/kitland/issues"
+    "url": "https://github.com/outof0/kitland/issues"
   },
   "license": "MIT",
   "author": "OutOf0 <hello.outof0@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OutOf0/kitland.git",
+    "url": "git+https://github.com/outof0/kitland.git",
     "directory": "packages/mcp"
   },
   "bin": {

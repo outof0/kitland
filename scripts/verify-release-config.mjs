@@ -43,6 +43,11 @@ requireExact(
   "kitland",
   "The VS Code Marketplace publisher must be Kitland",
 );
+requireExact(
+  manifests.find(({ path }) => path === "packages/mcp/package.json").json.repository?.url,
+  "git+https://github.com/outof0/kitland.git",
+  "The MCP repository URL must exactly match the canonical GitHub repository for npm provenance",
+);
 
 const release = read(".github/workflows/release.yml");
 requireMatch(
