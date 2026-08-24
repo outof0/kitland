@@ -17,12 +17,12 @@
   ],
   "homepage": "https://kitland.dev",
   "bugs": {
-    "url": "https://github.com/OutOf0/kitland/issues"
+    "url": "https://github.com/outof0/kitland/issues"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OutOf0/kitland.git",
+    "url": "https://github.com/outof0/kitland.git",
     "directory": "apps/vscode-extension"
   },
   "publisher": "kitland",

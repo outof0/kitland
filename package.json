@@ -5,14 +5,14 @@
   "description": "Kitland — everyday developer tools, in one place. Tools out. Work on.",
   "homepage": "https://kitland.dev",
   "bugs": {
-    "url": "https://github.com/OutOf0/kitland/issues",
+    "url": "https://github.com/outof0/kitland/issues",
     "email": "hello.outof0@gmail.com"
   },
   "license": "MIT",
   "author": "OutOf0 <hello.outof0@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OutOf0/kitland.git"
+    "url": "git+https://github.com/outof0/kitland.git"
   },
   "scripts": {
     "dev": "pnpm --filter @kitland/web dev",

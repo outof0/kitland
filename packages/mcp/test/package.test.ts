@@ -18,7 +18,7 @@ describe("Package Manifest & Artifact Constraints", () => {
     expect(pkgJson.dependencies["@modelcontextprotocol/sdk"]).toBe("1.30.0");
     expect(pkgJson.publishConfig?.access).toBe("public");
     expect(pkgJson.publishConfig?.provenance).toBe(true);
-    expect(pkgJson.repository?.url).toBe("git+https://github.com/OutOf0/kitland.git");
+    expect(pkgJson.repository?.url).toBe("git+https://github.com/outof0/kitland.git");
   });
 
   it("ensures bundled CLI artifact meets size budgets if built", async () => {

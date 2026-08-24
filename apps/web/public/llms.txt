@@ -5,7 +5,7 @@
 Kitland is a privacy-first workbench for developers who handle sensitive text, configuration, and payloads. Every transformation runs in the current browser via Web Workers or deterministic pure functions in `@kitland/core` — no payload upload, no telemetry, no persistence by default.
 
 - **Canonical origin:** https://kitland.dev
-- **Source:** https://github.com/OutOf0/kitland (MIT)
+- **Source:** https://github.com/outof0/kitland (MIT)
 - **Sitemap:** https://kitland.dev/sitemap-index.xml
 - **Explore registry:** https://kitland.dev/explore
 
@@ -41,7 +41,7 @@ Full registry and live status: https://kitland.dev/explore
 
 ## Contact & policy
 
-- **Bugs / feature requests:** https://github.com/OutOf0/kitland/issues
+- **Bugs / feature requests:** https://github.com/outof0/kitland/issues
 - **Security (private):** hello.outof0@gmail.com — see `SECURITY.md` (do not open public issue for vuln)
 - **License:** MIT
 - **Privacy:** No payload leaves the device; see tool-specific FAQ “Does Kitland upload my input?”
