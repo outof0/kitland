@@ -102,31 +102,37 @@ Pushing `v*` re-runs the reusable `ci.yml` quality gate (lint, typecheck, test, 
 
 ### Publishing (all gated by credentials + duplicate detection)
 
-- **npm (`@kitland/mcp`)** – the workflow reads the raw granular token from
-  GCP Secret Manager secret **`npm-token`** and exports it at runtime as
-  **`NODE_AUTH_TOKEN`**. It does **not** read a GitHub secret or environment
-  variable named `NPM_TOKEN`. The token holder must have package-and-scope
+- **npm (`@kitland/mcp`)** – the workflow reads the GitHub Actions
+  **`NPM_TOKEN`** repository secret and exposes it as **`NODE_AUTH_TOKEN`** for
+  npm. The token holder must have package-and-scope
   **Read and write** access to `@kitland` and must enable **Bypass 2FA** for
   non-interactive direct publishing. The workflow compares `dist.integrity`
   before publishing and uses npm provenance. Configure npm trusted publishing
   after the first successful package release, then remove this token path in a
   dedicated security change.
-- **VS Code Marketplace** – publisher ID `kitland` and `VSCE_PAT` (Azure DevOps PAT, Marketplace Manage). `vsce publish --skip-duplicate`.
-- **Open VSX** – `OVSX_PAT`. `ovsx publish --skip-duplicate`.
+- **VS Code Marketplace** – optional for the initial release. When `VSCE_PAT`
+  exists, publish under publisher ID `kitland` with
+  `vsce publish --skip-duplicate`; otherwise warn, skip the store, and retain
+  the verified VSIX in the GitHub Release.
+- **Open VSX** – optional for the initial release. When `OVSX_PAT` exists,
+  publish with `ovsx publish --skip-duplicate`; otherwise warn, skip the store,
+  and retain the verified VSIX in the GitHub Release.
 - **Chrome Web Store** – `CHROME_EXTENSION_ID`, `CHROME_CLIENT_ID`, `CHROME_CLIENT_SECRET`, `CHROME_REFRESH_TOKEN` via `chrome-webstore-upload-cli`.
 - **Firefox AMO** – `WEB_EXT_API_KEY`, `WEB_EXT_API_SECRET` via `web-ext sign`.
 - **Cloudflare Pages** – `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`; deployment to the `main` production branch happens only after every store publish succeeds.
 
-Every credential is required for a complete release. Missing credentials, a rejected
-store submission, or a failed Cloudflare deployment fails the workflow before a
-GitHub Release is created. This prevents a green run from representing a partial
-release.
+Credentials for npm, Chrome, Firefox, and Cloudflare are required. `VSCE_PAT`
+and `OVSX_PAT` are optional: a missing PAT skips only that store, while a
+configured store that rejects publication still fails the workflow. Any missing
+required credential, rejected configured-store submission, or failed Cloudflare
+deployment stops the workflow before a GitHub Release is created.
 
 ### GitHub Release
 
 On tag push or manual dispatch from `main`, the workflow creates `gh release create
-vX.Y.Z` only after npm, both VS Code stores, both browser stores, and Cloudflare
-Pages succeed. It attaches the deterministic artifacts with `--generate-notes`.
+vX.Y.Z` only after npm, both browser stores, Cloudflare Pages, and every
+configured VS Code store succeed. It attaches the deterministic artifacts with
+`--generate-notes`.
 Artifact upload (`retention 30d`) runs even on failure to support diagnosis; it is
 not a release.
 
@@ -137,31 +143,40 @@ not a release.
    → **Generate New Token**, create a granular, short-lived release token:
    packages and scopes **Read and write**, restricted to `@kitland`, with
    **Bypass 2FA** enabled. Copy it once.
-2. Store that raw value in Google Cloud Secret Manager under the exact name
-   **`npm-token`**. Do not put it in `.npmrc`, a local shell profile, the Git
-   repository, or a GitHub `NPM_TOKEN` secret. The release job maps it to
-   `NODE_AUTH_TOKEN` only for the npm publish step.
-3. Keep publishing credentials in the following locations. The release job
-   checks that every value is present before it packages or contacts a store;
-   permission and ownership are then verified by the real store API.
+2. Store that raw value under repository **Settings → Secrets and variables →
+   Actions → Repository secrets** as **`NPM_TOKEN`**. Do not put it in `.npmrc`,
+   a local shell profile, or the Git repository. The release job maps it to
+   `NODE_AUTH_TOKEN` only for npm.
+3. Keep every publishing credential in GitHub Actions repository secrets. The
+   release job checks that every value is present before it packages or contacts
+   a store; permission and ownership are then verified by the real store API.
 
 ```
-GCP Secret Manager
-  npm-token                # raw npm granular token, mapped to NODE_AUTH_TOKEN
-  vscode-marketplace-pat   # belongs to the Kitland Marketplace publisher
-  openvsx-pat
-  chrome-extension-id, chrome-client-id, chrome-client-secret, chrome-refresh-token
-  firefox-api-key, firefox-api-secret
-
-GitHub Actions production environment secrets
-  GCP_WIF_PROVIDER, GCP_SA_EMAIL, GCP_PROJECT_ID
+GitHub Actions repository secrets
+  NPM_TOKEN                # raw npm granular token
+  VSCE_PAT                 # optional; Kitland Marketplace publisher
+  OVSX_PAT                 # optional; Kitland Open VSX namespace
+  CHROME_EXTENSION_ID, CHROME_CLIENT_ID, CHROME_CLIENT_SECRET, CHROME_REFRESH_TOKEN
+  WEB_EXT_API_KEY, WEB_EXT_API_SECRET
   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
 ```
 
-The `kitland` VS Code Marketplace publisher must already exist and the user
-who created `vscode-marketplace-pat` must have its Marketplace **Manage**
-permission. Renaming `publisher` in `package.json` does not create or transfer
-publisher ownership.
+Create **`VSCE_PAT`** in Azure DevOps: User settings → Personal access tokens →
+New Token → Organization **All accessible organizations** → Scopes **Custom
+defined** → Show all scopes → **Marketplace: Manage**. The same Microsoft
+account must belong to the existing Marketplace publisher ID `kitland`. See the
+[official VS Code publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension).
+
+Create **`OVSX_PAT`** after signing the Publisher Agreement on open-vsx.org:
+avatar → Settings → Access Tokens → Generate New Token. The account must be a
+member of the `kitland` namespace; create it once with
+`npx ovsx create-namespace kitland -p <token>` if it does not exist. See the
+[official Open VSX publishing guide](https://github.com/eclipse-openvsx/openvsx/wiki/Publishing-Extensions).
+
+Renaming `publisher` in `package.json` does not create or transfer publisher or
+namespace ownership. `AMO_JWT_ISSUER`, `AMO_JWT_SECRET`, and a GitHub secret
+named `NODE_AUTH_TOKEN` are not used by this workflow; the canonical names are
+`WEB_EXT_API_KEY`, `WEB_EXT_API_SECRET`, and `NPM_TOKEN`.
 
 ## Shared package publication
 
