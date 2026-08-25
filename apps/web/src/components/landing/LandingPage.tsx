@@ -706,6 +706,7 @@ export function LandingPage() {
                 href: "https://github.com/outof0/kitland/blob/HEAD/CHANGELOG.md",
                 label: "Changelog",
               },
+              { href: "/privacy", label: "Privacy policy" },
               { href: "https://github.com/outof0/kitland/blob/HEAD/LICENSE", label: "MIT license" },
             ]}
           />

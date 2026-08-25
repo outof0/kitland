@@ -278,10 +278,17 @@ const familyGroups = REGISTRY_FAMILIES.map((family) => ({
     <footer class="border-t border-marketing-border px-4 py-8 sm:px-8">
       <div class="mx-auto flex w-full max-w-[1248px] flex-col gap-4 text-sm sm:flex-row sm:items-center sm:justify-between">
         <p class="text-marketing-text-muted">Kitland · tools that keep data on your device</p>
-        <a
-          href="/"
-          class="min-h-11 rounded-sm py-3 font-semibold text-marketing-text-secondary transition-colors hover:text-marketing-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-marketing-primary-light"
-        >Back to overview</a>
+        <div class="flex items-center gap-4">
+          <a
+            href="/"
+            class="min-h-11 rounded-sm py-3 font-semibold text-marketing-text-secondary transition-colors hover:text-marketing-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-marketing-primary-light"
+          >Back to overview</a>
+          <span class="text-marketing-border">·</span>
+          <a
+            href="/privacy"
+            class="min-h-11 rounded-sm py-3 font-semibold text-marketing-text-secondary transition-colors hover:text-marketing-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-marketing-primary-light"
+          >Privacy</a>
+        </div>
       </div>
     </footer>
   </div>
