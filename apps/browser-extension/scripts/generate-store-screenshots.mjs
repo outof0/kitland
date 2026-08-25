@@ -29,17 +29,29 @@ function startServer(port = 43820) {
   };
 
   const server = http.createServer((req, res) => {
-    let reqPath = req.url.split("?")[0].split("#")[0];
-    if (reqPath === "/" || reqPath === "") reqPath = "/popup.html";
+    const rawPath = (req.url ?? "").split("?")[0].split("#")[0];
+    const normalizedPath = path.normalize(rawPath).replace(/^(\.\.[/\\])+/, "");
+    const cleanPath =
+      normalizedPath === "/" || normalizedPath === "" ? "/popup.html" : normalizedPath;
 
-    const filePath = path.join(distDir, reqPath);
-    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-      const ext = path.extname(filePath);
+    const resolvedPath = path.resolve(
+      distDir,
+      "." + (cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`),
+    );
+
+    if (!resolvedPath.startsWith(distDir)) {
+      res.writeHead(403);
+      res.end("Forbidden");
+      return;
+    }
+
+    if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isFile()) {
+      const ext = path.extname(resolvedPath);
       res.writeHead(200, { "Content-Type": mimeTypes[ext] || "application/octet-stream" });
-      fs.createReadStream(filePath).pipe(res);
+      fs.createReadStream(resolvedPath).pipe(res);
     } else {
-      const fallback = path.join(distDir, "popup.html");
-      if (fs.existsSync(fallback)) {
+      const fallback = path.resolve(distDir, "popup.html");
+      if (fs.existsSync(fallback) && fs.statSync(fallback).isFile()) {
         res.writeHead(200, { "Content-Type": "text/html" });
         fs.createReadStream(fallback).pipe(res);
       } else {
