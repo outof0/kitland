@@ -19,6 +19,7 @@
     "package:chrome": "pnpm build && node ./scripts/create-zip.mjs && node ./scripts/verify-package.mjs --archive",
     "package:firefox": "pnpm build && node ./scripts/create-browser-artifacts.mjs && node ./scripts/verify-package.mjs --archive",
     "package:all": "pnpm build && node ./scripts/create-browser-artifacts.mjs && node ./scripts/verify-package.mjs --archive",
+    "screenshots": "node ./scripts/generate-store-screenshots.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm package:check && pnpm test:smoke"
   },
   "dependencies": {

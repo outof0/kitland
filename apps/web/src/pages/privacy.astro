@@ -1,0 +1,219 @@
+---
+import { Logo } from "@/components/Logo";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const description =
+  "Kitland Privacy Policy — Local-first developer tools with zero payload collection, zero tracking SDKs, and no accounts required.";
+---
+
+<BaseLayout
+  title="Privacy Policy — Kitland"
+  description={description}
+  canonicalPath="/privacy"
+  structuredData={{
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Kitland Privacy Policy",
+    url: "https://kitland.dev/privacy",
+    description,
+  }}
+>
+  <div class="min-h-screen overflow-x-hidden bg-marketing-canvas text-marketing-foreground">
+    <a
+      href="#privacy-main"
+      class="sr-only fixed left-4 top-4 z-50 min-h-11 rounded-md bg-marketing-primary px-4 py-3 text-sm font-semibold text-white focus:not-sr-only"
+    >
+      Skip to content
+    </a>
+
+    <header class="border-b border-marketing-border bg-marketing-canvas">
+      <nav
+        class="mx-auto flex min-h-16 w-full max-w-[1248px] items-center justify-between gap-3 px-4 sm:px-8"
+        aria-label="Navigation"
+      >
+        <a href="/" aria-label="Kitland home" class="flex min-h-11 items-center rounded-sm">
+          <Logo variant="reverse" className="h-9" />
+        </a>
+        <div class="flex items-center gap-3">
+          <a
+            href="/"
+            class="relative flex min-h-11 items-center rounded-sm px-2 text-sm font-medium text-marketing-text-secondary transition-colors hover:text-marketing-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-marketing-primary-light after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-marketing-primary after:transition-transform motion-safe:hover:after:scale-x-100"
+          >Home</a>
+          <a
+            href="/explore"
+            class="inline-flex h-10 min-h-11 items-center justify-center gap-2 rounded-md border border-marketing-border-strong bg-marketing-surface px-3 text-sm font-semibold text-marketing-foreground transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out hover:border-marketing-border-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marketing-primary-light motion-safe:hover:-translate-y-px motion-safe:active:scale-[0.985] sm:px-4"
+          >
+            Browse tools
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="privacy-main" tabindex="-1" class="px-4 py-12 sm:px-8 lg:py-16">
+      <div class="mx-auto max-w-[800px]">
+        <div class="border-b border-marketing-border pb-8">
+          <p class="font-mono text-xs font-semibold tracking-[0.18em] text-marketing-primary-light">
+            SECURITY & DATA GOVERNANCE
+          </p>
+          <h1 class="mt-4 font-display text-4xl font-extrabold tracking-[-0.04em] text-white sm:text-5xl">
+            Privacy Policy
+          </h1>
+          <p class="mt-3 font-mono text-xs text-marketing-text-muted">
+            Last updated: August 25, 2026 · Version 1.0
+          </p>
+          <p class="mt-6 text-base leading-7 text-marketing-text-secondary sm:text-lg">
+            Kitland is built on a simple premise: your code, API keys, tokens, and data payloads belong exclusively to you. We design every tool to execute locally on your device with no payload uploads and zero tracking SDKs.
+          </p>
+        </div>
+
+        <div class="mt-10 space-y-12 text-marketing-text-secondary">
+          <section aria-labelledby="section-collection">
+            <h2 id="section-collection" class="text-2xl font-bold text-white">
+              1. Zero Payload Collection & Storage
+            </h2>
+            <div class="mt-4 space-y-3 text-base leading-7">
+              <p>
+                <strong class="text-white">No Payload Logging:</strong> Kitland does not collect, record, log, transmit, or store any text, code, JSON payloads, API keys, hashes, tokens, or files you input into any tool.
+              </p>
+              <p>
+                <strong class="text-white">No User Accounts:</strong> Kitland does not require accounts, logins, email addresses, or user profiles.
+              </p>
+              <p>
+                <strong class="text-white">No In-App Tracking SDKs:</strong> Kitland does not embed third-party behavioral tracking libraries (such as Mixpanel, Hotjar, or session recorders) inside the tool application.
+              </p>
+            </div>
+          </section>
+
+          <section aria-labelledby="section-execution">
+            <h2 id="section-execution" class="text-2xl font-bold text-white">
+              2. 100% Client-Side & Local Execution
+            </h2>
+            <div class="mt-4 space-y-3 text-base leading-7">
+              <p>
+                All transformations, formatters, cryptographic algorithms, regex testers, and data converters run entirely client-side inside your browser tab or local Web Workers.
+              </p>
+              <p>
+                No payload network requests are dispatched during tool execution. Tools operate completely offline without requiring an active internet connection.
+              </p>
+            </div>
+          </section>
+
+          <section aria-labelledby="section-extension">
+            <h2 id="section-extension" class="text-2xl font-bold text-white">
+              3. Browser Extension & Permissions Boundary
+            </h2>
+            <div class="mt-4 space-y-3 text-base leading-7">
+              <p>
+                The Kitland Browser Extension operates under a strict zero-permission model:
+              </p>
+              <ul class="list-disc space-y-2 pl-6">
+                <li><strong class="text-white">No Permissions:</strong> Declares <code>permissions: []</code> and <code>host_permissions: []</code> in <code>manifest.json</code>.</li>
+                <li><strong class="text-white">No Website Access:</strong> Does not inject content scripts or access web pages you browse.</li>
+                <li><strong class="text-white">No Background Network Activity:</strong> Contains no background tracking service workers or remote code loading.</li>
+                <li><strong class="text-white">Store-Level Metrics:</strong> Aggregated usage statistics (such as total installs, active extension users, and crash reports) are provided anonymously by the Chrome Web Store Developer Console at the platform level without any telemetry code embedded in the extension itself.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section aria-labelledby="section-sharing">
+            <h2 id="section-sharing" class="text-2xl font-bold text-white">
+              4. Web Sharing & Link State
+            </h2>
+            <div class="mt-4 space-y-3 text-base leading-7">
+              <p>
+                When using the Web application:
+              </p>
+              <p>
+                <strong class="text-white">Fragment-Only State:</strong> If you explicitly choose to generate a share link, the state is encoded entirely in the URL hash/fragment (<code>#</code>), which is never sent to the web server in HTTP request headers. No server-side payload database is used.
+              </p>
+            </div>
+          </section>
+
+          <section aria-labelledby="section-hosting">
+            <h2 id="section-hosting" class="text-2xl font-bold text-white">
+              5. Hosting & Third-Party Infrastructure
+            </h2>
+            <div class="mt-4 space-y-3 text-base leading-7">
+              <p>
+                The static web application is hosted via Cloudflare Pages. Standard, privacy-preserving edge access logs (IP addresses and browser user-agent headers for basic routing and DDoS protection) may be processed by the CDN provider in accordance with their privacy standards. No tool payloads or user inputs are ever visible to or processed by the hosting provider.
+              </p>
+              <p>
+                We do not sell, rent, monetize, or trade any user information to third parties.
+              </p>
+            </div>
+          </section>
+
+          <section aria-labelledby="section-transparency">
+            <h2 id="section-transparency" class="text-2xl font-bold text-white">
+              6. Open Source Transparency
+            </h2>
+            <div class="mt-4 space-y-3 text-base leading-7">
+              <p>
+                Kitland is open source under the MIT License. You can inspect, audit, or self-host our entire codebase on GitHub:
+              </p>
+              <p>
+                <a
+                  href="https://github.com/outof0/kitland"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-mono text-sm text-marketing-primary-light underline hover:text-white"
+                >
+                  https://github.com/outof0/kitland
+                </a>
+              </p>
+            </div>
+          </section>
+
+          <section aria-labelledby="section-contact" class="rounded-xl border border-marketing-border bg-marketing-raised p-6">
+            <h2 id="section-contact" class="text-xl font-bold text-white">
+              7. Contact & Inquiries
+            </h2>
+            <p class="mt-2 text-sm leading-6 text-marketing-text-secondary">
+              If you have any questions, suggestions, or concerns regarding this Privacy Policy, please contact us:
+            </p>
+            <ul class="mt-4 space-y-2 text-sm">
+              <li>
+                <strong class="text-white">Email:</strong>{" "}
+                <a href="mailto:hello.outof0@gmail.com" class="text-marketing-primary-light hover:underline">
+                  hello.outof0@gmail.com
+                </a>
+              </li>
+              <li>
+                <strong class="text-white">GitHub Issues:</strong>{" "}
+                <a
+                  href="https://github.com/outof0/kitland/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-marketing-primary-light hover:underline"
+                >
+                  https://github.com/outof0/kitland/issues
+                </a>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer class="border-t border-marketing-border px-4 py-8 sm:px-8">
+      <div class="mx-auto flex w-full max-w-[1248px] flex-col gap-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-marketing-text-muted">Kitland · tools that keep data on your device</p>
+        <div class="flex items-center gap-4">
+          <a
+            href="/"
+            class="font-semibold text-marketing-text-secondary transition-colors hover:text-marketing-foreground"
+          >
+            Home
+          </a>
+          <span class="text-marketing-border">·</span>
+          <a
+            href="/explore"
+            class="font-semibold text-marketing-text-secondary transition-colors hover:text-marketing-foreground"
+          >
+            Explore Tools
+          </a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>
