@@ -18,7 +18,9 @@ describe("renderMarkdown", () => {
     const result = renderMarkdown('<script>alert("x")</script>\n\n[X](javascript:alert(1))');
     if (!result.ok) throw new Error(result.error.message);
     expect(result.value.html).not.toContain("<script>");
-    expect(result.value.html).not.toContain("alert");
+    // Dangerous tags are escaped as visible text (not silently removed),
+    // matching the e2e contract for safe preview.
+    expect(result.value.html).toContain("&lt;script&gt;");
     expect(result.value.html).not.toContain("javascript:");
   });
 

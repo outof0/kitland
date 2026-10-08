@@ -362,9 +362,10 @@ function isSafeHref(href: string): boolean {
 
 // ---------------------------------------------------------------------------
 // Raw HTML through a GitHub-style allowlist sanitizer. Only safe
-// tags/attributes survive; everything else degrades to escaped text, and
-// dangerous tags (script, style, iframe, …) lose their content entirely.
-// Malformed markup always degrades to text, never to executable markup.
+// tags/attributes survive; everything else degrades to escaped text.
+// Dangerous tags (script, style, iframe, …) are escaped as visible text
+// so users see what was filtered. Malformed markup always degrades to
+// text, never to executable markup.
 // ---------------------------------------------------------------------------
 
 const ALLOWED_HTML_TAGS = new Set([
@@ -622,9 +623,12 @@ function parseHtmlToken(src: string, pos: number): HtmlToken {
   }
   if (malformed || !closed) return null;
 
-  // Dangerous tags: drop the tag and everything up to the matching close tag.
+  // Dangerous tags: escape the entire element (tags + content) as text,
+  // so users see what was filtered instead of silent removal.
   if (DROP_HTML_CONTENT_TAGS.has(tagName)) {
-    return { next: skipToCloseTag(src, i, tagName), drop: true };
+    const end = skipToCloseTag(src, i, tagName);
+    const raw = src.slice(pos, end);
+    return { next: end, html: escapeHtml(raw) };
   }
   // Disallowed tags are dropped but their text content is kept.
   if (!ALLOWED_HTML_TAGS.has(tagName)) {
