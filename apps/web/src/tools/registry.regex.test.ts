@@ -24,7 +24,7 @@ describe("web tool renderer registry", () => {
       const escapedSlug = slug.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
       expect(source).toMatch(
         new RegExp(
-          `(?:["']${escapedSlug}["']|${escapedSlug}):\\s*(?:async|fromNamed|fromEncoding)`,
+          `(?:["']${escapedSlug}["']|${escapedSlug}):\\s*(?:async|fromNamed|fromEncoding|fromHostSpec)`,
           "u",
         ),
       );

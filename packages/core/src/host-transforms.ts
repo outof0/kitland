@@ -36,6 +36,7 @@ import { convertDataSize, type DataSizeUnit } from "./tools/data-size";
 import { convertColor } from "./tools/color-converter";
 import { formatDurationSeconds } from "./tools/duration-formatter";
 import { convertTimezone } from "./tools/timezone-converter";
+import { DRAWIO_TEXT_SPEC } from "./tools/drawio-text";
 import { HOST_EXTRA_TOOL_SPECS } from "./host-extra-tools.ts";
 
 export type { HostTransformRequest, HostTransformSpec } from "./host-types";
@@ -306,6 +307,7 @@ const HOST_CORE_TRANSFORM_SPECS: readonly HostTransformSpec[] = [
       return result.ok ? { ok: true, value: result.value.targetIso } : result;
     },
   },
+  DRAWIO_TEXT_SPEC,
 ];
 
 export const HOST_TRANSFORM_SPECS: readonly HostTransformSpec[] = [

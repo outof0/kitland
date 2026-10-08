@@ -51,7 +51,7 @@ export {
   type RegistrySurfaceRolloutIssueCode,
   type RegistrySurfaceRolloutReadiness,
 } from "./surface-rollout";
-export { base64Tool, encodingTools } from "./tools/encoding";
+export { base64Tool, drawioTextToolsTool, encodingTools } from "./tools/encoding";
 export { jsonMarkupTools } from "./tools/json-markup";
 export { cryptoSecurityTools } from "./tools/crypto-security";
 export { generatorTools } from "./tools/generators";

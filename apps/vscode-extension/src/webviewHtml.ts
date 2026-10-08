@@ -51,7 +51,7 @@ export function renderWebviewHtml(options: WebviewHtmlOptions): string {
   </head>
   <body class="m-0 min-h-full bg-bg font-ui text-on-surface antialiased">
     <div id="root" class="min-h-dvh w-full"></div>
-    <script nonce="${escapeAttribute(nonce)}" src="${escapeAttribute(options.scriptUri)}"></script>
+    <script type="module" nonce="${escapeAttribute(nonce)}" src="${escapeAttribute(options.scriptUri)}"></script>
   </body>
 </html>`;
 }

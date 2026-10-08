@@ -54,6 +54,29 @@ function fromEncoding(slug: string): ToolRendererLoader {
   };
 }
 
+/** Spec-driven tools share one generic workbench; the host supplies the runtime. */
+function fromHostSpec(slug: string): ToolRendererLoader {
+  return async () => {
+    const [{ GenericTransformTool }, { createWebCryptoHostRuntime, getHostTransformSpec }] =
+      await Promise.all([
+        import("@kitland/ui/tools/GenericTransformTool"),
+        import("@kitland/core"),
+      ]);
+    const spec = getHostTransformSpec(slug);
+    if (!spec) throw new Error(`Missing host transform spec for "${slug}".`);
+    return {
+      default: () => (
+        <GenericTransformTool
+          slug={slug}
+          spec={spec}
+          getRuntime={() => createWebCryptoHostRuntime(globalThis.crypto)}
+          capabilities={capabilitiesForWebTool(slug)}
+        />
+      ),
+    };
+  };
+}
+
 /**
  * Every available registry slug must have a dynamic entry. The exhaustive
  * record makes omissions a type error while preserving one renderer chunk per
@@ -135,6 +158,7 @@ const TOOL_RENDERER_LOADERS = Object.freeze({
   "unicode-converter": fromEncoding("unicode-converter"),
   "binary-text": fromEncoding("binary-text"),
   "rot13-caesar": fromEncoding("rot13-caesar"),
+  "drawio-text-tools": fromHostSpec("drawio-text-tools"),
   "sha-hash": fromNamed("sha-hash", () => import("@kitland/ui/tools/ShaHashTool"), "ShaHashTool"),
   "hmac-generator": fromNamed(
     "hmac-generator",

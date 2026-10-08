@@ -212,6 +212,8 @@ const TOOL_SAMPLES: Record<string, string> = {
     '[\n  {"name": "Alice", "role": "Engineer", "age": 28},\n  {"name": "Bob", "role": "Designer", "age": 32}\n]',
   "json-to-toml": '{\n  "title": "Kitland TOML Example",\n  "owner": {\n    "name": "Erik"\n  }\n}',
   "xml-formatter": '<root><user id="1"><name>Kitland</name><active>true</active></user></root>',
+  "drawio-text-tools":
+    '<mxfile host="app.diagrams.net"><diagram name="Page-1"><mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/><mxCell id="2" value="Hello" vertex="1" parent="1"><mxGeometry x="20" y="20" width="80" height="30" as="geometry"/></mxCell></root></mxGraphModel></diagram></mxfile>',
   "sql-formatter":
     "SELECT u.id, u.name, count(o.id) as orders_count FROM users u LEFT JOIN orders o ON u.id = o.user_id WHERE u.active = 1 GROUP BY u.id, u.name ORDER BY orders_count DESC LIMIT 10;",
   "markdown-preview":

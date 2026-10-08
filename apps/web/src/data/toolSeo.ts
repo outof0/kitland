@@ -401,6 +401,10 @@ export const TOOL_SEO_CONTENT: Readonly<Record<string, ToolSeoContent>> = {
     "Age Calculator",
     "Compute years, months, and days between two ISO dates locally.",
   ),
+  "drawio-text-tools": localTransformSeo(
+    "Draw.io Text Tools",
+    "Encode and decode text with the draw.io pipeline (URL encode, Deflate, Base64), and run individual URL, Base64, escape, JS variable, XML, and JSON transforms.",
+  ),
 };
 
 export function getToolSeoContent(slug: string): ToolSeoContent | undefined {

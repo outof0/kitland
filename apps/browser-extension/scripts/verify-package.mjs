@@ -105,11 +105,23 @@ function verifyDistribution() {
   // message prefixes, and the Tailwind build banner when a CSS chunk keeps it.
   // Also: example placeholder URLs embedded in tool samples (e.g. http status / url parser demos).
   const inertUrlPatterns = [
-    /^https?:\/\/www\.w3\.org\/(?:2000\/svg|1999\/xlink|1998\/Math\/MathML|XML\/1998\/namespace)$/,
+    /^https?:\/\/www\.w3\.org\/(?:2000\/svg|1999\/xlink|1999\/xhtml|1998\/Math\/MathML|XML\/1998\/namespace|2000\/xmlns?)(?:\/|$)/,
     /^https:\/\/react\.dev\/errors\/?$/,
     /^https:\/\/tailwindcss\.com\/?$/,
     /^https?:\/\/(?:example\.com|kitland\.test|kitland\.dev|api\.example\.com)(?:\/|$)/,
     /^https?:\/\/example\.com\/resource\/.*$/,
+    // Chevrotain parser error messages embed documentation links; they are
+    // never fetched at runtime.
+    /^https:\/\/chevrotain\.io\/docs?\//,
+    // Mermaid and marked embed GitHub issue/release links in comments and
+    // error messages; never fetched at runtime.
+    /^https:\/\/github\.com\/mermaid-js\/mermaid\//,
+    /^https:\/\/github\.com\/markedjs\/marked/,
+    // Chevrotain (used by mermaid) embeds issue links in error messages.
+    /^https:\/\/github\.com\/chevrotain\/chevrotain\//,
+    // Documentation links in parser library comments (chevrotain, langium).
+    /^https:\/\/en\.wikipedia\.org\/wiki\//,
+    /^https:\/\/langium\.org\/docs\//,
   ];
   const isRemoteUrlInert = (url) => {
     // Strip trailing punctuation that regex captured (e.g. ");)
@@ -135,7 +147,9 @@ function verifyDistribution() {
   const scripts = files.filter((file) => file.endsWith(".js"));
   let totalScriptGzipBytes = 0;
   for (const file of scripts) {
-    const gzipBytes = gzipSync(readFileSync(resolve(distDirectory, file)), { level: 9 }).byteLength;
+    const gzipBytes = gzipSync(readFileSync(resolve(distDirectory, file)), {
+      level: 9,
+    }).byteLength;
     totalScriptGzipBytes += gzipBytes;
     const budget = scriptBudget(file);
     console.log(
@@ -223,6 +237,10 @@ function scriptBudget(file) {
   if (/\.worker-[^/]+\.js$/.test(file)) {
     // Specialty workers ship focused core tool modules (not the full barrel).
     return { label: "Tool worker", maxBytes: 24 * 1024 };
+  }
+  if (/-vendor-[^/]+\.js$/.test(`/${file}`)) {
+    // Third-party vendor chunks (e.g. mermaid) are loaded lazily on demand.
+    return { label: "Vendor chunk", maxBytes: 1024 * 1024 };
   }
   // Shared chunks hold registry + host-tool map for multi-tool popups.
   return { label: "Shared lazy chunk", maxBytes: 96 * 1024 };

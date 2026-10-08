@@ -39,8 +39,9 @@ test("filters across searchable registry fields, availability, and clears an emp
 
   const search = page.getByRole("searchbox", { name: "Search all tools" });
   await search.fill("base64");
-  await expect(page.getByRole("status")).toHaveText(`Showing 1 of ${tools.length} tools.`);
+  await expect(page.getByRole("status")).toHaveText(`Showing 2 of ${tools.length} tools.`);
   await expect(page.getByRole("link", { name: "Open Base64 Encode / Decode" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open Draw.io Text Tools" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Clear filters" }).first()).toBeVisible();
 
   await search.fill("not-a-real-kitland-tool");
