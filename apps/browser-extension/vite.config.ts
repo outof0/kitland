@@ -61,7 +61,10 @@ export default defineConfig({
       { find: "@kitland/ui/tokens.css", replacement: toolUiTokens },
       { find: "@kitland/ui/sources.css", replacement: toolUiSources },
       { find: "@kitland/ui/styles.css", replacement: toolUiStyles },
-      { find: "@kitland/ui/code-editor.css", replacement: toolUiCodeEditorStyles },
+      {
+        find: "@kitland/ui/code-editor.css",
+        replacement: toolUiCodeEditorStyles,
+      },
       {
         find: "@kitland/ui/registry",
         replacement: fileURLToPath(
@@ -76,7 +79,10 @@ export default defineConfig({
       { find: "@kitland/ui", replacement: toolUiEntry },
       { find: "@fontsource-variable/inter", replacement: interDir },
       { find: "@fontsource-variable/manrope", replacement: manropeDir },
-      { find: "@fontsource-variable/jetbrains-mono", replacement: jetbrainsDir },
+      {
+        find: "@fontsource-variable/jetbrains-mono",
+        replacement: jetbrainsDir,
+      },
     ],
   },
   optimizeDeps: {

@@ -147,7 +147,9 @@ function verifyDistribution() {
   const scripts = files.filter((file) => file.endsWith(".js"));
   let totalScriptGzipBytes = 0;
   for (const file of scripts) {
-    const gzipBytes = gzipSync(readFileSync(resolve(distDirectory, file)), { level: 9 }).byteLength;
+    const gzipBytes = gzipSync(readFileSync(resolve(distDirectory, file)), {
+      level: 9,
+    }).byteLength;
     totalScriptGzipBytes += gzipBytes;
     const budget = scriptBudget(file);
     console.log(

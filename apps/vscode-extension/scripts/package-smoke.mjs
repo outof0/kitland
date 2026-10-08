@@ -50,9 +50,9 @@ const productionBundles = await Promise.all(
     "dist/webview/main.js",
     "dist/webview/main.css",
     // Code-split vendor chunks (e.g. mermaid) are loaded lazily on demand.
-    ...(await readdir(new URL("../dist/webview/", import.meta.url))).filter(
-      (f) => f.endsWith(".js") && f !== "main.js",
-    ).map((f) => `dist/webview/${f}`),
+    ...(await readdir(new URL("../dist/webview/", import.meta.url)))
+      .filter((f) => f.endsWith(".js") && f !== "main.js")
+      .map((f) => `dist/webview/${f}`),
   ].map(async (relativePath) => ({
     relativePath,
     source: await readFile(new URL(`../${relativePath}`, import.meta.url), "utf8"),
