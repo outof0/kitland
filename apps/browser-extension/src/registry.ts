@@ -39,6 +39,27 @@ function fromEncoding(slug: string): ToolRendererLoader {
   };
 }
 
+/** Spec-driven tools share one generic workbench; the host supplies the runtime. */
+function fromHostSpec(slug: string): ToolRendererLoader {
+  return async () => {
+    const [{ GenericTransformTool }, { getHostTransformSpec }] = await Promise.all([
+      import("@kitland/ui/tools/GenericTransformTool"),
+      import("@kitland/core"),
+    ]);
+    const spec = getHostTransformSpec(slug);
+    if (!spec) throw new Error(`Missing host transform spec for "${slug}".`);
+    const { getExtensionHostRuntime } = await import("./host-runtime");
+    return {
+      default: () =>
+        createElement(GenericTransformTool, {
+          slug,
+          spec,
+          getRuntime: () => getExtensionHostRuntime(),
+        }),
+    };
+  };
+}
+
 /**
  * Same shape as the web ToolWorkspace registry: one lazy React renderer per
  * registry slug. Host wrappers exist only when the extension must inject a
@@ -83,6 +104,7 @@ const TOOL_RENDERER_LOADERS = {
     () => import("@kitland/ui/tools/MarkdownPreviewTool"),
     "MarkdownPreviewTool",
   ),
+  "drawio-text-tools": fromHostSpec("drawio-text-tools"),
   "uuid-id": fromNamed(() => import("@kitland/ui/tools/UuidIdTool"), "UuidIdTool"),
   "sha-hash": fromNamed(() => import("@kitland/ui/tools/ShaHashTool"), "ShaHashTool"),
   "hmac-generator": fromNamed(
