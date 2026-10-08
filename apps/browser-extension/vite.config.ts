@@ -95,6 +95,9 @@ export default defineConfig({
         chunkFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash][extname]",
         manualChunks(id) {
+          if (id.includes("node_modules/mermaid")) {
+            return "mermaid-vendor";
+          }
           if (id.includes("@uiw/react-codemirror")) {
             return "codemirror-react";
           }
