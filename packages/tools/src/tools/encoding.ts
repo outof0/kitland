@@ -163,6 +163,49 @@ export const morseCodeTool = defineTool({
   platforms: multiHostTransformPlatforms,
 } as const);
 
+export const drawioTextToolsTool = defineTool({
+  id: "drawio-text-tools",
+  slug: "drawio-text-tools",
+  name: "Draw.io Text Tools",
+  shortName: "Draw.io Text",
+  family: "encoding-text",
+  description:
+    "Encode and decode text with the draw.io pipeline (URL encode → Deflate → Base64), plus individual transforms: URL/Base64, deflate, escape, JS variable, XML and JSON formatting. Runs locally on your device.",
+  keywords: [
+    "drawio",
+    "draw.io",
+    "diagrams.net",
+    "deflate",
+    "inflate",
+    "encode",
+    "decode",
+    "base64",
+    "url-encode",
+    "escape",
+    "js-variable",
+    "xml",
+    "json",
+    "mxfile",
+  ],
+  pattern: "transform",
+  status: "available",
+  releaseStage: "implemented",
+  platforms: {
+    web: {
+      status: "available",
+      capabilities: ["transform-text", "clipboard-write", "file-import", "file-export"],
+    },
+    "browser-extension": {
+      status: "available",
+      capabilities: ["transform-text", "clipboard-write"],
+    },
+    "vscode-extension": {
+      status: "available",
+      capabilities: ["transform-text", "clipboard-write", "active-editor"],
+    },
+  },
+} as const);
+
 export const encodingTools = [
   base64Tool,
   urlEncodeTool,
@@ -172,4 +215,5 @@ export const encodingTools = [
   binaryTextTool,
   rot13CaesarTool,
   morseCodeTool,
+  drawioTextToolsTool,
 ] as const satisfies readonly ToolDefinition[];

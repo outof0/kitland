@@ -372,6 +372,24 @@ export {
   type MorseMode,
 } from "./tools/morse-code";
 export {
+  DRAWIO_TEXT_MAX_INPUT_CHARS,
+  DRAWIO_TEXT_SPEC,
+  deflateRawBytes,
+  drawioDecode,
+  drawioEncode,
+  escapeText,
+  extractDiagramContent,
+  inflateRawBytes,
+  normalizeXmlText,
+  removeLinebreaks,
+  runDrawioText,
+  toJsVariable,
+  unescapeText,
+  type DrawioDecodeStages,
+  type DrawioEncodeStages,
+  type DrawioTextOperationId,
+} from "./tools/drawio-text";
+export {
   SPLIT_TO_NEWLINES_MAX_INPUT_CHARS,
   splitToNewlines,
   type SplitDelimiter,

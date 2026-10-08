@@ -39,6 +39,7 @@ export const CANONICAL_TOOL_INVENTORY = [
   { id: "binary-text", slug: "binary-text" },
   { id: "rot13-caesar", slug: "rot13-caesar" },
   { id: "morse-code", slug: "morse-code" },
+  { id: "drawio-text-tools", slug: "drawio-text-tools" },
   { id: "sha-hash", slug: "sha-hash" },
   { id: "hmac-generator", slug: "hmac-generator" },
   { id: "aes-cipher", slug: "aes-cipher" },

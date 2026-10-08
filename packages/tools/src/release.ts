@@ -3,7 +3,7 @@ import { CANONICAL_TOOL_INVENTORY, type CanonicalToolInventoryEntry } from "./in
 
 export const REGISTRY_RELEASE_POLICY = Object.freeze({
   /** Product direction: the first public production release is the full suite. */
-  targetToolCount: 65,
+  targetToolCount: 66,
   requiredWebPlatform: "web" as const satisfies ToolPlatformId,
   requiredReleaseStage: "release-ready" as const,
 });

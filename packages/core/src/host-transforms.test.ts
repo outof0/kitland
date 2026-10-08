@@ -7,8 +7,8 @@ const runtime = createWebCryptoHostRuntime(globalThis.crypto);
 describe("host transforms", () => {
   it("covers pure transforms plus remaining suite tools with unique slugs", () => {
     expect(new Set(HOST_TRANSFORM_SLUGS).size).toBe(HOST_TRANSFORM_SLUGS.length);
-    // 65 tools total minus specialty base64/curl/json-toolbox.
-    expect(HOST_TRANSFORM_SLUGS.length).toBe(62);
+    // 66 tools total minus specialty base64/curl/json-toolbox.
+    expect(HOST_TRANSFORM_SLUGS.length).toBe(63);
     for (const slug of [
       "beautify-minify",
       "url-encode",
