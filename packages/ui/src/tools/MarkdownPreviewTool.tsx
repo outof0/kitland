@@ -39,6 +39,58 @@ export function MarkdownPreviewTool({
   const result = useMarkdownPreview(source);
   const preview = result.ok ? result.value : null;
   const error = !result.ok ? result.error.message : null;
+  const previewHtml = preview?.html;
+
+  const previewContentRef = useRef<HTMLDivElement>(null);
+  const mermaidIdRef = useRef(0);
+
+  // Render ```mermaid fenced blocks into diagrams. Mermaid is lazy-loaded so
+  // the heavy dependency is only fetched when a diagram is actually present.
+  // Diagrams render with strict security (no script execution from diagram text).
+  useEffect(() => {
+    const container = previewContentRef.current;
+    if (!container || !previewHtml) return;
+    const blocks = container.querySelectorAll("pre > code.language-mermaid");
+    if (blocks.length === 0) return;
+    let cancelled = false;
+    void (async () => {
+      let mermaid: typeof import("mermaid").default;
+      try {
+        ({ default: mermaid } = await import("mermaid"));
+      } catch {
+        return; // Mermaid unavailable: keep the code blocks as-is.
+      }
+      if (cancelled) return;
+      const isDark = document.documentElement.getAttribute("data-theme") !== "light";
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: "strict",
+        theme: isDark ? "dark" : "default",
+      });
+      for (const code of Array.from(blocks)) {
+        if (cancelled) return;
+        const pre = code.parentElement;
+        const definition = code.textContent ?? "";
+        if (!pre || !definition.trim()) continue;
+        try {
+          const { svg } = await mermaid.render(
+            `kitland-mermaid-${mermaidIdRef.current++}`,
+            definition,
+          );
+          if (cancelled) return;
+          const wrapper = document.createElement("div");
+          wrapper.className = "mermaid-diagram not-prose";
+          wrapper.innerHTML = svg;
+          pre.replaceWith(wrapper);
+        } catch {
+          // Invalid diagram syntax: keep the code block.
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [previewHtml]);
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 font-ui">
@@ -175,7 +227,8 @@ export function MarkdownPreviewTool({
           >
             {preview ? (
               <div
-                className="prose prose-invert max-w-none text-[14px] leading-relaxed text-on-surface [&_h1]:text-[20px] [&_h1]:font-bold [&_h1]:text-on-surface [&_h1]:mb-3 [&_h2]:text-[17px] [&_h2]:font-bold [&_h2]:text-on-surface [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-on-surface [&_h3]:mt-3 [&_h3]:mb-1 [&_p]:text-on-muted [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:text-on-muted [&_li]:mb-1 [&_strong]:text-success [&_strong]:font-semibold [&_code]:bg-surface [&_code]:border [&_code]:border-outline [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-[4px] [&_code]:font-mono [&_code]:text-[12px] [&_code]:text-primary [&_pre]:bg-surface-low [&_pre]:border [&_pre]:border-outline [&_pre]:p-3 [&_pre]:rounded-[8px] [&_pre]:font-mono [&_pre]:text-[12px] [&_pre]:my-3"
+                ref={previewContentRef}
+                className="prose prose-invert max-w-none text-[14px] leading-relaxed text-on-surface [&_h1]:text-[20px] [&_h1]:font-bold [&_h1]:text-on-surface [&_h1]:mb-3 [&_h2]:text-[17px] [&_h2]:font-bold [&_h2]:text-on-surface [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:text-[15px] [&_h3]:font-semibold [&_h3]:text-on-surface [&_h3]:mt-3 [&_h3]:mb-1 [&_p]:text-on-muted [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:text-on-muted [&_li]:mb-1 [&_strong]:text-success [&_strong]:font-semibold [&_code]:bg-surface [&_code]:border [&_code]:border-outline [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-[4px] [&_code]:font-mono [&_code]:text-[12px] [&_code]:text-primary [&_pre]:bg-surface-low [&_pre]:border [&_pre]:border-outline [&_pre]:p-3 [&_pre]:rounded-[8px] [&_pre]:font-mono [&_pre]:text-[12px] [&_pre]:my-3 [&_.mermaid-diagram]:my-4 [&_.mermaid-diagram]:flex [&_.mermaid-diagram]:justify-center [&_.mermaid-diagram_svg]:max-w-full [&_.mermaid-diagram_svg]:h-auto"
                 dangerouslySetInnerHTML={{ __html: preview.html }}
               />
             ) : (

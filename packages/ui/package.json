@@ -46,6 +46,7 @@
     "@lezer/highlight": "^1.2.3",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^1.33.0",
+    "mermaid": "11",
     "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
