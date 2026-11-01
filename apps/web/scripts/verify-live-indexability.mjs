@@ -60,11 +60,17 @@ function assertIndexableDocument(label, url, document) {
   if (/noindex/i.test(robotsHeader)) {
     fail(`${label} sends X-Robots-Tag noindex`);
   }
-  const robots = attribute(document.text, /<meta[^>]+name=["']robots["'][^>]+content=["']([^"']+)["']/i);
+  const robots = attribute(
+    document.text,
+    /<meta[^>]+name=["']robots["'][^>]+content=["']([^"']+)["']/i,
+  );
   if (!/index/i.test(robots) || /noindex/i.test(robots)) {
     fail(`${label} robots meta is ${JSON.stringify(robots)}`);
   }
-  const canonical = attribute(document.text, /<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i);
+  const canonical = attribute(
+    document.text,
+    /<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i,
+  );
   if (canonical !== url) {
     fail(`${label} canonical is ${JSON.stringify(canonical)}`);
   }
