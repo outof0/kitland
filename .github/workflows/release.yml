@@ -240,9 +240,11 @@ jobs:
             --api-secret "$WEB_EXT_API_SECRET" \
             --channel listed
 
-      # Deploy last: production never advertises a version that failed to publish.
       - name: Deploy verified landing to Cloudflare Pages
         run: pnpm exec wrangler pages deploy apps/web/dist --project-name=kitland --branch=main
+
+      - name: Verify live indexability
+        run: pnpm --filter @kitland/web seo:live
 
       - name: Create GitHub Release
         env:

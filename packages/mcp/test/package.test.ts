@@ -15,7 +15,7 @@ describe("Package Manifest & Artifact Constraints", () => {
     expect(pkgJson.type).toBe("module");
     expect(pkgJson.bin).toEqual({ "kitland-mcp": "./dist/cli.js" });
     expect(pkgJson.engines.node).toBe(">=22.12.0");
-    expect(pkgJson.dependencies["@modelcontextprotocol/sdk"]).toBe("1.30.0");
+    expect(pkgJson.dependencies["@modelcontextprotocol/sdk"]).toBe("1.32.2");
     expect(pkgJson.publishConfig?.access).toBe("public");
     expect(pkgJson.publishConfig?.provenance).toBe(true);
     expect(pkgJson.repository?.url).toBe("git+https://github.com/outof0/kitland.git");

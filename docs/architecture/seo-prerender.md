@@ -56,3 +56,7 @@ artifact, including React streaming fallback scripts. CI must keep this gate
 after build and before deployment. It also rejects any emitted or sitemap-listed
 legacy `/tools` route. `bundle:check` adds entry-specific gzip budgets;
 Playwright then exercises the built route rather than the development server.
+`pnpm --filter @kitland/web seo:live` fetches the canonical origin after a
+production deploy. It fails when Googlebot is disallowed, when the apex
+response is `noindex`, or when `https://kitland.pages.dev/` loses its
+`X-Robots-Tag: noindex`. The command does not submit the sitemap to Google.

@@ -12,6 +12,7 @@
     "build": "node ./scripts/clean-dist.mjs && astro check && astro build",
     "bundle:check": "node ./scripts/verify-bundle-budget.mjs",
     "seo:check": "node ./scripts/verify-static-seo.mjs",
+    "seo:live": "node --experimental-strip-types --disable-warning=ExperimentalWarning ./scripts/verify-live-indexability.mjs",
     "rollout:artifact:check": "node ./scripts/verify-rollout-artifact.mjs",
     "preview": "astro preview",
     "test": "vitest run --configLoader runner",

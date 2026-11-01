@@ -17,6 +17,16 @@ default payload persistence.
 | **License** | MIT                               |
 | **Version** | 0.1.1                             |
 
+## Public site
+
+The canonical site is [kitland.dev](https://kitland.dev/).
+[Explore](https://kitland.dev/explore) lists every tool.
+These tool pages are linked from this repository so a crawler that already fetched the repository can open them.
+
+- [JSON Formatter](https://kitland.dev/explore/json-formatter)
+- [JWT Decoder](https://kitland.dev/explore/jwt-decoder)
+- [Base64](https://kitland.dev/explore/base64)
+
 ## Repository layout
 
 ```text
@@ -69,7 +79,7 @@ before changing a tool surface.
 
 | Surface | Public destination                           | Release guard                                                              |
 | ------- | -------------------------------------------- | -------------------------------------------------------------------------- |
-| Web     | Cloudflare Pages (`kitland.dev`)             | deploy verified `apps/web/dist` to `main` only after stores succeed        |
+| Web     | [kitland.dev](https://kitland.dev/)          | deploy verified `apps/web/dist` to `main` only after stores succeed        |
 | MCP     | npm `@kitland/mcp`                           | package allowlist, live stdio smoke, provenance, immutable integrity check |
 | VS Code | Marketplace publisher `kitland` and Open VSX | VSIX smoke/package checks and both store APIs                              |
 | Browser | Chrome Web Store and Firefox AMO             | deterministic ZIPs, manifest/CSP checks, both store APIs                   |

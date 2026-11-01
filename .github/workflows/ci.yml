@@ -263,6 +263,9 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy apps/web/dist --project-name=kitland --branch=${{ github.ref_name }}
 
+      - name: Verify live indexability
+        run: pnpm --filter @kitland/web seo:live
+
   deploy:
     name: Deploy complete 65-tool suite to Cloudflare Pages
     needs: [build, vscode-integration]
@@ -328,3 +331,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy apps/web/dist --project-name=kitland --branch=${{ github.ref_name }}
+
+      - name: Verify live indexability
+        run: pnpm --filter @kitland/web seo:live

@@ -1,6 +1,7 @@
 # @kitland/mcp
 
 Capability-minimal, local Model Context Protocol (MCP) server for Kitland developer utilities.
+The public web app is [kitland.dev](https://kitland.dev/).
 
 ## Overview
 

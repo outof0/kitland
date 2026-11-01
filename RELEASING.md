@@ -27,9 +27,10 @@ does not publish either extension.
    place. Keep `CLOUDFLARE_PAGES_ENABLED` unset: that variable is reserved for
    a complete-suite launch. CI downloads and re-verifies the normal artifact
    before deploying it.
-5. Smoke the canonical production origin. Confirm every registry-available
-   editor route remains reachable and the reviewed web rollout target set
-   matches the registry, then record rollback instructions.
+5. Smoke the canonical production origin. The rollout deploy job runs
+   `pnpm --filter @kitland/web seo:live` after Pages deploy. Confirm every
+   registry-available editor route remains reachable and the reviewed web
+   rollout target set matches the registry, then record rollback instructions.
 6. Roll back to the prior verified Pages artifact if production validation
    fails. Do not change rollout certification by editing host contracts outside
    the registry release stage.
@@ -64,8 +65,17 @@ ZIP, a VS Code VSIX, or a package registry release.
    surface, deploys the exact verified web build to Cloudflare Pages, then
    creates the GitHub Release. Do not create a GitHub Release manually.
 8. Smoke the canonical production origin and each published store listing.
-9. Record known limitations and rollback instructions. Roll back to the prior
-   verified artifact if production validation fails.
+   The release workflow runs `pnpm --filter @kitland/web seo:live` after the
+   Pages deploy and before it creates the GitHub Release. The command fetches
+   `https://kitland.dev/` and fails if Googlebot is disallowed, the apex
+   response is `noindex`, or `https://kitland.pages.dev/` loses its
+   `X-Robots-Tag: noindex`.
+9. Submit `https://kitland.dev/sitemap-index.xml` in Google Search Console
+   after you verify the `https://kitland.dev/` property. Google does not
+   accept an anonymous sitemap ping. The live check proves the origin is
+   indexable. It does not create the Google index entry.
+10. Record known limitations and rollback instructions. Roll back to the prior
+    verified artifact if production validation fails.
 
 ## Package & extension release pipeline
 
