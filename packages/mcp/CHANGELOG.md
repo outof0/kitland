@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keep the release version and published MCP build metadata aligned at `0.1.1`.
 - Bump `@modelcontextprotocol/sdk` to `1.32.2`. The accepted protocol set stays
   `2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`, and `2024-10-07`.
+- Require Node.js `>=22.23.4`. That release includes the October 2026 Node.js
+  security fixes, and Astro 7.4.4 refuses anything older.
 
 ### Added
 

@@ -21,7 +21,10 @@ const BUDGETS = [
   {
     label: "Astro client bootstrap",
     file: /^client\..+\.js$/,
-    maxGzipBytes: 64 * 1024,
+    // Astro 7.2.8 measured 59.2 KiB gzip combined. Astro 7.4.4 measures
+    // 67.5 KiB: the hydration chunk grew, and the view-transitions chunk
+    // stayed near 4.2 KiB. 72 KiB leaves about 4.5 KiB of headroom.
+    maxGzipBytes: 72 * 1024,
   },
   {
     label: "Tool workspace island",
