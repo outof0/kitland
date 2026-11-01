@@ -32,43 +32,57 @@ const NAV_LINKS = [
 const SURFACES = [
   {
     name: "Web",
-    status: "Available",
+    status: "Open now",
     description:
-      "The full registry as isolated, browser-based workspaces. Open a tool and work — no install, no account.",
+      "The full registry opens in the browser on kitland.dev. No install and no account.",
     icon: Globe2,
     install: "kitland.dev",
-    href: "/explore",
-    action: "Browse the web tools",
+    links: [{ href: "/explore", label: "Open the web tools" }],
   },
   {
     name: "Browser extension",
-    status: "Available",
+    status: "Chrome and Firefox",
     description:
-      "Chrome, Edge, and Firefox popup workspaces driven by the same registry and core. No payload network requests, ever.",
+      "Kitland Tools 0.1.1 is a permission-free extension on the Chrome Web Store and Firefox Add-ons. A web tool on this site does not install it.",
     icon: Puzzle,
-    install: "Chrome · Edge · Firefox",
-    href: "https://github.com/outof0/kitland/tree/HEAD/apps/browser-extension",
-    action: "Install the extension",
+    install: "Chrome Web Store · Firefox Add-ons",
+    links: [
+      {
+        href: "https://chromewebstore.google.com/detail/kitland-tools/eeccdmldhgjniaakofodmafffeinodnp",
+        label: "Add to Chrome",
+      },
+      {
+        href: "https://addons.mozilla.org/en-US/firefox/addon/kitland-tools/",
+        label: "Add to Firefox",
+      },
+    ],
   },
   {
     name: "VS Code",
-    status: "Available",
+    status: "Marketplace and Open VSX",
     description:
-      "Editor commands and local panels. Transform the active selection without leaving your editor.",
+      "Kitland Tools 0.1.1 is public on the VS Code Marketplace and on Open VSX. Install it from either registry.",
     icon: MonitorCog,
-    install: "Kitland Tools",
-    href: "https://github.com/outof0/kitland/tree/HEAD/apps/vscode-extension",
-    action: "Get the extension",
+    install: "Kitland.kitland-tools",
+    links: [
+      {
+        href: "https://marketplace.visualstudio.com/items?itemName=Kitland.kitland-tools",
+        label: "Install from Marketplace",
+      },
+      {
+        href: "https://open-vsx.org/extension/kitland/kitland-tools",
+        label: "Install from Open VSX",
+      },
+    ],
   },
   {
     name: "MCP server",
-    status: "Available",
+    status: "On npm",
     description:
-      "Local stdio server for AI clients like Claude Desktop and Cursor. Runs Kitland utilities without a network round trip.",
+      "Local stdio server for MCP clients such as Claude Desktop and Cursor. The published package is @kitland/mcp.",
     icon: Bot,
     install: "npx -y @kitland/mcp",
-    href: "https://github.com/outof0/kitland/tree/HEAD/packages/mcp",
-    action: "Connect via MCP",
+    links: [{ href: "https://www.npmjs.com/package/@kitland/mcp", label: "View on npm" }],
   },
 ] as const;
 
@@ -152,9 +166,10 @@ export function LandingPage() {
               </h1>
 
               <p className="mt-6 max-w-[540px] text-lg leading-[1.55] text-marketing-text-secondary">
-                Format JSON, decode tokens, generate IDs, inspect payloads — on the web, in Chrome
-                or Firefox, inside VS Code, or straight from your AI client over MCP. No uploads,
-                accounts, or context switching.
+                Format JSON, decode tokens, generate IDs, and inspect payloads in the browser on
+                this site. Published installs are separate: npm for MCP, the VS Code Marketplace and
+                Open VSX for the editor, and the Chrome Web Store and Firefox Add-ons for the
+                extension.
               </p>
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -353,8 +368,9 @@ export function LandingPage() {
                 </h2>
               </div>
               <p className="max-w-2xl text-base leading-7 text-marketing-text-secondary lg:justify-self-end">
-                One typed core, four native entry points — all available today. Every host runs the
-                same deterministic transforms on your device; nothing leaves it.
+                One typed core, four hosts. The web tools open on this site. The browser extension,
+                the VS Code extension, and the MCP server each have their own published install
+                below. Every host runs the transforms on your device.
               </p>
             </div>
 
@@ -384,16 +400,22 @@ export function LandingPage() {
                     <code className="mt-4 block truncate rounded border border-marketing-border bg-marketing-recessed px-2.5 py-1.5 font-mono text-[11px] text-marketing-text-muted">
                       {surface.install}
                     </code>
-                    <a
-                      href={surface.href}
-                      className={`${marketingLink} group mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-marketing-primary-light`}
-                    >
-                      {surface.action}
-                      <ArrowRight
-                        className="marketing-action-arrow size-4 transition-transform duration-150"
-                        aria-hidden="true"
-                      />
-                    </a>
+                    <ul className="mt-auto flex flex-col gap-2 pt-6">
+                      {surface.links.map((link) => (
+                        <li key={link.href}>
+                          <a
+                            href={link.href}
+                            className={`${marketingLink} group inline-flex items-center gap-2 text-sm font-semibold text-marketing-primary-light`}
+                          >
+                            {link.label}
+                            <ArrowRight
+                              className="marketing-action-arrow size-4 transition-transform duration-150"
+                              aria-hidden="true"
+                            />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
                   </li>
                 );
               })}
@@ -439,7 +461,7 @@ export function LandingPage() {
                 Start with a tool that works today.
               </h2>
               <p className="mt-5 text-base leading-7 text-marketing-text-secondary sm:text-lg">
-                {`Every one of the ${allTools.length} tools opens a working local editor on this site. The same typed contracts drive the browser extension, the VS Code extension, and the MCP server.`}
+                {`Every one of the ${allTools.length} tools opens a working local editor on this site. Opening one here does not install the browser extension, VS Code, or MCP.`}
               </p>
               <a
                 href="/explore"
@@ -506,7 +528,7 @@ export function LandingPage() {
                 </h2>
               </div>
               <p className="max-w-2xl text-base leading-7 text-marketing-text-secondary lg:justify-self-end lg:text-lg">
-                {`All ${allTools.length} tools are live across six families — every one shipped from the same deterministic core, with explicit web, browser-extension, and VS Code contracts.`}
+                {`All ${allTools.length} tools are open on this site across six families. Each one ships from the same deterministic core, and each host keeps its own install.`}
               </p>
             </div>
 
@@ -660,7 +682,7 @@ export function LandingPage() {
               Pick a tool. Finish the task. Keep the payload local.
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-marketing-text-soft sm:text-lg">
-              {`All ${allTools.length} tools are live — on the web, in your browser, in your editor, and in your AI client.`}
+              {`All ${allTools.length} tools are open on this site. Browser, editor, and MCP installs are the published listings above.`}
             </p>
             <a
               href="/explore"
