@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Keep the release version and published MCP build metadata aligned at `0.1.1`.
+- Bump `@modelcontextprotocol/sdk` to `1.32.2`. The accepted protocol set stays
+  `2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`, and `2024-10-07`.
 
 ### Added
 

@@ -253,7 +253,7 @@ as untrusted.
   doing something else.
 - Pin the accepted MCP SDK and protocol revision set in package metadata and test
   against it. For v1:
-  - SDK: `@modelcontextprotocol/sdk@1.30.0`
+  - SDK: `@modelcontextprotocol/sdk@1.32.2`
   - Preferred protocol: `2025-11-25`
   - Accepted stable set: `2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`, `2024-10-07`
     A protocol/SDK upgrade gets its own compatibility review and changelog entry.
