@@ -113,9 +113,29 @@ requireMatch(
 );
 requireMatch(
   release,
+  /wrangler pages deploy apps\/web\/dist --project-name=kitland --branch=main[\s\S]*pnpm --filter @kitland\/web seo:live[\s\S]*gh release create "\$RELEASE_TAG"/,
+  "The release workflow must verify live indexability after Pages deploy and before the GitHub Release",
+);
+requireMatch(
+  release,
   /gh release create "\$RELEASE_TAG"/,
   "The release workflow must create a GitHub Release only after publishing",
 );
+const deployWorkflow = read(".github/workflows/ci.yml");
+const pagesDeploys = [
+  ...deployWorkflow.matchAll(
+    /pages deploy apps\/web\/dist --project-name=kitland --branch=\$\{\{ github\.ref_name \}\}/g,
+  ),
+];
+if (pagesDeploys.length !== 2) {
+  failures.push("CI must deploy the web artifact from the rollout job and the complete-suite job.");
+}
+for (const deploy of pagesDeploys) {
+  const afterDeploy = deployWorkflow.slice(deploy.index ?? 0, (deploy.index ?? 0) + 500);
+  if (!afterDeploy.includes("pnpm --filter @kitland/web seo:live")) {
+    failures.push("Each CI Pages deploy must run seo:live before the job ends.");
+  }
+}
 if (/skip_(npm|vscode|browser)/.test(release)) {
   failures.push("The release workflow must not offer a partial-release skip switch.");
 }

@@ -1,6 +1,7 @@
 # Kitland Browser Extension
 
 The permission-free Manifest V3 host for the Kitland developer tool suite.
+The public web app is [kitland.dev](https://kitland.dev/).
 Registry metadata is the authority: only tools declared `available` on
 `browser-extension` appear in the full-page tab. Web availability never implies an
 extension adapter.

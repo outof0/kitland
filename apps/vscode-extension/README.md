@@ -2,7 +2,7 @@
 
 The VS Code surface for Kitland's local, privacy-first developer-tool suite. This package is a
 registry-driven host: only tools declared `available` on `vscode-extension` appear here. Web
-availability never implies a VS Code adapter.
+availability never implies a VS Code adapter. The public web app is [kitland.dev](https://kitland.dev/).
 
 ## Current host surface
 
