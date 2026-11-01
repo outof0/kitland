@@ -41,7 +41,7 @@ docs/                     ADRs, architecture contracts, UX evidence, rollout
 
 ## Develop and verify locally
 
-Requires Node **22.12.0+** and pnpm **9.12.0**.
+Requires Node **22.23.4+** and pnpm **9.12.0**.
 
 ```bash
 pnpm install --frozen-lockfile

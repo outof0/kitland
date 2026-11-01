@@ -108,7 +108,9 @@ export default defineConfig({
             return "codemirror-react";
           }
           if (id.includes("@codemirror/lang-")) {
-            return "codemirror-languages";
+            // Third-party grammars. The -vendor suffix keeps them on the
+            // vendor budget instead of the 96 KiB shared-app ceiling.
+            return "codemirror-languages-vendor";
           }
           if (id.includes("@codemirror/view")) return "codemirror-view";
           if (id.includes("@codemirror/state")) return "codemirror-state";
