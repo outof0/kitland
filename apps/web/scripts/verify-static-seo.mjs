@@ -388,6 +388,18 @@ function verifyPublicDeliveryFiles() {
     }
   }
 
+  const sitemapIndex = readText("sitemap-index.xml");
+  if (sitemapIndex && /<lastmod\b/i.test(sitemapIndex)) {
+    fail("sitemap-index.xml must not invent a lastmod value");
+  }
+  if (existsSync(resolve(DIST_DIRECTORY, "sitemap.xml"))) {
+    fail("/sitemap.xml must stay a redirect, not an emitted sitemap file");
+  }
+  const redirects = readText("_redirects");
+  if (!redirects || !/^\/sitemap\.xml\s+\/sitemap-index\.xml\s+301\s*$/m.test(redirects)) {
+    fail("_redirects must 301 /sitemap.xml to /sitemap-index.xml");
+  }
+
   const headers = readText("_headers");
   if (headers) {
     for (const header of [
@@ -477,6 +489,38 @@ function verifyLanding(page) {
     fail(`${pageLabel} is missing WebSite JSON-LD`);
   }
 
+  const forbiddenClaims = [
+    "all available today",
+    "apps/browser-extension",
+    "apps/vscode-extension",
+    "tree/HEAD/packages/mcp",
+    "Chrome · Edge · Firefox",
+  ];
+  for (const claim of forbiddenClaims) {
+    if (page.html.includes(claim)) {
+      fail(`${pageLabel} still publishes the install claim: ${claim}`);
+    }
+  }
+  const installUrls = [
+    "https://www.npmjs.com/package/@kitland/mcp",
+    "https://marketplace.visualstudio.com/items?itemName=Kitland.kitland-tools",
+    "https://open-vsx.org/extension/kitland/kitland-tools",
+    "https://chromewebstore.google.com/detail/kitland-tools/eeccdmldhgjniaakofodmafffeinodnp",
+    "https://addons.mozilla.org/en-US/firefox/addon/kitland-tools/",
+  ];
+  const llms = readText("llms.txt");
+  if (!llms) {
+    fail("llms.txt is missing from the built site");
+  }
+  for (const url of installUrls) {
+    if (!page.html.includes(url)) {
+      fail(`${pageLabel} is missing the verified install URL ${url}`);
+    }
+    if (llms && !llms.includes(url)) {
+      fail(`llms.txt is missing the verified install URL ${url}`);
+    }
+  }
+
   const ogImage = getMetaContent(page.html, "property", "og:image");
   const ogImageAlt = getMetaContent(page.html, "property", "og:image:alt");
   const ogImageWidth = getMetaContent(page.html, "property", "og:image:width");
@@ -546,6 +590,9 @@ if (!existsSync(DIST_DIRECTORY)) {
 
     const sitemap = readText(relativePath);
     if (!sitemap) continue;
+    if (/<lastmod\b/i.test(sitemap)) {
+      fail(`${relativePath} must not invent a lastmod value`);
+    }
 
     for (const pageLocation of getXmlLocations(sitemap)) {
       const normalizedPage = normalizedSiteUrl(pageLocation, "Sitemap page URL");

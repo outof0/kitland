@@ -18,8 +18,13 @@ interactive tool islands only; it does not own document routing or metadata.
   prior `/tools` namespace is deliberately absent: it is neither emitted nor
   redirected, and resolves to the real 404 document.
 - `@astrojs/sitemap` emits `sitemap-index.xml` from the generated routes, so
-  the sitemap does not duplicate registry slugs by hand.
-- `robots.txt` declares the public sitemap index.
+  the sitemap does not duplicate registry slugs by hand. It does not emit
+  `lastmod`. Do not add a lastmod value by hand.
+- `robots.txt` declares the public sitemap index,
+  `https://kitland.dev/sitemap-index.xml`.
+- `/sitemap.xml` is not a file. `apps/web/public/_redirects` answers it with
+  `301` to `/sitemap-index.xml`, because crawlers request that conventional
+  path. The redirect carries no sitemap body and no lastmod.
 - Cloudflare Pages hostnames receive `X-Robots-Tag: noindex` through
   `apps/web/public/_headers`; the public canonical origin is
   `https://kitland.dev`.
