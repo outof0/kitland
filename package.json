@@ -80,7 +80,9 @@
       "markdown-it@14": "14.3.3",
       "systeminformation@5": "5.33.19",
       "vite@>=8.2.0 <8.2.4": "8.2.4",
-      "zod@4": "4.6.7"
+      "zod@4": "4.6.7",
+      "@lezer/common": "1.5.5",
+      "@lezer/lr": "1.4.12"
     },
     "auditConfig": {
       "ignoreCves": [
